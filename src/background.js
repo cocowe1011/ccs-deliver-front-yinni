@@ -129,17 +129,17 @@ app.on('ready', () => {
       }
     })
   });
-  let revert = false;
-  setInterval(() => {
-    if(mainWindow) {
-      if(revert) {
-        mainWindow.webContents.send('receivedMsg', {DBW60:0, DBW68:99,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          '})
-      } else {
-        mainWindow.webContents.send('receivedMsg', {DBW60:1, DBW68:99,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          '})
-      }
-      revert = !revert;
-    }
-  }, 100);
+  // let revert = false;
+  // setInterval(() => {
+  //   if(mainWindow) {
+  //     if(revert) {
+  //       mainWindow.webContents.send('receivedMsg', {DBW60:0, DBW68:27473,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          ',DBW76:19})
+  //     } else {
+  //       mainWindow.webContents.send('receivedMsg', {DBW60:1, DBW68:27473,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          ',DBW76:19})
+  //     }
+  //     revert = !revert;
+  //   }
+  // }, 100);
 
   setAppTray();
   if (process.env.NODE_ENV === 'production') {
@@ -229,10 +229,24 @@ function conPLC() {
       setInterval(() => {
         conn.readAllItems(valuesReady);
       }, 50);
+      // 发送心跳
+      this.sendHeartToPLC()
     });
   }).catch((err)=> {
     logger.info('config error!')
   });
+}
+let times = 1;
+let nowValue = 0;
+function sendHeartToPLC() {
+  setInterval(() => {
+    if(times > 5) {
+        times = 1;
+        nowValue = 1 - nowValue;
+    }
+    times++;
+    conn.writeItems('DBW0', nowValue, valuesWritten);
+  }, 200); // 每200毫秒执行一次交替
 }
 
 function createFile(fileNameVal) {
