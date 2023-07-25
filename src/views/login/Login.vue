@@ -71,7 +71,7 @@ export default {
       registerStatus: false,
       regex: /^[a-zA-Z0-9_]*$/,
       javaAppStarted: false,
-      javaAppUrl: 'http://127.0.0.1:7005/status/check',
+      javaAppUrl: process.env.VUE_APP_BASE_URL + '/status/check',
       maxRetries: 30,
       retryInterval: 1000
     };
@@ -158,7 +158,7 @@ export default {
       HttpUtil.post('/login/login', param).then((res)=> {
         if(res.data) {
           ipcRenderer.send('setUserInfo', res.data)
-          // window.sessionStorage.setItem('userInfo', JSON.stringify(res.data));
+          window.sessionStorage.setItem('userInfo', JSON.stringify(res.data));
           setTimeout(() => {
             this.loadingStatus = false;
             // 跳转主页

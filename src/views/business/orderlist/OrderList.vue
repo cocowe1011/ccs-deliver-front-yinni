@@ -391,7 +391,7 @@ export default {
       }
       // 更新300状态
       HttpUtil.post('/order/update', param).then((res)=> {
-        if(res.data == 1) {
+        if(res.data != 1) {
           this.$message.error('更新订单运行状态失败！')
         }
       }).catch((err)=> {
