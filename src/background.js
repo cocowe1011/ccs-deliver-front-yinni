@@ -2,6 +2,18 @@ import { app, BrowserWindow, globalShortcut, ipcMain, Menu, dialog, Tray, screen
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import nodes7 from 'nodes7';
 import HttpUtil from '@/utils/HttpUtil'
+import logger from 'electron-log'
+// 设置日志文件的保存路径
+logger.transports.file.file = app.getPath("userData") + "/app.log";
+
+// 初始化日志记录器
+logger.transports.file.level = "info";
+logger.transports.console.level = "info";
+// 日期样式
+logger.transports.file.format = '[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}]{scope} {text}'
+console.log(app.getPath("userData"))
+logger.transports.file.file = app.getPath("userData") + "/app.log";
+
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
@@ -86,6 +98,10 @@ app.on('ready', () => {
     mainWindow.unmaximize()
     mainWindow.setBounds({ x: 10, y: 10, width: screen.getPrimaryDisplay().workAreaSize.width - 20, height: screen.getPrimaryDisplay().workAreaSize.height - 20 });
   })
+  // 启动plc conPLC
+  ipcMain.on('conPLC', (event, arg1, arg2) => {
+    conPLC();
+  })
   mainWindow.on('maximize', () => {
     mainWindow.webContents.send('mainWin-max', 'max-window')
   })
@@ -144,16 +160,52 @@ app.on('ready', () => {
     // });
   }
 
+  // 开发者工具
+  globalShortcut.register('CommandOrControl+L', () => {
+    mainWindow.webContents.openDevTools()
+  })
+  globalShortcut.register('CommandOrControl+F11', () => {
+    mainWindow.isFullScreen() ? mainWindow.setFullScreen(false) : mainWindow.setFullScreen(true);
+  })
+  // 定义自定义事件
+  ipcMain.on('full_screen', function() {
+    mainWindow.isFullScreen() ? mainWindow.setFullScreen(false) : mainWindow.setFullScreen(true);
+  })
+  // setUserInfo
+  ipcMain.on('setUserInfo', (event, arg) => {
+    mainWindow.webContents.executeJavaScript(`
+      (function(){ 
+        window.sessionStorage.setItem("userInfo", '${JSON.stringify(arg)}')
+      })()
+    `)
+  })
+  // 程序启动时判断是否存在报表、日志等本地文件夹，没有就创建
+  createFile('batchReport.grf');
+  createFile('boxreport.grf');
+});
+
+function conPLC() {
+  logger.info('开始连接PLC')
   // 查询配置
   HttpUtil.get('/cssConfig/getConfig').then((res)=> {
+    logger.info(JSON.stringify(res))
+    if(!res.data.plcPort) {
+      logger.info('配置查询失败')
+      // We have an error. Maybe the PLC is not reachable.
+      conPLC();
+      return false;
+    }
     conn.initiateConnection( { port: Number(res.data.plcPort), host: res.data.plcIp, rack: 0, slot: 1, debug: false }, (err) => {
       if (typeof(err) !== "undefined") {
+        logger.info('连接PLC失败' + JSON.stringify(err))
         // We have an error. Maybe the PLC is not reachable.
+        conPLC();
         console.log(err);
+        return false;
         // process.exit();
       }
       conn.setTranslationCB(function(tag) { return variables[tag]; }); // This sets the "translation" to allow us to work with object names
-
+      logger.info('连接PLC成功')
       // PLC看门狗心跳
       conn.addItems('DBW60')
       // 故障信息
@@ -179,31 +231,9 @@ app.on('ready', () => {
       }, 50);
     });
   }).catch((err)=> {
-    console.log('config error!')
+    logger.info('config error!')
   });
-  // 开发者工具
-  globalShortcut.register('CommandOrControl+L', () => {
-    mainWindow.webContents.openDevTools()
-  })
-  globalShortcut.register('CommandOrControl+F11', () => {
-    mainWindow.isFullScreen() ? mainWindow.setFullScreen(false) : mainWindow.setFullScreen(true);
-  })
-  // 定义自定义事件
-  ipcMain.on('full_screen', function() {
-    mainWindow.isFullScreen() ? mainWindow.setFullScreen(false) : mainWindow.setFullScreen(true);
-  })
-  // setUserInfo
-  ipcMain.on('setUserInfo', (event, arg) => {
-    mainWindow.webContents.executeJavaScript(`
-      (function(){ 
-        window.sessionStorage.setItem("userInfo", '${JSON.stringify(arg)}')
-      })()
-    `)
-  })
-  // 程序启动时判断是否存在报表、日志等本地文件夹，没有就创建
-  createFile('batchReport.grf');
-  createFile('boxreport.grf');
-});
+}
 
 function createFile(fileNameVal) {
   const sourcePath = path.join(__static, './report', fileNameVal);// 要复制的文件的路径=

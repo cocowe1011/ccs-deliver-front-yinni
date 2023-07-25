@@ -197,6 +197,8 @@ export default {
         if (response.data === 'OK') {
           this.javaAppStarted = true;
           this.$message.success('已启动！')
+          // 给主进程发消息，启动PLC连接
+          ipcRenderer.send('conPLC');
         } else {
           if (retries < this.maxRetries) {
             setTimeout(() => this.checkJavaAppStatus(retries + 1), this.retryInterval);

@@ -13,10 +13,10 @@
               <el-input v-model="cssConfig.plcPort" style="width: 250px;"></el-input>
             </el-form-item>
             <el-divider content-position="left">束前传送带长度</el-divider>
-            <el-form-item label="L1-1长度：">
+            <el-form-item label="L1-1长度(mm)：">
               <el-input v-model="cssConfig.oneOneLength" style="width: 250px;"></el-input>
             </el-form-item>
-            <el-form-item label="L2长度：">
+            <el-form-item label="L2长度(mm)：">
               <el-input v-model="cssConfig.twoLength" style="width: 250px;"></el-input>
             </el-form-item>
             <el-divider content-position="left">点位</el-divider>

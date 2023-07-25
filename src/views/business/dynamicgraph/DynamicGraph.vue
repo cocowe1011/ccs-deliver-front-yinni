@@ -33,13 +33,13 @@
             <div class="data-card" style="padding: 7px 10px 7px 10px;">
               <div class="data-card-border">
                 <div class="data-card-border-borderTop">束下设置速度</div>
-                <div class="data-card-border-borderDown">{{ orderMainDy.sxSpeedSet }}米/分钟</div>
+                <div class="data-card-border-borderDown">{{ orderMainDy.sxSpeedSet }}mm/分钟</div>
               </div>
             </div>
             <div class="data-card" style="padding: 7px 20px 7px 10px;">
               <div class="data-card-border">
                 <div class="data-card-border-borderTop granient-text">束下实时速度</div>
-                <div class="data-card-border-borderDown">{{ lightBeamRealTimeSpeed }}米/分钟</div>
+                <div class="data-card-border-borderDown">{{ lightBeamRealTimeSpeed }}mm/分钟</div>
               </div>
             </div>
             <div class="data-card" style="padding: 7px 10px 14px 20px;">
@@ -788,30 +788,32 @@ export default {
     // 拿到模拟id去判断箱子的工艺是否合格
     getUndercutProcess(boxImitateIdVal) {
       this.nowShuXiaid = boxImitateIdVal;
+      this.qualified4Box(boxImitateIdVal, true)
+      this.$message.success(this.nowShuXiaid + '合格！');
       // 获取当前加速器工艺，和系统设置工艺做比较
-      HttpUtil.get('/box/getAccData').then((res)=> {
-        if(res.data&&JSON.stringify(this.orderMainDy) != '{}' && this.judgeAccData(res.data, boxImitateIdVal)) {
-          this.$message({
-            type: 'success',
-            message: '箱子id' + boxImitateIdVal + '工艺合格！更新状态！'
-          });
-          this.qualified4Box(boxImitateIdVal, true)
-        } else {
-          this.$message({
-            type: 'warning',
-            message: '箱子id' + boxImitateIdVal + '工艺不合格！更新状态！'
-          });
-          this.qualified4Box(boxImitateIdVal, false)
-        }
-      }).catch((err)=> {
-        this.$message({
-          type: 'warning',
-          message: '箱子id' + boxImitateIdVal + '工艺不合格！更新状态！'
-        });
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！数据异常，未读取到加速器数值！', 'log');
-        this.qualified4Box(boxImitateIdVal, false)
-        console.log(err)
-      });
+      // HttpUtil.get('/box/getAccData').then((res)=> {
+      //   if(res.data&&JSON.stringify(this.orderMainDy) != '{}' && this.judgeAccData(res.data, boxImitateIdVal)) {
+      //     this.$message({
+      //       type: 'success',
+      //       message: '箱子id' + boxImitateIdVal + '工艺合格！更新状态！'
+      //     });
+      //     this.qualified4Box(boxImitateIdVal, true)
+      //   } else {
+      //     this.$message({
+      //       type: 'warning',
+      //       message: '箱子id' + boxImitateIdVal + '工艺不合格！更新状态！'
+      //     });
+      //     this.qualified4Box(boxImitateIdVal, false)
+      //   }
+      // }).catch((err)=> {
+      //   this.$message({
+      //     type: 'warning',
+      //     message: '箱子id' + boxImitateIdVal + '工艺不合格！更新状态！'
+      //   });
+      //   this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！数据异常，未读取到加速器数值！', 'log');
+      //   this.qualified4Box(boxImitateIdVal, false)
+      //   console.log(err)
+      // });
     },
     analogOptoelectronics(point) {
       console.log(point)
