@@ -158,7 +158,7 @@ export default {
       HttpUtil.post('/login/login', param).then((res)=> {
         if(res.data) {
           ipcRenderer.send('setUserInfo', res.data)
-          window.sessionStorage.setItem('userInfo', JSON.stringify(res.data));
+          // window.sessionStorage.setItem('userInfo', JSON.stringify(res.data));
           setTimeout(() => {
             this.loadingStatus = false;
             // 跳转主页

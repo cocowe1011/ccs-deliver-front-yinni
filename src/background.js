@@ -230,7 +230,7 @@ function conPLC() {
         conn.readAllItems(valuesReady);
       }, 50);
       // 发送心跳
-      this.sendHeartToPLC()
+      sendHeartToPLC()
     });
   }).catch((err)=> {
     logger.info('config error!')
@@ -291,6 +291,7 @@ function createFile(fileNameVal) {
 }
 
 var variables = {
+  DBW0: 'DB101,INT0', // 心跳
   DBW2: 'DB101,INT2', // 加速器设定输送线速度
   DBW4: 'DB101,INT4', // 加速器允许货物进入辐照区
   DBW6: 'DB101,INT6', // 暂停按钮
