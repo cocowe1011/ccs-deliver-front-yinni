@@ -426,10 +426,25 @@ export default {
       judgeSpeedInterval: null, // 工艺对比添加 束下实际速度与设定速度对比，不合格报警 DBW4 加速器允许货物进入辐照区
       shuxiaSpeedProportion: 1, // 束下前输送速度比
       logNotReadNumber: 0, // 日志未读数量
-      errorLogNotReadNumber: 0 // 错误日志未读数量
+      errorLogNotReadNumber: 0, // 错误日志未读数量
+      timers: {},
+      beltRunStatus: 0
     };
   },
   watch: {
+    beltRunStatus: {
+      async handler(newVal, oldVal) {
+        if(newVal == 0) {
+          if(JSON.stringify(this.timers) != '{}') {
+            this.pauseAllTimers()
+          }
+        } else if(newVal == 1) {
+          if(JSON.stringify(this.timers) != '{}') {
+            this.resumeAllTimers()
+          }
+        }
+      }
+    },
     pointA: {
       async handler(newVal, oldVal) {
         if(!this.enteringPonitA && newVal === '1' && oldVal === '0') { //货物开始进入A点
@@ -491,10 +506,9 @@ export default {
             this.$message.success('开始进入B点')
             // 进入B的下降沿，获取AB队列第一个，开始计算时间，到时间后，进行工艺对比，判断货物是否合格
             const boxImitateId = this.arrAB[0].boxImitateId;
-            // 计算时间
-            setTimeout(() => {
-              this.getUndercutProcess(boxImitateId);
-            }, this.calculateMilliseconds((Number(this.l11)/Number(this.lightBeamRealTimeSpeed)).toFixed(2),(Number(this.l2)/(Number(this.lightBeamRealTimeSpeed)  * (this.shuxiaSpeedProportion/10)) ).toFixed(2)));
+            // 计算时间 改为任务管理
+            const times = this.calculateMilliseconds(((Number(this.l11) + Number(this.orderMainDy.boxWidth))/Number(this.lightBeamRealTimeSpeed)).toFixed(2),(Number(this.l2)/(Number(this.lightBeamRealTimeSpeed)  * (this.shuxiaSpeedProportion/10)) ).toFixed(2));
+            this.startTimerWithDelay(boxImitateId, times)
           }
         } else if(this.enteringPonitB && newVal === '0' && oldVal === '1') { // 货物走出B点
           this.$message.warning('货物走出B点')
@@ -700,9 +714,25 @@ export default {
       //判断箱子在哪个队列 AB BC CD DG GH,status为true为合格，false为不合格
       for (let index = 0; index < this.arrBC.length; index++) {
         if(this.arrBC[index].boxImitateId == boxImitateIdVal) {
-          this.arrBC[index].qualified = status?'1':'0';
-          // 给当前圈也赋值合格
-          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].qualified = status?'1':'0';
+          if(this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].qualified == undefined) {
+            this.arrBC[index].qualified = status?'1':'0';
+            // 给当前圈也赋值合格
+            this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].qualified = status?'1':'0';
+            if(!status) {
+              // 给后一个箱子赋值不合格
+              if(index <= this.arrBC.length - 1) {
+                this.arrBC[index + 1].qualified = '0';
+                // 给当前圈也赋值合格
+                this.arrBC[index + 1].turnsInfoList[this.arrBC[index + 1].numberTurns - 1].qualified = '0';
+              }
+              // 给前一个箱子赋值不合格  
+              if(index >= 1) {
+                this.arrBC[index - 1].qualified = '0';
+                // 给当前圈也赋值合格
+                this.arrBC[index - 1].turnsInfoList[this.arrBC[index - 1].numberTurns - 1].qualified = '0';
+              }  
+            }
+          }
           break;
         }
       }
@@ -792,6 +822,13 @@ export default {
       this.nowShuXiaid = boxImitateIdVal;
       this.qualified4Box(boxImitateIdVal, true)
       this.$message.success(this.nowShuXiaid + '合格！');
+      // if(boxImitateIdVal == '202307260003') {
+      //   this.qualified4Box(boxImitateIdVal, false)
+      //   this.$message.error(this.nowShuXiaid + '不合格！');
+      // } else {
+      //   this.qualified4Box(boxImitateIdVal, true)
+      //   this.$message.success(this.nowShuXiaid + '合格！');
+      // }
       // 获取当前加速器工艺，和系统设置工艺做比较
       // HttpUtil.get('/box/getAccData').then((res)=> {
       //   // 给当前箱子赋值acc读取值
@@ -1506,6 +1543,33 @@ export default {
       } else {
         return value; // 非负数保持不变
       }
+    },
+    startTimerWithDelay(boxImitateId, delay) {
+      const timerId = setTimeout(() => {
+        // 执行逻辑
+        this.getUndercutProcess(boxImitateId);
+        // 执行完删除定时器 delete 操作符用于删除对象的某个属性
+        delete this.timers[boxImitateId];
+      }, delay);
+      this.timers[boxImitateId] = {
+        timerId: timerId,
+        endTime: Date.now() + delay,
+        remainingTime: delay,
+      };
+    },
+    pauseAllTimers() {
+      for (const boxImitateId in this.timers) {
+        clearTimeout(this.timers[boxImitateId].timerId);
+        this.timers[boxImitateId].remainingTime = this.timers[boxImitateId].endTime - Date.now();
+      }
+    },
+    resumeAllTimers() {
+      const currentTime = Date.now();
+      for (const boxImitateId in this.timers) {
+        const remainingTime = this.timers[boxImitateId].remainingTime;
+        this.startTimerWithDelay(boxImitateId, remainingTime);
+        this.timers[boxImitateId].endTime = currentTime + remainingTime;
+      }
     }
   },
   created() {
@@ -1518,15 +1582,19 @@ export default {
     // 订阅<状态球>eventBus发布的消息
     EventBus.$on('pushPLCMessage', eventData => {
       // --------无PLC测试时，这里以下代码毙掉--------
-      this.guangDianStatusArr = this.PrefixZero(this.convertToWord(eventData.DBW70).toString(2), 16);
-      this.pointA = this.guangDianStatusArr[7];
-      this.pointB = this.guangDianStatusArr[6];
-      this.pointC = this.guangDianStatusArr[5];
-      this.pointD = this.guangDianStatusArr[4];
-      this.pointE = this.guangDianStatusArr[3];
-      this.pointF = this.guangDianStatusArr[2];
-      this.pointG = this.guangDianStatusArr[1];
-      this.pointH = this.guangDianStatusArr[0];
+      // 输送线运行状态
+      this.beltRunStatus = Number(eventData.DBW62);
+      if(Number(eventData.DBW62) == 1) {
+        this.guangDianStatusArr = this.PrefixZero(this.convertToWord(eventData.DBW70).toString(2), 16);
+        this.pointA = this.guangDianStatusArr[7];
+        this.pointB = this.guangDianStatusArr[6];
+        this.pointC = this.guangDianStatusArr[5];
+        this.pointD = this.guangDianStatusArr[4];
+        this.pointE = this.guangDianStatusArr[3];
+        this.pointF = this.guangDianStatusArr[2];
+        this.pointG = this.guangDianStatusArr[1];
+        this.pointH = this.guangDianStatusArr[0];
+      }
       // --------无PLC测试时，这里以上代码毙掉--------
       this.dianJiStatusArr = this.PrefixZero(this.convertToWord(eventData.DBW72).toString(2), 16);
       this.lightBeamRealTimeSpeed = Number(eventData.DBW68);

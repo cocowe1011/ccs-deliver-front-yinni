@@ -41,10 +41,10 @@
                 <el-input type="number" size="small" v-model="orderMainForm.boxLength" placeholder="箱子长度" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
               <el-form-item label="箱子高度：">
-                <el-input type="number" size="small" v-model="orderMainForm.boxWidth" placeholder="箱子高度" :readonly="!(isNewSave || isEdit)"></el-input>
+                <el-input type="number" size="small" v-model="orderMainForm.boxHeight" placeholder="箱子高度" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
               <el-form-item label="箱子宽度：">
-                <el-input type="number" size="small" v-model="orderMainForm.boxHeight" placeholder="箱子宽度" :readonly="!(isNewSave || isEdit)"></el-input>
+                <el-input type="number" size="small" v-model="orderMainForm.boxWidth" placeholder="箱子宽度" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
               <el-form-item label="箱子重量：">
                 <el-input type="number" size="small" v-model="orderMainForm.boxWeight" placeholder="箱子重量" :readonly="!(isNewSave || isEdit)"></el-input>

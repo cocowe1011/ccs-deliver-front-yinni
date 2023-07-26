@@ -100,7 +100,9 @@ app.on('ready', () => {
   })
   // 启动plc conPLC
   ipcMain.on('conPLC', (event, arg1, arg2) => {
-    conPLC();
+    if (process.env.NODE_ENV === 'production') {
+      conPLC();
+    }
   })
   mainWindow.on('maximize', () => {
     mainWindow.webContents.send('mainWin-max', 'max-window')
@@ -129,18 +131,19 @@ app.on('ready', () => {
       }
     })
   });
-  // let revert = false;
-  // setInterval(() => {
-  //   if(mainWindow) {
-  //     if(revert) {
-  //       mainWindow.webContents.send('receivedMsg', {DBW60:0, DBW68:27473,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          ',DBW76:19})
-  //     } else {
-  //       mainWindow.webContents.send('receivedMsg', {DBW60:1, DBW68:27473,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          ',DBW76:19})
-  //     }
-  //     revert = !revert;
-  //   }
-  // }, 100);
-
+  if (process.env.NODE_ENV === 'development') {
+    let revert = false;
+    setInterval(() => {
+      if(mainWindow) {
+        if(revert) {
+          mainWindow.webContents.send('receivedMsg', {DBW60:0,DBW62:0, DBW68:35580,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          ',DBW76:19})
+        } else {
+          mainWindow.webContents.send('receivedMsg', {DBW60:1,DBW62:0, DBW68:35580,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          ',DBW76:19})
+        }
+        revert = !revert;
+      }
+    }, 100);
+  }
   setAppTray();
   if (process.env.NODE_ENV === 'production') {
     // 启动Java进程
@@ -200,7 +203,6 @@ function conPLC() {
         logger.info('连接PLC失败' + JSON.stringify(err))
         // We have an error. Maybe the PLC is not reachable.
         conPLC();
-        console.log(err);
         return false;
         // process.exit();
       }
@@ -208,6 +210,8 @@ function conPLC() {
       logger.info('连接PLC成功')
       // PLC看门狗心跳
       conn.addItems('DBW60')
+      // 输送线自动运行 DBW62
+      conn.addItems('DBW62')
       // 故障信息
       conn.addItems('DBW66')
       // 输送线不允许加速器写
@@ -308,7 +312,7 @@ var variables = {
   DBW34: 'DB101,INT34', // 扫码信息不一致报警
   DBW36: 'DB101,INT36', // 允许上货
   DBW60: 'DB101,INT60', // 看门狗心跳
-  DBW62: 'DB101,INT62',
+  DBW62: 'DB101,INT62', // 输送系统自动运行
   DBW64: 'DB101,INT64',
   DBW66: 'DB101,INT66', // 故障信息
   DBW68: 'DB101,INT68',
