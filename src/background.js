@@ -32,8 +32,7 @@ app.on('window-all-closed', () => {
 });
 
 global.sharedObject = {
-  cookieStr: '',
-  deptInfo: {}
+  userInfo: {}
 }
 let mainWindow = null;
 app.on('ready', () => {
@@ -70,11 +69,7 @@ app.on('ready', () => {
       mainWindow.unmaximize()
       mainWindow.setSize(1100, 600);
       mainWindow.center();
-      mainWindow.webContents.executeJavaScript(`
-        (function(){ 
-          window.sessionStorage.removeItem('userInfo')
-        })()
-      `)
+      global.sharedObject.userInfo = {}
       // mainWindow.setResizable(false)
     }
   })
@@ -147,20 +142,7 @@ app.on('ready', () => {
   setAppTray();
   if (process.env.NODE_ENV === 'production') {
     // 启动Java进程
-    const java = spawn(path.join(__static, './jre', 'jre1.8.0_251', 'bin', 'java'), ['-Xmx4096m', '-Xms4096m', '-jar', path.join(__static, './jarlib', 'ccs-deliver-middle.jar')]);
-    // 监听Java进程的输出
-    // java.stdout.on('data', (data) => {
-    //   console.log(`stdout: ${data}`);
-    // });
-  
-    // java.stderr.on('data', (data) => {
-    //   console.error(`stderr: ${data}`);
-    // });
-  
-    // // 当Java进程退出时关闭Electron应用程序
-    // java.on('exit', (code) => {
-    //   app.quit();
-    // });
+    spawn(path.join(__static, './jre', 'jre1.8.0_251', 'bin', 'java'), ['-Xmx4096m', '-Xms4096m', '-jar', path.join(__static, './jarlib', 'ccs-deliver-middle.jar')]);
   }
 
   // 开发者工具
@@ -173,14 +155,6 @@ app.on('ready', () => {
   // 定义自定义事件
   ipcMain.on('full_screen', function() {
     mainWindow.isFullScreen() ? mainWindow.setFullScreen(false) : mainWindow.setFullScreen(true);
-  })
-  // setUserInfo
-  ipcMain.on('setUserInfo', (event, arg) => {
-    mainWindow.webContents.executeJavaScript(`
-      (function(){ 
-        window.sessionStorage.setItem("userInfo", '${JSON.stringify(arg)}')
-      })()
-    `)
   })
   // 程序启动时判断是否存在报表、日志等本地文件夹，没有就创建
   createFile('batchReport.grf');

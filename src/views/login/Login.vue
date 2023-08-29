@@ -52,6 +52,7 @@
 import { ipcRenderer } from 'electron'
 import HttpUtil from '@/utils/HttpUtil'
 import axios from 'axios';
+const remote = require('electron').remote
 export default {
   name: "Login",
   components: {},
@@ -157,8 +158,7 @@ export default {
       }
       HttpUtil.post('/login/login', param).then((res)=> {
         if(res.data) {
-          ipcRenderer.send('setUserInfo', res.data)
-          // window.sessionStorage.setItem('userInfo', JSON.stringify(res.data));
+          remote.getGlobal('sharedObject').userInfo = res.data;
           setTimeout(() => {
             this.loadingStatus = false;
             // 跳转主页

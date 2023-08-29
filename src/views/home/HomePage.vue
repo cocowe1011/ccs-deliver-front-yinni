@@ -74,6 +74,7 @@
 import { ipcRenderer } from 'electron'
 import StatusMonitor from '@/components/StatusMonitoring.vue'
 import HttpUtil from '@/utils/HttpUtil'
+const remote = require('electron').remote
 export default {
   name: "HomePage",
   components: {
@@ -166,7 +167,6 @@ export default {
           path: '/'
         });
       });
-      // window.sessionStorage.removeItem('userInfo');
       this.$nextTick(() => {
         ipcRenderer.send('logStatus','logout')
       })
@@ -190,7 +190,7 @@ export default {
             // 验证姓名是否正确
             const param = {
               userName: value,
-              userCode: JSON.parse(window.sessionStorage.getItem('userInfo')).userCode
+              userCode: remote.getGlobal('sharedObject').userInfo.userCode
             }
             HttpUtil.post('/userInfo/verifyName', param).then((res)=> {
               if(res.data) {
@@ -245,7 +245,7 @@ export default {
       }
       const param = {
         userPassword: this.updatePasswordForm.newPassword,
-        userCode: JSON.parse(window.sessionStorage.getItem('userInfo')).userCode
+        userCode: remote.getGlobal('sharedObject').userInfo.userCode
       }
       HttpUtil.post('/userInfo/updatePassword', param).then((res)=> {
         if(res.data > 0) {

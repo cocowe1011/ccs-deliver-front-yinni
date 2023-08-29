@@ -13,13 +13,14 @@
   </div>
 </template>
 <script>
+const remote = require('electron').remote
 export default {
   name: "WelcomPage",
   components: {},
   props: {},
   data() {
     return {
-      userName : JSON.parse(window.sessionStorage.getItem('userInfo')).userName
+      userName : remote.getGlobal('sharedObject').userInfo.userName
     };
   },
   watch: {},

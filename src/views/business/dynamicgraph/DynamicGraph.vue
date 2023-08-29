@@ -315,6 +315,7 @@ import { EventBus } from '@/utils/EventBus'
 import { Debugger, ipcRenderer } from 'electron'
 import HttpUtil from '@/utils/HttpUtil'
 import moment from 'moment';
+const remote = require('electron').remote
 export default {
   name: "DynamicGraph",
   components: {},
@@ -1513,13 +1514,13 @@ export default {
             // 验证姓名是否正确
             const param = {
               userPassword: value,
-              userCode: JSON.parse(window.sessionStorage.getItem('userInfo')).userCode
+              userCode: remote.getGlobal('sharedObject').userInfo.userCode
             }
             HttpUtil.post('/userInfo/verifyPassword', param).then((res)=> {
               if(res.data) {
                 this.$message.success('验证通过！');
                 this.clearAllData();
-                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 用户：' + JSON.parse(window.sessionStorage.getItem('userInfo')).userName + '进行了全线清空操作！', 'log');
+                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 用户：' + remote.getGlobal('sharedObject').userInfo.userName + '进行了全线清空操作！', 'log');
               } else {
                 this.$message.error('验证未通过！');
               }
