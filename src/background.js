@@ -98,6 +98,10 @@ app.on('ready', () => {
     if (process.env.NODE_ENV === 'production') {
       conPLC();
     }
+    // setInterval(() => {
+    //   console.log(writeStrArr.toString());
+    // }, 50);
+    // sendHeartToPLC()
   })
   mainWindow.on('maximize', () => {
     mainWindow.webContents.send('mainWin-max', 'max-window')
@@ -159,6 +163,10 @@ app.on('ready', () => {
   // 程序启动时判断是否存在报表、日志等本地文件夹，没有就创建
   createFile('batchReport.grf');
   createFile('boxreport.grf');
+  // 定义自定义事件
+  ipcMain.on('writeLogToLocal', (event, arg) => {
+    fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + ".txt").replaceAll('/','-'), arg + '\n', function(err) {});
+  })
 });
 
 function conPLC() {
@@ -207,6 +215,10 @@ function conPLC() {
       setInterval(() => {
         conn.readAllItems(valuesReady);
       }, 50);
+      setInterval(() => {
+        // nodes7 代码
+        conn.writeItems(writeAddArr, writeStrArr, valuesWritten);
+      }, 100);
       // 发送心跳
       sendHeartToPLC()
     });
@@ -223,7 +235,7 @@ function sendHeartToPLC() {
         nowValue = 1 - nowValue;
     }
     times++;
-    conn.writeItems('DBW0', nowValue, valuesWritten);
+    writeValuesToPLC('DBW0', nowValue);
   }, 200); // 每200毫秒执行一次交替
 }
 
@@ -247,6 +259,19 @@ function createFile(fileNameVal) {
   if (!fs.existsSync(destinationPath)) {
     try {
       fs.mkdirSync(destinationPath, { recursive: true });
+      console.log('目标文件夹已成功创建');
+    } catch (err) {
+      console.error('创建目标文件夹时出现错误：', err);
+      return;
+    }
+  }
+
+  const destinationLogPath = 'D://css_temp_data/log'; // 目标文件夹的路径
+
+  // 创建日志的文件夹
+  if (!fs.existsSync(destinationLogPath)) {
+    try {
+      fs.mkdirSync(destinationLogPath, { recursive: true });
       console.log('目标文件夹已成功创建');
     } catch (err) {
       console.error('创建目标文件夹时出现错误：', err);
@@ -285,6 +310,7 @@ var variables = {
   DBW26: 'DB101,INT26', // 不允许上货
   DBW34: 'DB101,INT34', // 扫码信息不一致报警
   DBW36: 'DB101,INT36', // 允许上货
+  DBW38: 'DB101,INT38', // 下货报警
   DBW60: 'DB101,INT60', // 看门狗心跳
   DBW62: 'DB101,INT62', // 输送系统自动运行
   DBW64: 'DB101,INT64',
@@ -297,13 +323,63 @@ var variables = {
   DBB130: 'DB101,C130.30'
 };
 
+var writeStrArr = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+var writeAddArr = ['DBW0', 'DBW2', 'DBW4', 'DBW6', 'DBW8', 'DBW10', 'DBW12', 'DBW14', 'DBW16', 'DBW18', 'DBW22', 'DBW24', 'DBW26', 'DBW34', 'DBW36', 'DBW38'];
+
 // 给PLC写值
 function writeValuesToPLC(add, values) {
-  // console.log(add)
-  // console.log(values)
-  // nodes7 代码
-  conn.writeItems(add, values, valuesWritten); // This writes a single boolean item (one bit) to true
-  // console.log(add +','+values)
+  switch (add) {
+    case 'DBW0':
+      writeStrArr[0] = values;
+      break;
+    case 'DBW2':
+      writeStrArr[1] = values;
+      break;
+    case 'DBW4':
+      writeStrArr[2] = values;
+      break;
+    case 'DBW6':
+      writeStrArr[3] = values;
+      break;
+    case 'DBW8':
+      writeStrArr[4] = values;
+      break;
+    case 'DBW10':
+      writeStrArr[5] = values;
+      break;
+    case 'DBW12':
+      writeStrArr[6] = values;
+      break;
+    case 'DBW14':
+      writeStrArr[7] = values;
+      break;
+    case 'DBW16':
+      writeStrArr[8] = values;
+      break;
+    case 'DBW18':
+      writeStrArr[9] = values;
+      break;
+    case 'DBW22':
+      writeStrArr[10] = values;
+      break;
+    case 'DBW24':
+      writeStrArr[11] = values;
+      break;
+    case 'DBW26':
+      writeStrArr[12] = values;
+      break;
+    case 'DBW34':
+      writeStrArr[13] = values;
+      break;
+    case 'DBW36':
+      writeStrArr[14] = values;
+      break;
+    case 'DBW38':
+      writeStrArr[15] = values;
+      break;
+    default:
+      break;
+  }
 }
 
 function valuesWritten(anythingBad) {

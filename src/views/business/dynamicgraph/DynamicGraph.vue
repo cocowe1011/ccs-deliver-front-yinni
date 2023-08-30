@@ -229,82 +229,86 @@
       </div>
     </div>
     <el-drawer
-      title="输送带xx"
+      title="快捷移动-拖动表格切换队列"
       :visible.sync="drawer"
       :modal-append-to-body="false"
       border
-      size="1120px">
+      size="1200px">
       <div class="drawer-left">
         <div class="content_table">
           <div class="table_head">
             <table>
               <thead>
                 <tr>
-                  <th style="width:40px;">
-                    <div>序号</div>
-                  </th>
-                  <th style="width: 100px">
-                    <div>箱编号</div>
-                  </th>
-                  <th style="width: 150px">
-                    <div>一维/二维码信息</div>
-                  </th>
-                  <th style="width: 80px">
-                    <div>进入时间</div>
-                  </th>
-                  <th style="width: 80px">
-                    <div>测试箱</div>
-                  </th>
-                  <th style="width: 80px">
-                    <div>圈数</div>
-                  </th>
-                  <th style="width: 80px">
-                    <div>翻转</div>
-                  </th>
-                  <th style="width: 80px">
-                    <div>已完成</div>
-                  </th>
-                  <th style="width: 80px">
-                    <div>合格</div>
-                  </th>
-                  <th style="width: 80px">
-                    <div>状态</div>
-                  </th>
-                  <th>
-                    <div>POID</div>
-                  </th>
-                </tr>
+                    <th style="width:40px;">
+                      <div>序号</div>
+                    </th>
+                    <th style="width: 150px">
+                      <div>订单号</div>
+                    </th>
+                    <th style="width: 120px">
+                      <div>箱编号</div>
+                    </th>
+                    <th style="width: 150px">
+                      <div>一维/二维码信息</div>
+                    </th>
+                    <th style="width: 130px">
+                      <div>进入时间</div>
+                    </th>
+                    <th style="width: 60px">
+                      <div>圈数</div>
+                    </th>
+                    <th style="width: 60px">
+                      <div>翻转</div>
+                    </th>
+                    <th style="width: 60px">
+                      <div>已完成</div>
+                    </th>
+                    <th style="width: 60px">
+                      <div>合格</div>
+                    </th>
+                    <th style="width: 60px">
+                      <div>状态</div>
+                    </th>
+                  </tr>
               </thead>
             </table>
           </div>
           <div class="table_list">
             <table>
               <tbody>
-                <tr v-for="(item, index) in boxArr" class="body-col" :key="index" draggable="true" @dragstart="dragStart(index)">
-                  <td style="width: 40px;">{{ index + 1 }}</td>
-                  <td style="width: 100px;">{{ item.boxImitateId }}</td>
-                  <th style="width: 150px">{{ item.loadScanCode }}</th>
-                  <th style="width: 80px"></th>
-                  <th style="width: 80px"></th>
-                  <th style="width: 80px">{{ item.numberTurns }}</th>
-                  <th style="width: 80px"></th>
-                  <th style="width: 80px"></th>
-                  <th style="width: 80px">{{ item.qualified === '1' ? '合格' : item.qualified === '0' ? '不合格' : '' }}</th>
-                  <th style="width: 80px"></th>
-                  <th></th>
-                </tr>
-              </tbody>
+                  <tr v-for="(item, index) in boxArr" class="body-col" :key="index" draggable="true" @dragstart="dragStart(index)">
+                    <td style="width: 40px;">{{ index + 1 }}</td>
+                    <td style="width: 150px">{{ orderMainDy.orderNo }}</td>
+                    <td style="width: 120px;">{{ item.boxImitateId }}</td>
+                    <td style="width: 150px">{{ item.loadScanCode }}</td>
+                    <td style="width: 130px">{{ item.turnsInfoList[0].passATime }}</td>
+                    <td style="width: 60px">{{ item.numberTurns }}</td>
+                    <td style="width: 60px">{{ orderMainDy.revertFlag == '翻转' ? '√': 'X' }}</td>
+                    <td style="width: 60px">{{ item.xiahuoFlag ? '√': '' }}</td>
+                    <td style="width: 60px">
+                      <el-tag type="success" v-if="item.qualified === '1'" size="mini">合格</el-tag>
+                      <el-tag type="danger" v-else-if="item.qualified === '0'" size="mini">不合格</el-tag>
+                      <div v-else></div>
+                    </td>
+                    <td style="width: 60px">
+                      <el-tag type="success" v-if="item.xiahuoFlag" size="mini">已下货</el-tag>
+                      <el-tag type="danger" v-if="item.tichuFlag" size="mini">已剔除</el-tag>
+                      <el-tag v-if="!item.xiahuoFlag && !item.tichuFlag" size="mini">执行中</el-tag>
+                    </td>
+                  </tr>
+                </tbody>
             </table>
           </div><!-- <orderList id="orderListComp" ref="orderListComp" :visible="visibleOrderList" :add-data="addData" left="210px" top="95px" @changeSearchWindow="changeSearchWindow" @selectOrderItem="selectOrderItem"></orderList> -->
         </div>
       </div>
       <div class="drawer-right">
-        <div :class="['transform-card',traAB?'transform-card-active':'']" @dragover.prevent @drop="dropItem('AB', $event)" @click="showCache('AB')">101-103区域货物缓存队列</div>
-        <div :class="['transform-card',traBC?'transform-card-active':'']" @dragover.prevent @drop="dropItem('BC', $event)" @click="showCache('BC')">104-106区域货物缓存队列</div>
-        <div :class="['transform-card',traCD?'transform-card-active':'']" @dragover.prevent @drop="dropItem('CD', $event)" @click="showCache('CD')">107-109区域货物缓存队列</div>
-        <div :class="['transform-card',traDG?'transform-card-active':'']" @dragover.prevent @drop="dropItem('DG', $event)" @click="showCache('DG')">110-111区域货物缓存队列</div>
-        <div :class="['transform-card',traF?'transform-card-active':'']" @dragover.prevent @drop="dropItem('F', $event)" @click="showCache('F')">剔除货物缓存队列</div>
-        <div :class="['transform-card',traGH?'transform-card-active':'']" @dragover.prevent @drop="dropItem('GH', $event)" @click="showCache('GH')">下货区缓存队列</div>
+        <div :class="['transform-card',traAB?'transform-card-active':'']" @dragover.prevent @drop="dropItem('AB', $event)" @click="showCache('AB')" @dragenter="dragEnter" @dragleave="dragLeave">101-103区域队列</div>
+        <div :class="['transform-card',traBC?'transform-card-active':'']" @dragover.prevent @drop="dropItem('BC', $event)" @click="showCache('BC')" @dragenter="dragEnter" @dragleave="dragLeave">104-106区域队列</div>
+        <div :class="['transform-card',traCD?'transform-card-active':'']" @dragover.prevent @drop="dropItem('CD', $event)" @click="showCache('CD')" @dragenter="dragEnter" @dragleave="dragLeave">107-109区域队列</div>
+        <div :class="['transform-card',traDG?'transform-card-active':'']" @dragover.prevent @drop="dropItem('DG', $event)" @click="showCache('DG')" @dragenter="dragEnter" @dragleave="dragLeave">110-111区域队列</div>
+        <div :class="['transform-card',traF?'transform-card-active':'']" @dragover.prevent @drop="dropItem('F', $event)" @click="showCache('F')" @dragenter="dragEnter" @dragleave="dragLeave">剔除货物缓存队列</div>
+        <div :class="['transform-card',traGH?'transform-card-active':'']" @dragover.prevent @drop="dropItem('GH', $event)" @click="showCache('GH')" @dragenter="dragEnter" @dragleave="dragLeave">下货区缓存队列</div>
       </div>
     </el-drawer>
   </div>
@@ -471,6 +475,11 @@ export default {
             this.nowInNum++;
             // 模拟id数+1
             this.beginCountNum++;
+            // 判断上货数和订单箱数的数量，如果满足则锁定上货
+            if(Number(this.nowInNum) === Number(this.orderMainDy.orderBoxNum)) {
+              ipcRenderer.send('writeValuesToPLC', 'DBW26', 1); // 锁定上货电机（保留）
+              this.banLoadStatus = true; // 显示禁止上货图标
+            }
             // 生成日志
             this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateId + '进入A点', 'log');
           } else {
@@ -551,6 +560,7 @@ export default {
           }
         } else if(this.enteringPonitE && newVal === '0' && oldVal === '1') { // 货物走出B点
           this.$message.warning('货物走出E点')
+          ipcRenderer.send('writeValuesToPLC', 'DBW18', 0);
           this.enteringPonitE = false
           if(this.arrDG.length > 0) {
             // 走出E点，读码
@@ -589,15 +599,24 @@ export default {
     },
     pointG: {
       handler(newVal, oldVal) {
-        if(this.arrDG.length > 0) {
-          this.dealBoxLogic('G')
+        if(this.arrDG.length > 0 || (this.arrDG.length == 0 && newVal == '0')) {
+          if(newVal == '1') {
+            this.dealBoxLogic('G')
+          } else {
+            ipcRenderer.send('writeValuesToPLC', 'DBW16', 0);
+          }
         }
       }
     },
     pointH: {
       handler(newVal, oldVal) {
         if(this.arrGH.length > 0) {
-          this.dealBoxLogic('H')
+          if(newVal == '1') {
+            this.dealBoxLogic('H')
+          } else {
+            ipcRenderer.send('writeValuesToPLC', 'DBW16', 0);
+            ipcRenderer.send('writeValuesToPLC', 'DBW38', 0);
+          }
         }  
       }
     },
@@ -688,6 +707,8 @@ export default {
       if(type == 'log') {
         // 生成日志
         this.logArr.push({text: msg})
+        // 同时往本地写日志
+        ipcRenderer.send('writeLogToLocal', msg);
         this.$nextTick(() => {
           this.scrollToBottom();
         });
@@ -905,7 +926,7 @@ export default {
       this.fullRun = true;
       this.fullPause = false;
       this.fullStop = false;
-      // 开始监听束下实际速度和设定速度
+      // 开始监听束下实际速度和设定速度,不合格，加速器不允许货物进入辐照区
       this.judgeSpeedInterval = setInterval(() => {
         if(this.lightBeamRealTimeSpeed != null && this.lightBeamRealTimeSpeed != undefined && this.lightBeamRealTimeSpeed != '') {
           if((Number(this.lightBeamRealTimeSpeed) >= Number(this.orderMainDy.sxSpeedLowerLimit)) && (Number(this.lightBeamRealTimeSpeed) <= Number(this.orderMainDy.sxSpeedUpperLimit))) {
@@ -947,27 +968,89 @@ export default {
       switch (dropZoneId) {
         case 'AB':
           this.arrAB.push(this.boxArr[this.dragIndex]);
+          this.$notify({
+            title: '移动成功！',
+            message: '成功移至A-B区域',
+            position: 'top-left',
+            offset: 70,
+            duration:0,
+            type: 'success'
+          });
           break;
         case 'BC':
           this.arrBC.push(this.boxArr[this.dragIndex]);
+          this.$notify({
+            title: '移动成功！',
+            message: '成功移至B-C区域',
+            position: 'top-left',
+            offset: 70,
+            duration:0,
+            type: 'success'
+          });
           break;
         case 'CD':
           this.arrCD.push(this.boxArr[this.dragIndex]);
+          this.$notify({
+            title: '移动成功！',
+            message: '成功移至C-D区域',
+            position: 'top-left',
+            offset: 70,
+            duration:0,
+            type: 'success'
+          });
           break;
         case 'DG':
           this.arrDG.push(this.boxArr[this.dragIndex]);
+          this.$notify({
+            title: '移动成功！',
+            message: '成功移至D-G区域',
+            position: 'top-left',
+            offset: 70,
+            duration:0,
+            type: 'success'
+          });
           break;
         case 'F':
           this.arrF.push(this.boxArr[this.dragIndex]);
+          this.$notify({
+            title: '移动成功！',
+            message: '成功移至F区域',
+            position: 'top-left',
+            offset: 70,
+            duration:0,
+            type: 'success'
+          });
           break;
         case 'GH':
           this.arrGH.push(this.boxArr[this.dragIndex]);
+          this.$notify({
+            title: '移动成功！',
+            message: '成功移至G-H区域',
+            position: 'top-left',
+            offset: 70,
+            duration:0,
+            type: 'success'
+          });
           break;
         default:
           break;
       }
       this.boxArr.splice(this.dragIndex,1);
-      console.log(this.boxArr)
+      // 出去拖动背景色
+      const draggingRows = document.querySelectorAll(".transform-card.hover");
+      draggingRows.forEach(row => {
+        row.classList.remove("hover");
+      });
+    },
+    dragEnter(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.target.classList.add('hover');
+    },
+    dragLeave(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.target.classList.remove('hover');
     },
     indexMethod(index) {
       return index + 1;
@@ -1043,22 +1126,11 @@ export default {
               this.arrAB[this.arrAB.length - 1].loadScanCode = this.loadScanCode;
             } else {
               if(this.loadScanCode != '' && this.loadScanCode != this.arrAB[this.arrAB.length - 1].loadScanCode) {
+                // 第二圈和第一圈扫码不一致，报警
                 ipcRenderer.send('writeValuesToPLC', 'DBW34', 1);
               }
             }
             this.arrAB[this.arrAB.length - 1].loadScanCode;
-          }
-          // 判断是否满足可上货条件，就是当前这批消毒的箱子，最后一个满足圈数并且离开A，即可上货
-          if(this.arrAB[this.arrAB.length - 1].boxImitateId == this.lastNewBoxPassABoxImitateId) {
-            if(this.arrAB[this.arrAB.length - 1].numberTurns == this.orderMainDy.numberTurns) {
-              // 开始上新货，当前箱子圈数变成1
-              this.nowNumberTurns = 1;
-              this.ifNextPassABoxIsFirst = true;
-              this.banLoadStatus = false; // 隐藏禁止上货图标
-              this.judgeBanLoadBoxImitateId = ''
-              // 给PLC发送允许上货命令
-              ipcRenderer.send('writeValuesToPLC', 'DBW36', 1);
-            }
           }
           this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrAB[this.arrAB.length - 1].boxImitateId + '离开A点，扫码信息：' + this.loadScanCode, 'log');
           break;
@@ -1069,6 +1141,21 @@ export default {
           this.arrBC[this.arrBC.length - 1].turnsInfoList[this.arrBC[this.arrBC.length - 1].numberTurns - 1].passBTime = moment().format('YYYY-MM-DD HH:mm:ss');
           // 删除AB队列第一个
           this.arrAB.splice(0,1)
+          // 判断是否满足可上货条件，就是当前这批消毒的箱子，最后一个满足圈数并且离开A，即可上货
+          if(this.arrBC[this.arrBC.length - 1].boxImitateId == this.lastNewBoxPassABoxImitateId) {
+            if(this.arrBC[this.arrBC.length - 1].numberTurns == this.orderMainDy.numberTurns) {
+              // 开始上新货，当前箱子圈数变成1
+              this.nowNumberTurns = 1;
+              this.ifNextPassABoxIsFirst = true;
+              this.judgeBanLoadBoxImitateId = ''
+              // 判断上货数和订单箱数的数量，如果满足则还是不允许上货
+              if(Number(this.nowInNum) < Number(this.orderMainDy.orderBoxNum)) {
+                // 给PLC发送允许上货命令
+                ipcRenderer.send('writeValuesToPLC', 'DBW26', 0);
+                this.banLoadStatus = false; // 隐藏禁止上货图标
+              }
+            }
+          }
           // 生成日志
           this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrBC[this.arrBC.length - 1].boxImitateId + '经过B点，扫码信息：' + this.arrBC[this.arrBC.length - 1].loadScanCode, 'log');
           break;
@@ -1140,6 +1227,7 @@ export default {
                   break;
                 }
               }
+              this.arrF[this.arrF.length - 1].tichuFlag = true;
               // 生成箱报告
               const param = {
                 boxMainDTOList: [this.arrF[this.arrF.length - 1]],
@@ -1172,6 +1260,8 @@ export default {
               this.arrDG[0].turnsInfoList[this.arrDG[0].numberTurns - 1].passGTime = moment().format('YYYY-MM-DD HH:mm:ss');
               // 发送下货指令
               ipcRenderer.send('writeValuesToPLC', 'DBW16', 1);
+              // 给箱子标记下货标识
+              this.arrDG[0].xiahuoFlag = true;
               const param = {
                 boxMainDTOList: [this.arrDG[0]],
                 finishOrder: false
@@ -1228,6 +1318,8 @@ export default {
               // 更新全局圈数 和 报警信号
               if (this.arrGH[indexHBox].numberTurns >= this.orderMainDy.numberTurns) {
                 this.baojingShow = true;
+                // 发送报警信号
+                ipcRenderer.send('writeValuesToPLC', 'DBW38', 1);
                 const param = {
                   boxMainDTOList: [this.arrGH[indexHBox]],
                   finishOrder: false
@@ -1268,6 +1360,14 @@ export default {
       this.lastRouteEPoint = this.arrDG[index].boxImitateId;
       // 更新进入E点时间
       this.arrDG[index].turnsInfoList[this.arrDG[index].numberTurns - 1].passETime = moment().format('YYYY-MM-DD HH:mm:ss');
+      if(this.judgeLoadPoint === 'E') {
+        // 判断是不是符合禁止上货条件
+        if(this.arrDG[index].boxImitateId == this.judgeBanLoadBoxImitateId) {
+          this.banLoadStatus = true; // 显示禁止上货图标
+          // 给PLC发送禁止上货指令
+          ipcRenderer.send('writeValuesToPLC', 'DBW26', 1);
+        }
+      }
       if(this.arrDG[index].qualified === '0') {
         // 执行剔除命令
         ipcRenderer.send('writeValuesToPLC', 'DBW18', 1);
@@ -1297,6 +1397,9 @@ export default {
       switch (command) {
         case 'suspend':
           ipcRenderer.send('writeValuesToPLC', 'DBW6', 1);
+          setTimeout(() => {
+            ipcRenderer.send('writeValuesToPLC', 'DBW6', 0);
+          }, 500);
           this.$notify({
             title: '指令发送成功！',
             message: '全线暂停指令已成功发送！',
@@ -1306,6 +1409,9 @@ export default {
           break;
         case 'run':
           ipcRenderer.send('writeValuesToPLC', 'DBW8', 1);
+          setTimeout(() => {
+            ipcRenderer.send('writeValuesToPLC', 'DBW8', 0);
+          }, 500);
           this.$notify({
             title: '指令发送成功！',
             message: '全线启动指令已成功发送！',
@@ -1314,7 +1420,6 @@ export default {
           });
           break;
         case 'stop':
-          // ipcRenderer.send('writeValuesToPLC', 'DBW10', 1);
           this.$emit('stopMethod', this.orderMainDy, false)
           this.$notify({
             title: '指令发送成功！',
@@ -1420,6 +1525,11 @@ export default {
       // 清空迷宫出口固定扫码
       this.labyrinthScanCode = '';
       this.$message.success('全线清空成功!')
+      // 恢复一些PLC的状态
+      ipcRenderer.send('writeValuesToPLC', 'DBW34', 0); // 第二圈和第一圈扫码不一致
+      ipcRenderer.send('writeValuesToPLC', 'DBW26', 0); // 锁定上货电机（保留）
+      ipcRenderer.send('writeValuesToPLC', 'DBW18', 0); // 剔除
+      ipcRenderer.send('writeValuesToPLC', 'DBW16', 0); // 下货
     },
     getConfig() {
       // 查询配置
@@ -1996,7 +2106,7 @@ export default {
     }
   }
   .drawer-left {
-    width: 900px;
+    width: 1020px;
     height: 100%;
     float: left;
     .content_table {
@@ -2010,24 +2120,24 @@ export default {
         table {
           width: 100%;
           table-layout: fixed;
-          border-collapse: collapse;
+          border-spacing:0;
           text-align: center;
         }
         td,
         th {
           border: 1px #dedede solid;
-          height: 35px;
+          height: 30px;
+          font-size: 13px;
+          text-align: center;
         }
         thead {
-          height: 35px;
+          height: 30px;
           background: #eeeeee;
         }
         td {
-          height: 40px;
-          font-size: 14px;
-        }
-        th {
-          text-align: center;
+          height: 30px;
+          font-size: 13px;
+          font-weight: 500;
         }
         .body-col {
           &:hover {
@@ -2040,9 +2150,19 @@ export default {
             }
           }
         }
+        /* 添加这个样式来在拖动时隐藏边框 */
+        .body-col.dragging {
+          border: none;
+          pointer-events: none;
+        }
+
+        /* 添加这个样式来在拖动时高亮目标行 */
+        .body-col.drag-over {
+          border: 1px dashed #999;
+        }
       }
       .table_head {
-        height: 35px;
+        height: 30px;
         overflow: hidden;
         border-bottom: 1px #e4e4e4 solid;
         th {
@@ -2050,7 +2170,7 @@ export default {
         }
       }
       .table_list {
-        height: calc(100% - 36px);
+        height: calc(100% - 50px);
         overflow-y: auto;
         tr {
           cursor: pointer;
@@ -2059,30 +2179,59 @@ export default {
     }
   }
   .drawer-right {
-    width: 200px;
+    width: 180px;
     height: 100%;
     float: left;
+    padding: 0px 5px;
+    background-color: white;
+    border-left: 1px #efefef solid;
     .transform-card {
       width: 100%;
-      height: 50px;
+      height: 38px;
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: antiquewhite;
-      border: 1px white solid;
+      background-color: #ecf5ff;
+      border: 1px #b3d8ff solid;
       cursor: pointer;
-    }
-    .transform-card:hover {
-      background-color: aquamarine;
+      font-weight: 700;
+      margin-bottom: 3px;
+      color: #409eff;
     }
     .transform-card-active {
-      background-color: #c2eeff;
+      background-color: #409eff;
+      border-color: #409eff;
+      color: #fff;
     }
   }
   ::v-deep .el-drawer__body{
     flex: none;
     height: calc(100% - 79px);
     overflow: hidden;
+  }
+  /* 添加半透明效果和虚线边框 */
+  .body-col.dragging {
+    opacity: 0.6;
+    border: 1px dashed #ccc;
+  }
+
+  /* 添加过渡效果 */
+  .transform-card {
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+  .transform-card.hover {
+    background-color: #409eff;
+    color: #fff;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  }
+  ::v-deep .el-drawer__header {
+    margin-bottom: 0px;
+    padding: 8px;
+    color: #000000;
+    border-top: 1px solid #ebebeb;
+  }
+  ::-webkit-scrollbar {
+    display: none;
   }
 }
 </style>

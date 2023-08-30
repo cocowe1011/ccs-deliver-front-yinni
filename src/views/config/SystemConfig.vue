@@ -22,9 +22,9 @@
             <el-divider content-position="left">点位</el-divider>
             <el-form-item label="判断禁止上货点位：">
               <el-select v-model="cssConfig.judgeLoadPoint" style="width: 250px;">
-                <el-option label="光电D" value="shanghai"></el-option>
-                <el-option label="光电E" value="beijing"></el-option>
-                <el-option label="光电F" value="beijing"></el-option>
+                <el-option label="光电D" value="D"></el-option>
+                <el-option label="光电E" value="E"></el-option>
+                <el-option label="光电F" value="F"></el-option>
               </el-select>
             </el-form-item>
           </el-form>
