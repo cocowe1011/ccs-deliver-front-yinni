@@ -1,6 +1,7 @@
 <template>
   <div class="dynamic">
     <el-button type="danger" icon="el-icon-close" style="position: absolute;z-index: 999;right: 35px;top: 70px;" @click="closeDynamicGraphShow"></el-button>
+    <el-button type="primary" plain style="position: absolute;z-index: 999;right: 130px;top: 75px;" @click="testAcc">测试加速器</el-button>
     <div class="dynamic-left">
       <div class="dynamic-left-top">
         <div>
@@ -73,6 +74,9 @@
             </div>
             <div class="img" @click="operationConfirm('clear')">
               全线<br/>清空
+            </div>
+            <div class="img" @click="changeOrder()">
+              切换<br/>订单
             </div>
           </div>
         </div>
@@ -212,18 +216,19 @@
             <div :class="['dianji', dianJiStatusArr[9] == '1' ? 'dianji-active' : '']" style="top: 596px;right: 264px;">114#电机</div>
             <div :class="['dianji', dianJiStatusArr[8] == '1' ? 'dianji-active' : '']" style="top: 690px;right: 367px;">115#电机</div>
             <!-- 队列信息 -->
-            <el-link type="danger" style="position: absolute;top: 326px;right: 109px;" @click="showChuanSong('AB')">{{ '101-103区域货物缓存队列 (' + arrAB.length + ')' }}</el-link>
-            <el-link type="danger" style="position: absolute;top: 86px;right: 118px;" @click="showChuanSong('BC')">{{ '104-106区域货物缓存队列 (' + arrBC.length + ')' }}</el-link>
-            <el-link type="danger" style="position: absolute;top: 320px;right: 536px;" @click="showChuanSong('CD')">{{ '107-109区域货物缓存队列 (' + arrCD.length + ')' }}</el-link>
-            <el-link type="danger" style="position: absolute;top: 445px;left: 240px;" @click="showChuanSong('DG')">{{ '110-111区域货物缓存队列 (' + arrDG.length + ')' }}</el-link>
-            <el-link type="danger" style="position: absolute;top: 395px;left: -9px;" @click="showChuanSong('F')">{{ '剔除货物缓存队列 (' + arrF.length + ')' }}</el-link>
-            <el-link type="danger" style="position: absolute;top: 689px;right: 542px;" @click="showChuanSong('GH')">{{ '下货区缓存队列 (' + arrGH.length + ')' }}</el-link>
+            <el-link type="danger" style="position: absolute;top: 326px;right: 89px;font-size: 16px;font-weight: 600;" @click="showChuanSong('AB')">{{ '101-103区域货物缓存队列 (' + arrAB.length + ')' }}</el-link>
+            <el-link type="danger" style="position: absolute;top: 86px;right: 113px;font-size: 16px;font-weight: 600;" @click="showChuanSong('BC')">{{ '104-106区域货物缓存队列 (' + arrBC.length + ')' }}</el-link>
+            <el-link type="danger" style="position: absolute;top: 320px;right: 536px;font-size: 16px;font-weight: 600;" @click="showChuanSong('CD')">{{ '107-109区域货物缓存队列 (' + arrCD.length + ')' }}</el-link>
+            <el-link type="danger" style="position: absolute;top: 445px;left: 240px;font-size: 16px;font-weight: 600;" @click="showChuanSong('DG')">{{ '110-111区域货物缓存队列 (' + arrDG.length + ')' }}</el-link>
+            <el-link type="danger" style="position: absolute;top: 395px;left: -37px;font-size: 16px;font-weight: 600;" @click="showChuanSong('F')">{{ '剔除货物缓存队列 (' + arrF.length + ')' }}</el-link>
+            <el-link type="danger" style="position: absolute;top: 689px;right: 542px;font-size: 16px;font-weight: 600;" @click="showChuanSong('GH')">{{ '下货区缓存队列 (' + arrGH.length + ')' }}</el-link>
             <!-- 预警 -->
             <img src="./img/yujing.png" class="warning-img" v-show="yujingShow" style="left: 41px;top: 663px;"/>
             <img src="./img/baojing.png" class="warning-img" v-show="baojingShow" style="top: 717px;left: 352px;"/>
             <div style="width: 70px;height: 70px;left: 695px; position: absolute;background-color: lightcoral;color: white;display: flex;justify-content: center;align-items: center;" v-show="banLoadStatus">
               禁止上货
             </div>
+            <el-button type="success" icon="el-icon-check" v-show="baojingShow" @click="downClick" style="position: absolute;right: 271px;top: 744px;" plain>下货完成</el-button>
           </div>
         </div>
       </div>
@@ -839,11 +844,21 @@ export default {
       this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺合格！', 'log');
       return true;
     },
+    testAcc() {
+      HttpUtil.get('/box/getAccData').then((res)=> {
+        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 加速器返回数据：' + JSON.stringify(res), 'log');
+      }).catch((err)=> {
+        this.$message.success('连接加速器失败！原因：' + err)
+      });
+    },
     // 拿到模拟id去判断箱子的工艺是否合格
     getUndercutProcess(boxImitateIdVal) {
       this.nowShuXiaid = boxImitateIdVal;
-      this.qualified4Box(boxImitateIdVal, true)
-      this.$message.success(this.nowShuXiaid + '合格！');
+      // 无加速器时放开此注释********************************************
+      // this.qualified4Box(boxImitateIdVal, true)
+      // this.$message.success(this.nowShuXiaid + '合格！');
+      // 无加速器时放开此注释*********************************************
+      // 测试一个箱子不合格，，前后两个箱子都不合格*************************
       // if(boxImitateIdVal == '202307260003') {
       //   this.qualified4Box(boxImitateIdVal, false)
       //   this.$message.error(this.nowShuXiaid + '不合格！');
@@ -851,44 +866,45 @@ export default {
       //   this.qualified4Box(boxImitateIdVal, true)
       //   this.$message.success(this.nowShuXiaid + '合格！');
       // }
+      // 测试一个箱子不合格，，前后两个箱子都不合格*************************
+
       // 获取当前加速器工艺，和系统设置工艺做比较
-      // HttpUtil.get('/box/getAccData').then((res)=> {
-      //   // 给当前箱子赋值acc读取值
-      //   const index = this.arrBC.findIndex(item => {
-      //     return item.boxImitateId === boxImitateIdVal
-      //   })
-      //   if(index != -1) {
-      //     // 给箱子设置读取值
-      //     this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].slRead = res.data.beam;
-      //     this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].glRead = res.data.power;
-      //     this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].skRead = res.data.scanW;
-      //     this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].smplRead = res.data.scanF;
-      //     this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].pfnRead = res.data.pfn;
-      //     this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].nlRead = res.data.energy;
-      //     this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].sxSpeedRead = res.data.speed;
-      //   }
-      //   if(res.data&&JSON.stringify(this.orderMainDy) != '{}' && this.judgeAccData(res.data, boxImitateIdVal)) {
-      //     this.$message({
-      //       type: 'success',
-      //       message: '箱子id' + boxImitateIdVal + '工艺合格！更新状态！'
-      //     });
-      //     this.qualified4Box(boxImitateIdVal, true)
-      //   } else {
-      //     this.$message({
-      //       type: 'warning',
-      //       message: '箱子id' + boxImitateIdVal + '工艺不合格！更新状态！'
-      //     });
-      //     this.qualified4Box(boxImitateIdVal, false)
-      //   }
-      // }).catch((err)=> {
-      //   this.$message({
-      //     type: 'warning',
-      //     message: '箱子id' + boxImitateIdVal + '工艺不合格！更新状态！'
-      //   });
-      //   this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！数据异常，未读取到加速器数值！', 'log');
-      //   this.qualified4Box(boxImitateIdVal, false)
-      //   console.log(err)
-      // });
+      HttpUtil.get('/box/getAccData').then((res)=> {
+        // 给当前箱子赋值acc读取值
+        const index = this.arrBC.findIndex(item => {
+          return item.boxImitateId === boxImitateIdVal
+        })
+        if(index != -1) {
+          // 给箱子设置读取值
+          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].slRead = res.data.beam;
+          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].glRead = res.data.power;
+          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].skRead = res.data.scanW;
+          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].smplRead = res.data.scanF;
+          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].pfnRead = res.data.pfn;
+          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].nlRead = res.data.energy;
+          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].sxSpeedRead = res.data.speed;
+        }
+        if(res.data&&JSON.stringify(this.orderMainDy) != '{}' && this.judgeAccData(res.data, boxImitateIdVal)) {
+          this.$message({
+            type: 'success',
+            message: '箱子id' + boxImitateIdVal + '工艺合格！更新状态！'
+          });
+          this.qualified4Box(boxImitateIdVal, true)
+        } else {
+          this.$message({
+            type: 'warning',
+            message: '箱子id' + boxImitateIdVal + '工艺不合格！更新状态！'
+          });
+          this.qualified4Box(boxImitateIdVal, false)
+        }
+      }).catch((err)=> {
+        this.$message({
+          type: 'warning',
+          message: '箱子id' + boxImitateIdVal + '工艺不合格！更新状态！'
+        });
+        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！数据异常，未读取到加速器数值！', 'log');
+        this.qualified4Box(boxImitateIdVal, false)
+      });
     },
     analogOptoelectronics(point) {
       console.log(point)
@@ -1308,11 +1324,11 @@ export default {
             if(this.arrGH[indexHBox].numberTurns != this.orderMainDy.numberTurns) {
               this.arrGH[indexHBox].turnsInfoList[this.arrGH[indexHBox].numberTurns - 1].passHTime = moment().format('YYYY-MM-DD HH:mm:ss');
             }
-            // 最后一个箱子倒数第二圈经过H点 lastNewBoxPassABoxImitateId
-            if(this.arrGH[indexHBox].boxImitateId == this.lastNewBoxPassABoxImitateId && this.arrGH[indexHBox].numberTurns == Number(this.orderMainDy.numberTurns) - 1) {
-              // 发送不翻转指令
-              ipcRenderer.send('writeValuesToPLC', 'DBW12', 0);
-            }
+            // 最后一个箱子倒数第二圈经过H点 lastNewBoxPassABoxImitateId 23-08-31 要求控制翻转由PLC完成，软件无需处理此状态
+            // if(this.arrGH[indexHBox].boxImitateId == this.lastNewBoxPassABoxImitateId && this.arrGH[indexHBox].numberTurns == Number(this.orderMainDy.numberTurns) - 1) {
+            //   // 发送不翻转指令
+            //   ipcRenderer.send('writeValuesToPLC', 'DBW12', 0);
+            // }
             // 判断当前箱子的圈数，和全局圈数
             if(this.arrGH[indexHBox].numberTurns >= this.nowNumberTurns) {
               // 更新全局圈数 和 报警信号
@@ -1681,6 +1697,25 @@ export default {
         this.startTimerWithDelay(boxImitateId, remainingTime);
         this.timers[boxImitateId].endTime = currentTime + remainingTime;
       }
+    },
+    downClick() {
+      this.$confirm('此操作将默认全部箱子已下货, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.baojingShow = false;
+        this.yujingShow = false;
+        if(Number(this.nowInNum) < Number(this.orderMainDy.orderBoxNum)) {
+          // 给PLC发送允许上货命令
+          ipcRenderer.send('writeValuesToPLC', 'DBW26', 0);
+          this.banLoadStatus = false; // 隐藏禁止上货图标
+        }
+        this.$message({
+          type: 'success',
+          message: '操作成功!'
+        });
+      }).catch(() => {});
     }
   },
   created() {
