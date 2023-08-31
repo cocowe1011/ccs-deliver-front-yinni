@@ -75,7 +75,7 @@
             <div class="img" @click="operationConfirm('clear')">
               全线<br/>清空
             </div>
-            <div class="img" @click="changeOrder()">
+            <div class="img" v-show="isCanChangeOrder" @click="changeOrder()">
               切换<br/>订单
             </div>
           </div>
@@ -438,7 +438,8 @@ export default {
       logNotReadNumber: 0, // 日志未读数量
       errorLogNotReadNumber: 0, // 错误日志未读数量
       timers: {},
-      beltRunStatus: 0
+      beltRunStatus: 0,
+      isCanChangeOrder: false
     };
   },
   watch: {
@@ -1157,7 +1158,7 @@ export default {
           this.arrBC[this.arrBC.length - 1].turnsInfoList[this.arrBC[this.arrBC.length - 1].numberTurns - 1].passBTime = moment().format('YYYY-MM-DD HH:mm:ss');
           // 删除AB队列第一个
           this.arrAB.splice(0,1)
-          // 判断是否满足可上货条件，就是当前这批消毒的箱子，最后一个满足圈数并且离开A，即可上货
+          // 判断是否满足可上货条件，就是当前这批消毒的箱子，最后一个满足圈数并且离开B，即可上货
           if(this.arrBC[this.arrBC.length - 1].boxImitateId == this.lastNewBoxPassABoxImitateId) {
             if(this.arrBC[this.arrBC.length - 1].numberTurns == this.orderMainDy.numberTurns) {
               // 开始上新货，当前箱子圈数变成1
