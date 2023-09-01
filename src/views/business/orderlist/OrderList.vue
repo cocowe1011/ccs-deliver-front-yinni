@@ -482,39 +482,6 @@ export default {
           justify-content: center;
           align-items: center;
         }
-        // margin: 0;
-        // padding: 0;
-        // height: 100vh;
-        // display: flex;
-        // justify-content: center;
-        // align-items: center;
-        // // background-color: #efeeee;
-        // gap: 30px;
-        // .img {
-        //     width: 100px;
-        //     height: 100px;
-        //     display: flex;
-        //     justify-content: center;
-        //     align-items: center;
-        //     border-radius: 20px;
-        //     box-shadow: 18px 18px 30px rgba(0, 0, 0, 0.2),
-        //     -18px -18px 30px rgba(255, 255, 255, 1);
-        //     transition: all .2s ease-out;
-        // }
-        // img {
-        //     width: 60px;
-        //     transition: all .2s ease-out;
-        // }
-        // .img:hover{
-        //     cursor: pointer;
-        //     box-shadow: 0 0 0 rgba(0, 0, 0, 0.2),
-        //     0 0 0 rgba(255, 255, 255, 0.8),
-        //     inset 18px 18px 30px rgba(0, 0, 0, 0.1),
-        //     inset -18px -18px 30px rgba(255, 255, 255, 1);
-        // }
-        // .img:hover img {
-        //     width: 58px;
-        // }
         ::v-deep .el-form-item {
           margin-bottom: 9px;
         }
