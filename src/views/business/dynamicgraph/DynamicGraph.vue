@@ -219,7 +219,7 @@
             <el-link type="danger" style="position: absolute;top: 326px;right: 89px;font-size: 16px;font-weight: 600;" @click="showChuanSong('AB')">{{ '101-103区域货物缓存队列 (' + arrAB.length + ')' }}</el-link>
             <el-link type="danger" style="position: absolute;top: 86px;right: 113px;font-size: 16px;font-weight: 600;" @click="showChuanSong('BC')">{{ '104-106区域货物缓存队列 (' + arrBC.length + ')' }}</el-link>
             <el-link type="danger" style="position: absolute;top: 320px;right: 536px;font-size: 16px;font-weight: 600;" @click="showChuanSong('CD')">{{ '107-109区域货物缓存队列 (' + arrCD.length + ')' }}</el-link>
-            <el-link type="danger" style="position: absolute;top: 445px;left: 240px;font-size: 16px;font-weight: 600;" @click="showChuanSong('DG')">{{ '110-111区域货物缓存队列 (' + arrDG.length + ')' }}</el-link>
+            <el-link type="danger" style="position: absolute;top: 445px;left: 240px;font-size: 16px;font-weight: 600;" @click="showChuanSong('DG')">{{ '110-111区域货物缓存队列 (' + (arrDG.length + this.tempArrF.length) + ')' }}</el-link>
             <el-link type="danger" style="position: absolute;top: 395px;left: -37px;font-size: 16px;font-weight: 600;" @click="showChuanSong('F')">{{ '剔除货物缓存队列 (' + arrF.length + ')' }}</el-link>
             <el-link type="danger" style="position: absolute;top: 689px;right: 542px;font-size: 16px;font-weight: 600;" @click="showChuanSong('GH')">{{ '下货区缓存队列 (' + arrGH.length + ')' }}</el-link>
             <!-- 预警 -->
@@ -284,12 +284,12 @@
               <tbody>
                   <tr v-for="(item, index) in boxArr" class="body-col" :key="index" draggable="true" @dragstart="dragStart(index)">
                     <td style="width: 40px;">{{ index + 1 }}</td>
-                    <td style="width: 150px">{{ orderMainDy.orderNo }}</td>
+                    <td style="width: 150px">{{ item.orderNo }}</td>
                     <td style="width: 120px;">{{ item.boxImitateId }}</td>
                     <td style="width: 150px">{{ item.loadScanCode }}</td>
                     <td style="width: 130px">{{ item.turnsInfoList[0].passATime }}</td>
                     <td style="width: 60px">{{ item.numberTurns }}</td>
-                    <td style="width: 60px">{{ orderMainDy.revertFlag == '翻转' ? '√': 'X' }}</td>
+                    <td style="width: 60px">{{ item.revertFlag == '翻转' ? '√': 'X' }}</td>
                     <td style="width: 60px">{{ item.xiahuoFlag ? '√': '' }}</td>
                     <td style="width: 60px">
                       <el-tag type="success" v-if="item.qualified === '1'" size="mini">合格</el-tag>
@@ -298,8 +298,9 @@
                     </td>
                     <td style="width: 60px">
                       <el-tag type="success" v-if="item.xiahuoFlag" size="mini">已下货</el-tag>
-                      <el-tag type="danger" v-if="item.tichuFlag" size="mini">已剔除</el-tag>
-                      <el-tag v-if="!item.xiahuoFlag && !item.tichuFlag" size="mini">执行中</el-tag>
+                      <el-tag type="warning" v-if="item.tichuFlag === 'WAIT_PUT_OUT'" size="mini">待剔除</el-tag>
+                      <el-tag type="danger" v-if="item.tichuFlag === 'HAVE_PUT_OUT'" size="mini">已剔除</el-tag>
+                      <el-tag v-if="!item.xiahuoFlag && item.tichuFlag !== 'WAIT_PUT_OUT' && item.tichuFlag !== 'HAVE_PUT_OUT'" size="mini">执行中</el-tag>
                     </td>
                   </tr>
                 </tbody>
@@ -320,14 +321,13 @@
       title="切换订单"
       :visible.sync="dialogVisible"
       append-to-body
-      width="70%">
+      width="80%">
       <el-table
         :data="tableData"
         border
         style="width: 100%"
         :max-height="500"
         highlight-current-row
-        @current-change="handleCurrentChange"
         v-loading="getOrderListLoading">
         <el-table-column type="index" width="80" :index="indexMethod" fixed="left" label="序号">
         </el-table-column>
@@ -344,6 +344,15 @@
           fixed="right">
           <template>
             <el-tag type="success" disable-transitions>手动</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
+          fixed="right"
+          label="操作"
+          width="150">
+          <template slot-scope="scope">
+            <el-link type="success" icon="el-icon-loading" v-if="orderMainDy.orderId == scope.row.orderId">当前运行订单</el-link>
+            <el-link type="primary" @click="handleCurrentChange(scope.row)" v-else>切换</el-link>
           </template>
         </el-table-column>
       </el-table>
@@ -471,7 +480,7 @@ export default {
       errorLogNotReadNumber: 0, // 错误日志未读数量
       timers: {},
       beltRunStatus: 0,
-      isCanChangeOrder: true,
+      isCanChangeOrder: false,
       dialogVisible: false,
       tableTitle:[
         {prop:"orderId",label:"任务编号",width:"200"},{prop:"revertFlag",label:"翻转",width:"150"},
@@ -508,7 +517,7 @@ export default {
             const boxImitateId = await this.getCurrentTimeSort();
             this.nowABoxImitateId = boxImitateId;
             // 代表货物进入光电A，生成模拟id绑定,如果有扫码数据则
-            this.arrAB.push({orderId: this.orderMainDy.orderId, orderNo: this.orderMainDy.orderNo, boxImitateId: boxImitateId, numberTurns: 1, loadScanCode: this.loadScanCode, turnsInfoList:[{numberTurns: 1, passATime: moment().format('YYYY-MM-DD HH:mm:ss')}]});
+            this.arrAB.push({orderId: this.orderMainDy.orderId, orderNo: this.orderMainDy.orderNo, totalNumberTurns: this.orderMainDy.numberTurns, revertShowFlag: this.orderMainDy.revertFlag, boxImitateId: boxImitateId, numberTurns: 1, loadScanCode: this.loadScanCode, turnsInfoList:[{numberTurns: 1, passATime: moment().format('YYYY-MM-DD HH:mm:ss')}]});
             // 判断当前箱子是不是当前批次消毒的第一个
             if(this.ifNextPassABoxIsFirst) {
               this.judgeBanLoadBoxImitateId = boxImitateId;
@@ -560,7 +569,6 @@ export default {
         if(!this.enteringPonitB && newVal === '1' && oldVal === '0') { //货物开始进入B点
           this.enteringPonitB = true
           if(this.arrAB.length > 0) {
-            this.$message.success('开始进入B点')
             // 进入B的下降沿，获取AB队列第一个，开始计算时间，到时间后，进行工艺对比，判断货物是否合格
             const boxImitateId = this.arrAB[0].boxImitateId;
             // 计算时间 改为任务管理
@@ -568,7 +576,6 @@ export default {
             this.startTimerWithDelay(boxImitateId, times)
           }
         } else if(this.enteringPonitB && newVal === '0' && oldVal === '1') { // 货物走出B点
-          this.$message.warning('货物走出B点')
           this.enteringPonitB = false
           if(this.arrAB.length > 0) {
             this.dealBoxLogic('B')
@@ -602,11 +609,9 @@ export default {
           if(this.arrDG.length > 0) {
             // 进入E点，清空读码信息
             this.labyrinthScanCode = '';
-            this.$message.warning('货物进入E点')
             this.dealBoxLogic('E')
           }
         } else if(this.enteringPonitE && newVal === '0' && oldVal === '1') { // 货物走出E点
-          this.$message.warning('货物走出E点')
           // 进入E点写1，离开E点写0。
           ipcRenderer.send('writeValuesToPLC', 'DBW18', 0);
           this.enteringPonitE = false
@@ -614,16 +619,19 @@ export default {
             // 走出E点，读码
             this.labyrinthScanCode = this.labyrinthScanCodeTemp.replace(/\s/g,'');
             // 查找DG数组，lastRouteEPoint的元素，那么下一个必定是此时经过E点的元素
-            const indexLast = this.arrDG.findIndex(item => {
-              return item.boxImitateId === this.lastRouteEPoint
-            })
+            // const indexLast = this.arrDG.findIndex(item => {
+            //   return item.boxImitateId === this.lastRouteEPoint
+            // })
 
-            if(indexLast != -1) {
-              this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + '货物' + this.arrDG[indexLast].boxImitateId + '走出E点，扫码信息：' + this.labyrinthScanCode, 'log');
-            } else {
-              // 找不到，队列第一个肯定就是经过E点的元素
-              this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + '货物' + this.arrDG[0].boxImitateId + '走出E点，扫码信息：' + this.labyrinthScanCode, 'log');
-            }
+            // if(indexLast != -1) {
+            //   this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + '货物' + this.arrDG[indexLast].boxImitateId + '走出E点，扫码信息：' + this.labyrinthScanCode, 'log');
+            // } else {
+            //   // 找不到说明剔除了，去剔除缓存队列找
+            //   const indexLast2 = this.tempArrF.findIndex(item => {
+            //     return item.boxImitateId === this.lastRouteEPoint
+            //   })
+            //   this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + '货物' + this.arrDG[0].boxImitateId + '走出E点，扫码信息：' + this.labyrinthScanCode, 'log');
+            // }
           }
         } else {
           // 先暂定报警吧，因为肯定不会出现这种情况，出现了视为异常，不做任何处理
@@ -868,8 +876,8 @@ export default {
       // 判断束下速度 speed
       // console.log(accData.speed)
       if(accData.speed != undefined && accData.speed != null) {
-        if (Number(this.orderMainDy.sxSpeedLowerLimit) > Number(accData.speed) || Number(this.orderMainDy.sxSpeedUpperLimit) < Number(accData.speed)) {
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束下速度设定最小值：' + this.orderMainDy.sxSpeedLowerLimit + '，束下速度设定最大值：' + this.orderMainDy.sxSpeedUpperLimit + '，束下速度读取值：' + accData.speed, 'log');
+        if (Number(this.orderMainDy.sxSpeedLowerLimit) > (Number(accData.speed) * 1000) || Number(this.orderMainDy.sxSpeedUpperLimit) < (Number(accData.speed) * 1000)) {
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束下速度设定最小值：' + this.orderMainDy.sxSpeedLowerLimit + '，束下速度设定最大值：' + this.orderMainDy.sxSpeedUpperLimit + '，束下速度读取值：' + (Number(accData.speed) * 1000), 'log');
           return false;
         } 
       } else {
@@ -936,7 +944,7 @@ export default {
           type: 'warning',
           message: '箱子id' + boxImitateIdVal + '工艺不合格！更新状态！'
         });
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！数据异常，未读取到加速器数值！', 'log');
+        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！数据异常，未读取到加速器数值！'+ err, 'log');
         this.qualified4Box(boxImitateIdVal, false)
       });
     },
@@ -971,11 +979,26 @@ export default {
           break;
       }
     },
+    replaceOrderData(orderMain) {
+      if(orderMain.orderId === this.orderMainDy.orderId) {
+        this.orderMainDy = JSON.parse(JSON.stringify(orderMain));
+        this.$message.success('修改信息已同步到当前使用订单！')
+      }
+    },
     showOrderInfo(orderMain) {
+      // 当前上货数清空
+      this.nowInNum = 0
+      // 恢复
+      this.isCanChangeOrder = false;
+      this.dialogVisible = false;
       this.orderMainDy = JSON.parse(JSON.stringify(orderMain))
       this.fullRun = true;
       this.fullPause = false;
       this.fullStop = false;
+      // 先清空定时器
+      if(this.judgeSpeedInterval) {
+        clearInterval(this.judgeSpeedInterval);
+      }
       // 开始监听束下实际速度和设定速度,不合格，加速器不允许货物进入辐照区
       this.judgeSpeedInterval = setInterval(() => {
         if(this.lightBeamRealTimeSpeed != null && this.lightBeamRealTimeSpeed != undefined && this.lightBeamRealTimeSpeed != '') {
@@ -1127,7 +1150,7 @@ export default {
           this.traCD = true
           break;
         case 'DG':
-          this.boxArr = this.arrDG;
+          this.boxArr = [...this.arrDG, ...this.tempArrF] ;
           this.traDG = true
           break;
         case 'F':
@@ -1193,7 +1216,7 @@ export default {
           this.arrAB.splice(0,1)
           // 判断是否满足可上货条件，就是当前这批消毒的箱子，最后一个满足圈数并且离开B，即可上货
           if(this.arrBC[this.arrBC.length - 1].boxImitateId == this.lastNewBoxPassABoxImitateId) {
-            if(this.arrBC[this.arrBC.length - 1].numberTurns == this.orderMainDy.numberTurns) {
+            if(this.arrBC[this.arrBC.length - 1].numberTurns == this.arrBC[this.arrBC.length - 1].totalNumberTurns) {
               // 开始上新货，当前箱子圈数变成1
               this.nowNumberTurns = 1;
               this.ifNextPassABoxIsFirst = true;
@@ -1216,6 +1239,13 @@ export default {
             // 删除BC队列第一个
             this.arrBC.splice(0,1);
             this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrCD[this.arrCD.length - 1].boxImitateId + '经过C点，扫码信息：' + this.arrCD[this.arrCD.length - 1].loadScanCode, 'log');
+            // 允许切换订单
+            if(this.arrCD[this.arrCD.length - 1].boxImitateId == this.lastNewBoxPassABoxImitateId) {
+              if(this.arrCD[this.arrCD.length - 1].numberTurns == this.arrCD[this.arrCD.length - 1].totalNumberTurns) {
+                // 展示切换订单按钮
+                this.isCanChangeOrder = true
+              }
+            }
           }
           break;
         case 'D':
@@ -1277,7 +1307,7 @@ export default {
                   break;
                 }
               }
-              this.arrF[this.arrF.length - 1].tichuFlag = true;
+              this.arrF[this.arrF.length - 1].tichuFlag = 'HAVE_PUT_OUT';
               // 生成箱报告
               const param = {
                 boxMainDTOList: [this.arrF[this.arrF.length - 1]],
@@ -1301,9 +1331,9 @@ export default {
           break;
         case 'G':
           if(this.pointG === '1') {
-            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrDG[0].boxImitateId + '经过G点，扫码信息：' + this.arrDG[0].loadScanCode + '。当前 ' + this.arrDG[0].numberTurns + ' 圈，剩余 ' + (Number(this.orderMainDy.numberTurns) - Number(this.arrDG[0].numberTurns)) + ' 圈', 'log');
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrDG[0].boxImitateId + '经过G点，扫码信息：' + this.arrDG[0].loadScanCode + '。当前 ' + this.arrDG[0].numberTurns + ' 圈，剩余 ' + (Number(this.arrDG[0].totalNumberTurns) - Number(this.arrDG[0].numberTurns)) + ' 圈', 'log');
             // 判断是否符合下货条件
-            if (this.arrDG[0].numberTurns >= this.orderMainDy.numberTurns) {
+            if (this.arrDG[0].numberTurns >= this.arrDG[0].totalNumberTurns) {
               // 符合下货条件，展示预警，货物需要下线标识。
               this.yujingShow = true;
               this.nowOutNum++;
@@ -1355,7 +1385,7 @@ export default {
             }
             this.lastRouteHPoint = this.arrGH[indexHBox].boxImitateId;
             // 不是箱子最后一圈，更新进入H点时间
-            if(this.arrGH[indexHBox].numberTurns != this.orderMainDy.numberTurns) {
+            if(this.arrGH[indexHBox].numberTurns != this.arrGH[indexHBox].totalNumberTurns) {
               this.arrGH[indexHBox].turnsInfoList[this.arrGH[indexHBox].numberTurns - 1].passHTime = moment().format('YYYY-MM-DD HH:mm:ss');
             }
             // 最后一个箱子倒数第二圈经过H点 lastNewBoxPassABoxImitateId 23-08-31 要求控制翻转由PLC完成，软件无需处理此状态
@@ -1366,7 +1396,7 @@ export default {
             // 判断当前箱子的圈数，和全局圈数
             if(this.arrGH[indexHBox].numberTurns >= this.nowNumberTurns) {
               // 更新全局圈数 和 报警信号
-              if (this.arrGH[indexHBox].numberTurns >= this.orderMainDy.numberTurns) {
+              if (this.arrGH[indexHBox].numberTurns >= this.arrGH[indexHBox].totalNumberTurns) {
                 this.baojingShow = true;
                 // 发送报警信号
                 ipcRenderer.send('writeValuesToPLC', 'DBW38', 1);
@@ -1389,9 +1419,7 @@ export default {
                 });
               } else {
                 // 有货物的圈数和全局圈数一致时，则全局圈数加1
-                if(this.arrGH[indexHBox].boxImitateId == this.judgeBanLoadBoxImitateId) {
-                  this.nowNumberTurns++;
-                }
+                this.nowNumberTurns++;
               }
             }
           }
@@ -1421,10 +1449,18 @@ export default {
       if(this.arrDG[index].qualified === '0') {
         // 执行剔除命令
         ipcRenderer.send('writeValuesToPLC', 'DBW18', 1);
-        console.log('剔除')
         this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + '货物' + this.arrDG[index].boxImitateId + '经过E点,货物不合格！执行剔除命令！', 'log');
+        this.arrDG[index].tichuFlag = 'WAIT_PUT_OUT';
         // 将不合格货物加入 tempArrF 缓存队列
         this.tempArrF.push(this.arrDG[index])
+        // 移除原队列
+        this.arrDG.splice(index, 1);
+        // 经过E点元素id，因为本箱子被移除了，所以直接取上个箱子的id作为本次经过E点的id，方便下次判断
+        if(index > 0) {
+          this.lastRouteEPoint = this.arrDG[index - 1].boxImitateId;
+        } else {
+          this.lastRouteEPoint = '';
+        }
       } else {
         // 合格无需处理，写0即可
         ipcRenderer.send('writeValuesToPLC', 'DBW18', 0);
@@ -1483,7 +1519,9 @@ export default {
       }
     },
     setBeginCountNum(num) {
-      this.beginCountNum = num
+      if(Number(num) > Number(this.beginCountNum)) {
+        this.beginCountNum = num
+      }
     },
     async generateBatchReport() {
       // 生成批报告，并且更新一下所有箱子
@@ -1574,6 +1612,8 @@ export default {
       this.loadScanCode = '';
       // 清空迷宫出口固定扫码
       this.labyrinthScanCode = '';
+      this.isCanChangeOrder = false;
+      this.dialogVisible = false;
       this.$message.success('全线清空成功!')
       // 恢复一些PLC的状态
       ipcRenderer.send('writeValuesToPLC', 'DBW34', 0); // 第二圈和第一圈扫码不一致
@@ -1740,6 +1780,7 @@ export default {
       }).then(() => {
         this.baojingShow = false;
         this.yujingShow = false;
+        ipcRenderer.send('writeValuesToPLC', 'DBW38', 0);
         if(Number(this.nowInNum) < Number(this.orderMainDy.orderBoxNum)) {
           // 给PLC发送允许上货命令
           ipcRenderer.send('writeValuesToPLC', 'DBW26', 0);
@@ -1760,14 +1801,31 @@ export default {
           type: 'warning',
           cancelButtonClass: 'el-button--info'
         })
-        .then(() => {
-          this.$message.success('当前订单已完成！');
-          this.orderMainForm = JSON.parse(JSON.stringify(val));
+        .then(async () => {
+          // 完成
+          // 生成批报告，并且更新一下所有箱子
+          const param = {
+            boxMainDTOList: [...this.arrAB, ...this.arrBC, ...this.arrCD, ...this.arrDG, ...this.arrGH],
+            finishOrder: true
+          }
+          await HttpUtil.post('/box/save', param).then((res)=> {
+            if(res.data == 1) {
+              this.$emit('returnGenerateBatchReport',true)
+            } else {
+              this.$emit('returnGenerateBatchReport',false)
+            }
+          }).catch((err)=> {
+            this.$emit('returnGenerateBatchReport',false)
+          });
+          // 启动
+          this.$emit('runPLC', JSON.parse(JSON.stringify(val)));
         })
         .catch(action => {
           if(action === 'cancel') {
-            this.$message.success('当前订单已暂停！');
-            this.orderMainForm = JSON.parse(JSON.stringify(val));
+            // 暂停
+            this.$emit('changeOrderStop', JSON.parse(JSON.stringify(val)));
+            // 启动
+            this.$emit('runPLC', JSON.parse(JSON.stringify(val)));
           }
         });
       }

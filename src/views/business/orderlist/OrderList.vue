@@ -193,7 +193,7 @@
       </div>
     </div>
     <div style="width:100%;height: 100%;" v-show="isDynamicGraphShow">
-      <DynamicGraph @closeDynamicGraphShow="closeDynamicGraphShow" @returnGenerateBatchReport="returnGenerateBatchReport" @stopMethod="stop" ref="dynamicGraph"></DynamicGraph>
+      <DynamicGraph @closeDynamicGraphShow="closeDynamicGraphShow" @returnGenerateBatchReport="returnGenerateBatchReport" @stopMethod="stop" @changeOrderStop="changeOrderStop" @runPLC="runPLC" ref="dynamicGraph"></DynamicGraph>
     </div>
   </div>
   
@@ -272,6 +272,10 @@ export default {
       await HttpUtil.post('/order/update', this.orderMainForm).then((res)=> {
         if(res.data === 1) {
           this.$message.success('修改成功！');
+          // 将修改的订单信息同步到动态图组件
+          this.$nextTick(() => {
+            this.$refs.dynamicGraph.replaceOrderData(this.orderMainForm);
+          });
           // 查询订单信息
           this.getOrderList();
         } else {
@@ -378,6 +382,22 @@ export default {
           this.$refs.dynamicGraph.stopOrder();
         });
       }
+      // 更新订单状态300
+      const param = {
+        orderId: obj.orderId,
+        orderStatus: 300
+      }
+      // 更新300状态
+      HttpUtil.post('/order/update', param).then((res)=> {
+        if(res.data != 1) {
+          this.$message.error('更新订单运行状态失败！')
+        }
+      }).catch((err)=> {
+        this.$message.success('更新订单运行状态失败！')
+      });
+    },
+    changeOrderStop(obj) {
+      this.nowRunOrderId = '';
       // 更新订单状态300
       const param = {
         orderId: obj.orderId,
