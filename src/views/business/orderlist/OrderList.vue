@@ -13,7 +13,10 @@
                 <el-input size="small" v-model="orderMainForm.orderName" placeholder="订单名称" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
               <el-form-item>
-                <el-checkbox v-model="orderMainForm.revertFlag" :disabled="!(isNewSave || isEdit)">翻转</el-checkbox>
+                <el-checkbox v-model="orderMainForm.revertFlag" :disabled="!(isNewSave || isEdit)" @change="clickRevert">翻转</el-checkbox>
+              </el-form-item>
+              <el-form-item>
+                <el-checkbox v-model="orderMainForm.trayFlag" :disabled="!(isNewSave || isEdit)" @change="clickTray">托盘模式</el-checkbox>
               </el-form-item>
               <br/>
               <el-form-item label="批次编号：">
@@ -180,11 +183,11 @@
                 width="320">
                 <template slot-scope="scope">
                   <el-link type="primary" icon="el-icon-edit" @click.stop="editClick(scope.row)">编辑</el-link>
-                  <el-link type="success" icon="el-icon-switch-button" style="margin-left: 10px;" v-if="scope.row.orderId != nowRunOrderId" :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId)" @click="runPLC(scope.row)">启动</el-link>
-                  <el-link type="success" icon="el-icon-loading" style="margin-left: 10px;" v-else :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId)">运行中</el-link>
-                  <el-link type="danger" icon="el-icon-error" style="margin-left: 10px;" @click="stop(scope.row, true)" :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId) || nowRunOrderId == ''">停止</el-link>
+                  <el-link type="success" icon="el-icon-switch-button" style="margin-left: 10px;" v-if="scope.row.orderId != nowRunOrderId" :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId)" @click="chooseOrder(scope.row, false)">开始</el-link>
+                  <el-link type="success" icon="el-icon-loading" style="margin-left: 10px;" v-else :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId)">已选中</el-link>
+                  <el-link type="danger" icon="el-icon-error" style="margin-left: 10px;" @click="cancelOrder(scope.row)" :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId) || nowRunOrderId == ''">停止</el-link>
                   <el-link type="primary" icon="el-icon-success" style="margin-left: 10px;" :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId)" @click="generateBatchReport">完成</el-link>
-                  <el-link type="primary" icon="el-icon-pie-chart" style="margin-left: 10px;" @click="showDynamicGraph(scope.row)" :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId)">动态图</el-link>
+                  <el-link type="primary" icon="el-icon-pie-chart" style="margin-left: 10px;" @click="showDynamicGraph(scope.row)" :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId) || nowRunOrderId == ''">动态图</el-link>
                 </template>
               </el-table-column>
             </el-table>
@@ -193,7 +196,7 @@
       </div>
     </div>
     <div style="width:100%;height: 100%;" v-show="isDynamicGraphShow">
-      <DynamicGraph @closeDynamicGraphShow="closeDynamicGraphShow" @returnGenerateBatchReport="returnGenerateBatchReport" @stopMethod="stop" @changeOrderStop="changeOrderStop" @runPLC="runPLC" ref="dynamicGraph"></DynamicGraph>
+      <DynamicGraph @closeDynamicGraphShow="closeDynamicGraphShow" @returnGenerateBatchReport="returnGenerateBatchReport" @cancelOrder="cancelOrder"  @chooseOrder="chooseOrder" ref="dynamicGraph"></DynamicGraph>
     </div>
   </div>
   
@@ -203,6 +206,7 @@
 import HttpUtil from '@/utils/HttpUtil'
 import { Debugger, ipcRenderer } from 'electron'
 import DynamicGraph from '../dynamicgraph/DynamicGraph.vue'
+import moment from 'moment';
 export default {
   name: "OrderList",
   components: {
@@ -233,6 +237,18 @@ export default {
   watch: {},
   computed: {},
   methods: {
+    clickRevert(value) {
+      if(value && this.orderMainForm.trayFlag) {
+        this.$message.error('请先取消托盘模式！')
+        this.orderMainForm.revertFlag = null
+      }
+    },
+    clickTray(value) {
+      if(value && this.orderMainForm.revertFlag) {
+        this.$message.error('请先取消翻转！')
+        this.orderMainForm.trayFlag = null
+      }
+    },
     cancelEditOrSave() {
       this.isNewSave = false;
       this.isEdit = false;
@@ -245,12 +261,14 @@ export default {
       this.isEdit = true;
       this.orderMainForm = JSON.parse(JSON.stringify(val));
       this.orderMainForm.revertFlag = this.orderMainForm.revertFlag == '翻转' ? true : false
+      this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
       this.currentSelect = val;
       // alert(JSON.stringify(orderMain))
     },
     async saveOrder() {
       this.saveLoading = true;
       this.orderMainForm.revertFlag = this.orderMainForm.revertFlag ? '1' : '0'
+      this.orderMainForm.trayFlag = this.orderMainForm.trayFlag ? '1' : '0'
       await HttpUtil.post('/order/save', this.orderMainForm).then((res)=> {
         if(res.data === 1) {
           this.$message.success('保存成功！');
@@ -269,6 +287,7 @@ export default {
     async updateOrder() {
       this.editLoading = true;
       this.orderMainForm.revertFlag = this.orderMainForm.revertFlag ? '1' : '0'
+      this.orderMainForm.trayFlag = this.orderMainForm.trayFlag ? '1' : '0'
       await HttpUtil.post('/order/update', this.orderMainForm).then((res)=> {
         if(res.data === 1) {
           this.$message.success('修改成功！');
@@ -316,24 +335,6 @@ export default {
     closeDynamicGraphShow() {
       this.isDynamicGraphShow = false
     },
-    async runPLC(obj) {
-      // 启动前的准备工作，不符合则不让启动
-      // 1、首先判断本次模拟id0~9999数字起始的数字
-      try {
-        await this.getId();
-      } catch (error) {
-        this.$message.error('获取模拟id方法错误！请重新尝试！');
-        throw new Error("A 方法异常");
-      }
-      // 运行
-      this.nowRunOrderId = obj.orderId;
-      // 将订单信息同步到动态图组件
-      this.$nextTick(() => {
-        this.$refs.dynamicGraph.showOrderInfo(obj);
-      });
-      this.writeValuesToPLC(obj);
-      this.$message.success('已启动！');
-    },
     async getId() {
       await HttpUtil.post('/box/getId').then((res)=> {
         if(res.data >= 0) {
@@ -347,57 +348,38 @@ export default {
         throw new Error();
       });
     },
-    async writeValuesToPLC(obj) {
-      // DB101.DBW2 加速器设定输送速度
-      ipcRenderer.send('writeValuesToPLC', 'DBW2', Number(obj.sxSpeedSet));
-      // DB101.DBW8 启动输送线
-      ipcRenderer.send('writeValuesToPLC', 'DBW8', 1);
-      setTimeout(() => {
-        ipcRenderer.send('writeValuesToPLC', 'DBW8', 0);
-      }, 500);
-      // 翻转&回流
-      if(obj.revertFlag === '翻转') {
-        // DB101.DBW12 翻转
-        ipcRenderer.send('writeValuesToPLC', 'DBW12', 1);
-        ipcRenderer.send('writeValuesToPLC', 'DBW14', 0);
-      }  else {
-        // DB101.DBW14 回流模式
-        ipcRenderer.send('writeValuesToPLC', 'DBW14', 1);
-        ipcRenderer.send('writeValuesToPLC', 'DBW12', 0);
+    async chooseOrder(obj, changeFlag) {
+      // 启动前的准备工作，不符合则不让启动
+      // 1、首先判断本次模拟id0~9999数字起始的数字
+      try {
+        await this.getId();
+      } catch (error) {
+        this.$message.error('获取模拟id方法错误！请重新尝试！');
+        throw new Error("A 方法异常");
       }
-      // DB101.DBW22 纸箱宽度
-      ipcRenderer.send('writeValuesToPLC', 'DBW22', Number(obj.boxWidth));
-      // DB101.DBW24 纸箱长度
-      ipcRenderer.send('writeValuesToPLC', 'DBW24', Number(obj.boxLength));
-    },
-    stop(obj, flag) {
-      ipcRenderer.send('writeValuesToPLC', 'DBW10', 1);
-      setTimeout(() => {
-        ipcRenderer.send('writeValuesToPLC', 'DBW10', 0);
-      }, 500);
-      this.nowRunOrderId = '';
-      if(flag) {
-        // 当前订单页面停止，需要同步更新动态图组件的按钮状态，如果是动态图调用则无需走这方法
-        this.$nextTick(() => {
-          this.$refs.dynamicGraph.stopOrder();
-        });
-      }
-      // 更新订单状态300
       const param = {
         orderId: obj.orderId,
-        orderStatus: 300
+        startTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+        orderStatus: 200
       }
-      // 更新300状态
+      // 更新订单开始时间
       HttpUtil.post('/order/update', param).then((res)=> {
-        if(res.data != 1) {
-          this.$message.error('更新订单运行状态失败！')
+        if(res.data == 1) {
+          this.$message.success('开始订单！更新订单开始时间成功！')
+          // 运行
+          this.nowRunOrderId = obj.orderId;
+        } else {
+          this.$message.error('开始失败！更新订单开始时间失败！')
         }
       }).catch((err)=> {
-        this.$message.success('更新订单运行状态失败！')
+        this.$message.error('开始失败！更新订单开始时间失败！')
+      });
+      // 将订单信息同步到动态图组件
+      this.$nextTick(() => {
+        this.$refs.dynamicGraph.showOrderInfo(obj, changeFlag);
       });
     },
-    changeOrderStop(obj) {
-      this.nowRunOrderId = '';
+    cancelOrder(obj) {
       // 更新订单状态300
       const param = {
         orderId: obj.orderId,
@@ -407,9 +389,12 @@ export default {
       HttpUtil.post('/order/update', param).then((res)=> {
         if(res.data != 1) {
           this.$message.error('更新订单运行状态失败！')
+        } else {
+          this.$message.success('已停止！更新订单运行状态！')
+          this.nowRunOrderId = '';
         }
       }).catch((err)=> {
-        this.$message.success('更新订单运行状态失败！')
+        this.$message.error('更新订单运行状态失败！')
       });
     },
     indexMethod(index) {
@@ -419,6 +404,7 @@ export default {
       if(val != null) {
         this.orderMainForm = JSON.parse(JSON.stringify(val));
         this.orderMainForm.revertFlag = this.orderMainForm.revertFlag == '翻转' ? true : false
+        this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
         this.currentSelect = val;
         this.isNewSave = false;
         this.isEdit = false;

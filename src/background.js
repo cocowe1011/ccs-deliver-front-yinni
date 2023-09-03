@@ -311,6 +311,10 @@ var variables = {
   DBW34: 'DB101,INT34', // 扫码信息不一致报警
   DBW36: 'DB101,INT36', // 允许上货
   DBW38: 'DB101,INT38', // 下货报警
+  DBW40: 'DB101,INT40', // 调节自动居中
+  DBW42: 'DB101,INT42', // 故障复位
+  DBW44: 'DB101,INT44', // 下货完成
+  DBW46: 'DB101,INT46', // 托盘模式
   DBW60: 'DB101,INT60', // 看门狗心跳
   DBW62: 'DB101,INT62', // 输送系统自动运行
   DBW64: 'DB101,INT64',
@@ -323,8 +327,8 @@ var variables = {
   DBB130: 'DB101,C130.30'
 };
 
-var writeStrArr = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-var writeAddArr = ['DBW0', 'DBW2', 'DBW4', 'DBW6', 'DBW8', 'DBW10', 'DBW12', 'DBW14', 'DBW16', 'DBW18', 'DBW22', 'DBW24', 'DBW26', 'DBW34', 'DBW36', 'DBW38'];
+var writeStrArr = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+var writeAddArr = ['DBW0', 'DBW2', 'DBW4', 'DBW6', 'DBW8', 'DBW10', 'DBW12', 'DBW14', 'DBW16', 'DBW18', 'DBW22', 'DBW24', 'DBW26', 'DBW34', 'DBW36', 'DBW38', 'DBW40', 'DBW42', 'DBW44', 'DBW46'];
 
 // 给PLC写值
 function writeValuesToPLC(add, values) {
@@ -376,6 +380,18 @@ function writeValuesToPLC(add, values) {
       break;
     case 'DBW38':
       writeStrArr[15] = values;
+      break;
+    case 'DBW40':
+      writeStrArr[16] = values;
+      break;
+    case 'DBW42':
+      writeStrArr[17] = values;
+      break;
+    case 'DBW44':
+      writeStrArr[18] = values;
+      break;
+    case 'DBW46':
+      writeStrArr[19] = values;
       break;
     default:
       break;

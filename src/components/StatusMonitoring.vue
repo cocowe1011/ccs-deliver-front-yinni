@@ -75,6 +75,7 @@ export default {
   watch: {
     watchDog: {
       handler(newVal, oldVal) {
+        // console.log(new Date() + '心跳变化!' + newVal)
         this.plcStatus = true
         if(this.warningTimeOut) {
           clearTimeout(this.warningTimeOut);
