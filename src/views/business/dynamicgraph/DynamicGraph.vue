@@ -981,7 +981,7 @@ export default {
           this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].smplRead = res.data.scanF;
           this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].pfnRead = res.data.pfn;
           this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].nlRead = res.data.energy;
-          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].sxSpeedRead = res.data.speed;
+          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].sxSpeedRead = (Number(res.data.speed) * 1000);
         }
         if(res.data&&JSON.stringify(this.orderMainDy) != '{}' && this.judgeAccData(res.data, boxImitateIdVal)) {
           this.$message({
