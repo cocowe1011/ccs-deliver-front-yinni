@@ -1050,21 +1050,21 @@ export default {
         this.fullPause = false;
         this.fullStop = false;
         // 先清空定时器
-        if(this.judgeSpeedInterval) {
-          clearInterval(this.judgeSpeedInterval);
-        }
+        // if(this.judgeSpeedInterval) {
+        //   clearInterval(this.judgeSpeedInterval);
+        // }
         // 开始监听束下实际速度和设定速度,不合格，加速器不允许货物进入辐照区
-        this.judgeSpeedInterval = setInterval(() => {
-          if(this.lightBeamRealTimeSpeed != null && this.lightBeamRealTimeSpeed != undefined && this.lightBeamRealTimeSpeed != '') {
-            if((Number(this.lightBeamRealTimeSpeed) >= Number(this.orderMainDy.sxSpeedLowerLimit)) && (Number(this.lightBeamRealTimeSpeed) <= Number(this.orderMainDy.sxSpeedUpperLimit))) {
-              ipcRenderer.send('writeValuesToPLC', 'DBW4', 1);
-            } else {
-              ipcRenderer.send('writeValuesToPLC', 'DBW4', 0);
-            }
-          } else {
-            ipcRenderer.send('writeValuesToPLC', 'DBW4', 0);
-          }
-        }, 1000);
+        // this.judgeSpeedInterval = setInterval(() => {
+        //   if(this.lightBeamRealTimeSpeed != null && this.lightBeamRealTimeSpeed != undefined && this.lightBeamRealTimeSpeed != '') {
+        //     if((Number(this.lightBeamRealTimeSpeed) >= Number(this.orderMainDy.sxSpeedLowerLimit)) && (Number(this.lightBeamRealTimeSpeed) <= Number(this.orderMainDy.sxSpeedUpperLimit))) {
+        //       ipcRenderer.send('writeValuesToPLC', 'DBW4', 1);
+        //     } else {
+        //       ipcRenderer.send('writeValuesToPLC', 'DBW4', 0);
+        //     }
+        //   } else {
+        //     ipcRenderer.send('writeValuesToPLC', 'DBW4', 0);
+        //   }
+        // }, 1000);
       } else {
         // 全线清空
         this.clearAllData(true);
@@ -1356,7 +1356,8 @@ export default {
               // 生成箱报告
               const param = {
                 boxMainDTOList: [this.arrF[this.arrF.length - 1]],
-                finishOrder: false
+                finishOrder: false,
+                orderId: this.orderMainDy.orderId
               }
               // 生成箱报告
               await HttpUtil.post('/box/save', param).then((res)=> {
@@ -1392,7 +1393,8 @@ export default {
               }
               const param = {
                 boxMainDTOList: [this.arrDG[0]],
-                finishOrder: false
+                finishOrder: false,
+                orderId: this.orderMainDy.orderId
               }
               // 生成箱报告
               await HttpUtil.post('/box/save', param).then((res)=> {
@@ -1453,7 +1455,8 @@ export default {
                 ipcRenderer.send('writeValuesToPLC', 'DBW38', 1);
                 const param = {
                   boxMainDTOList: [this.arrGH[indexHBox]],
-                  finishOrder: false
+                  finishOrder: false,
+                  orderId: this.orderMainDy.orderId
                 }
                 // 更新箱报告的H点的时间
                 await HttpUtil.post('/box/save', param).then((res)=> {
@@ -1635,7 +1638,8 @@ export default {
       // 生成批报告，并且更新一下所有箱子
       const param = {
         boxMainDTOList: [...this.arrAB, ...this.arrBC, ...this.arrCD, ...this.arrDG, ...this.arrGH],
-        finishOrder: true
+        finishOrder: true,
+        orderId: this.orderMainDy.orderId
       }
       await HttpUtil.post('/box/save', param).then((res)=> {
         if(res.data == 1) {
@@ -1644,8 +1648,8 @@ export default {
           this.fullStop = false;
           this.orderMainDy = {};
           this.clearAllData(false);
-          clearInterval(this.judgeSpeedInterval);
-          this.judgeSpeedInterval = null;
+          // clearInterval(this.judgeSpeedInterval);
+          // this.judgeSpeedInterval = null;
           this.$emit('returnGenerateBatchReport',true)
         } else {
           this.$emit('returnGenerateBatchReport',false)
@@ -1778,8 +1782,8 @@ export default {
       this.fullPause = false
       this.fullRun = false
       this.fullStop = true
-      clearInterval(this.judgeSpeedInterval);
-      this.judgeSpeedInterval = null;
+      // clearInterval(this.judgeSpeedInterval);
+      // this.judgeSpeedInterval = null;
     },
     operationConfirm(command) {
       switch (command) {
@@ -1826,8 +1830,8 @@ export default {
             this.fullPause = false
             this.fullRun = false
             this.fullStop = true
-            clearInterval(this.judgeSpeedInterval);
-            this.judgeSpeedInterval = null;
+            // clearInterval(this.judgeSpeedInterval);
+            // this.judgeSpeedInterval = null;
             this.sendMsgToPLC('stop');
           }).catch(() => {
             this.$message({
@@ -1956,7 +1960,8 @@ export default {
           // 生成批报告，并且更新一下所有箱子
           const param = {
             boxMainDTOList: [...this.arrAB, ...this.arrBC, ...this.arrCD, ...this.arrDG, ...this.arrGH],
-            finishOrder: true
+            finishOrder: true,
+            orderId: this.orderMainDy.orderId
           }
           await HttpUtil.post('/box/save', param).then((res)=> {
             if(res.data == 1) {
@@ -2045,6 +2050,12 @@ export default {
         this.err8 = this.errorModArr[0];
         this.err9 = this.errorModArr[15];
         this.err10 = this.errorModArr[14];
+        this.err11 = this.errorModArr[13];
+        this.err12 = this.errorModArr[12];
+        this.err13 = this.errorModArr[11];
+        this.err14 = this.errorModArr[10];
+        this.err15 = this.errorModArr[9];
+        this.err16 = this.errorModArr[8];
       }
       
     })
