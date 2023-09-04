@@ -473,6 +473,12 @@ export default {
       err8: '', // PLC报警8
       err9: '', // PLC报警9
       err10: '', // PLC报警10
+      err11: '', // PLC报警11
+      err12: '', // PLC报警12
+      err13: '', // PLC报警13
+      err14: '', // PLC报警14
+      err15: '', // PLC报警15
+      err16: '', // PLC报警16
       logPageFlag: 'log', // 日志是显示传送带运行日常日志还是报警日志
       fullPause: false,
       fullRun: false,
@@ -697,24 +703,24 @@ export default {
     err4: {
       handler(newVal, oldVal){
         if(newVal == '1') {
-          // 输送线进线变频过载
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 输送线进线变频过载!', 'error')
+          // 输送线变频过载
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 输送线变频过载!', 'error')
         }
       }
     },
     err5: {
       handler(newVal, oldVal){
         if(newVal == '1') {
-          // 束下输送线进线变频过载
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 束下输送线进线变频过载!', 'error')
+          // 束下输送线变频过载
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 束下输送线变频过载!', 'error')
         }
       }
     },
     err6: {
       handler(newVal, oldVal){
         if(newVal == '1') {
-          // 输送线出线变频过载
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 输送线出线变频过载!', 'error')
+          // 不翻转模式下，翻转叉子未卸。
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 不翻转模式下，翻转叉子未卸。!', 'error')
         }
       }
     },
@@ -749,6 +755,54 @@ export default {
           this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 束下出货堵料!', 'error')
         }
       }
+    },
+    err11: {
+      handler(newVal, oldVal){
+        if(newVal == '1') {
+          // 货物到达链板前加速器不允许进入报警停机
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物到达链板前加速器不允许进入报警停机!', 'error')
+        }
+      }
+    },
+    err12: {
+      handler(newVal, oldVal){
+        if(newVal == '1') {
+          // 居中机构运转超限报警
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 居中机构运转超限报警!', 'error')
+        }
+      }
+    },
+    err13: {
+      handler(newVal, oldVal){
+        if(newVal == '1') {
+          // 不翻转模式下113翻转处箱子堵料报警
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 不翻转模式下113翻转处箱子堵料报警!', 'error')
+        }
+      }
+    },
+    err14: {
+      handler(newVal, oldVal){
+        if(newVal == '1') {
+          // 不翻转模式下114翻转处箱子堵料报警
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 不翻转模式下114翻转处箱子堵料报警!', 'error')
+        }
+      }
+    },
+    err15: {
+      handler(newVal, oldVal){
+        if(newVal == '1') {
+          // 下货箱子未卸货，误进入翻转机构
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 下货箱子未卸货，误进入翻转机构!', 'error')
+        }
+      }
+    },
+    err16: {
+      handler(newVal, oldVal){
+        if(newVal == '1') {
+          // 加速器紧急停机
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 加速器紧急停机!', 'error')
+        }
+      }
     }
   },
   computed: {},
@@ -757,8 +811,6 @@ export default {
       if(type == 'log') {
         // 生成日志
         this.logArr.push({text: msg})
-        // 同时往本地写日志
-        ipcRenderer.send('writeLogToLocal', msg);
         this.$nextTick(() => {
           this.scrollToBottom();
         });
@@ -773,6 +825,8 @@ export default {
           this.errorLogNotReadNumber++;
         }
       }
+      // 同时往本地写日志
+      ipcRenderer.send('writeLogToLocal', msg);
     },
     scrollToBottom() {
       const logContainer = this.$refs.logContainer;

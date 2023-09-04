@@ -86,7 +86,7 @@ export default {
           if(this.$route.path != '/login') {
             this.$message.error('PLC断开连接！');
           }
-        }, 2000);
+        }, 3000);
       }
     }
   },
