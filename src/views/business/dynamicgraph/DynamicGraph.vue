@@ -1537,6 +1537,11 @@ export default {
       setTimeout(() => {
         ipcRenderer.send('writeValuesToPLC', 'DBW8', 0);
       }, 500);
+      // DB101.DBW40 发送居中信号
+      ipcRenderer.send('writeValuesToPLC', 'DBW40', 1);
+      setTimeout(() => {
+        ipcRenderer.send('writeValuesToPLC', 'DBW40', 0);
+      }, 500);
       // 判断是不是托盘模式
       if(this.orderMainDy.trayFlag === '1') {
         ipcRenderer.send('writeValuesToPLC', 'DBW12', 0);
