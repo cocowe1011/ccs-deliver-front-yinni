@@ -25,9 +25,6 @@
               <el-form-item label="产品名称：">
                 <el-input size="small" v-model="orderMainForm.productName" placeholder="产品名称" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <!-- <el-form-item label="加速器k值：">
-                <el-input size="small" v-model="orderMainForm.acceleratorKValue" placeholder="加速器k值" :readonly="!(isNewSave || isEdit)"></el-input>
-              </el-form-item> -->
               <el-form-item label="工艺名称：">
                 <el-input size="small" v-model="orderMainForm.artName" placeholder="工艺名称" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
@@ -137,6 +134,16 @@
               <el-button type="primary" style="margin-left: 6px;" size="small" icon="el-icon-success" @click="saveOrder" :loading="saveLoading" v-if="isNewSave">保存</el-button>
               <el-button type="primary" size="small" icon="el-icon-success" @click="updateOrder" :loading="editLoading" v-else>修改</el-button>
               <el-button size="small" style="margin-left: 15px;" icon="el-icon-error" @click="cancelEditOrSave">取消</el-button>
+              <div v-if="isNewSave" style="height: 30px;width: 72px;display: flex;align-items: center;margin-left: 30px;font-size: 14px;font-weight: 600;">引入配方：</div>
+              <el-select v-if="isNewSave" filterable placeholder="可输入汉字检索配方" @visible-change="getDictOrder" @change="selectDictOrder" size="small">
+                <el-option
+                  v-for="(item, index) in dictOrderList"
+                  :key="index"
+                  :label="item.dictName"
+                  :value="item"
+                  >
+                </el-option>
+              </el-select>
             </div>
           </div>
         </div>
@@ -198,23 +205,45 @@
     <div style="width:100%;height: 100%;" v-show="isDynamicGraphShow">
       <DynamicGraph @closeDynamicGraphShow="closeDynamicGraphShow" @returnGenerateBatchReport="returnGenerateBatchReport" @cancelOrder="cancelOrder"  @chooseOrder="chooseOrder" ref="dynamicGraph"></DynamicGraph>
     </div>
+    <div :class="zhankaiflag ? 'zhankai-div' : ''" @click.self="zhankaiflag = false">
+      <div :class="['patlist', zhankaiflag?'open':'']">
+        <div class="huakuai" style="z-index: 1000" @click="zhankai()">
+          <i v-show="!zhankaiflag" class="el-icon-caret-left"></i>
+          <i v-show="zhankaiflag" class="el-icon-caret-right"></i>
+          <span style="font-size: 15px;">
+            工艺配方
+          </span>
+        </div>
+        <div class="patlist-container">
+          <div class="patlist-container-wrapper">
+            <span class="patlist-container-wrapper-title">维护工艺配方模板</span>
+            <span class="patlist-container-wrapper-close" @click="zhankaiflag = false"><i class="el-icon-close"></i></span>
+          </div>
+          <div class="patlist-container-inner">
+            <DictOrder v-if="zhankaiflag"></DictOrder>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  
 </template>
 
 <script>
 import HttpUtil from '@/utils/HttpUtil'
 import { Debugger, ipcRenderer } from 'electron'
 import DynamicGraph from '../dynamicgraph/DynamicGraph.vue'
+import DictOrder from './DictOrder.vue'
 import moment from 'moment';
 export default {
   name: "OrderList",
   components: {
-    DynamicGraph
+    DynamicGraph,
+    DictOrder
   },
   props: {},
   data() {
     return {
+      zhankaiflag: false,
       orderMainForm: {},
       tableTitle:[
         {prop:"orderId",label:"任务编号",width:"200"},{prop:"revertFlag",label:"翻转",width:"150"},
@@ -222,6 +251,7 @@ export default {
         {prop:"planNum",label:"计划数量",width:"150"},{prop:"productName",label:"产品名称",width:"150"},{prop:"loadMethod",label:"装载方式",width:"150"},
         {prop:"pathName",label:"路径名称",width:"150"},{prop:"artName",label:"工艺名称",width:"150"},{prop:"acceleratorKValue",label:"加速器k值",width:"150"}
       ],
+      dictOrderList: [],
       tableData: [],
       saveLoading: false,
       editLoading: false,
@@ -237,6 +267,13 @@ export default {
   watch: {},
   computed: {},
   methods: {
+    zhankai() {
+      if (this.zhankaiflag) {
+        this.zhankaiflag = false;
+      } else {
+        this.zhankaiflag = true;
+      }
+    },
     clickRevert(value) {
       if(value && this.orderMainForm.trayFlag) {
         this.$message.error('请先取消托盘模式！')
@@ -433,6 +470,22 @@ export default {
     },
     autoCalMaxHeight() {
       this.tableMaxHeight = this.$refs.listMiddle.offsetHeight - 55;
+    },
+    getDictOrder() {
+      this.dictOrderList = []
+      HttpUtil.get('/dict/getDictOrder').then((res)=> {
+        if(res.data) {
+          this.dictOrderList = res.data
+        }
+      }).catch((err)=> {
+        // 网络异常 稍后再试
+        this.$message.error('获取配方失败！' + err);
+      });
+    },
+    selectDictOrder(value) {
+      this.orderMainForm = value
+      this.orderMainForm.revertFlag = this.orderMainForm.revertFlag == '1' ? true : false
+      this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
     }
   },
   created() {
@@ -543,5 +596,71 @@ export default {
       }
     }
   }
+}
+.patlist {
+  position: absolute;
+  width: 0;
+  background-color: #fff;
+  box-shadow: 0 0 10px #888;
+  z-index: 999;
+  height: calc(100vh - 180px);
+  transition: width 0.15s linear;
+  top: 45px;
+  right: 6px;
+  .huakuai {
+    position: absolute;
+    height: 58px;
+    width: 50px;
+    top: calc(50% - 150px);
+    left: -50px;
+    background-color: #459df5;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    color: white;
+  }
+  .patlist-container {
+    height: 100%;
+    .patlist-container-wrapper {
+      position: relative;
+      text-align: right;
+      height: 40px;
+      background: #eef2fd;
+      line-height: 40px;
+      color: rgba(0, 0, 0, 0.65);
+      &-title {
+        font-weight: bold;
+        margin-left: 10px;
+        float: left;
+      }
+      &-close {
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        margin-right: 20px;
+      }
+    }
+    .patlist-container-inner {
+      margin: 8px;
+      height: calc(100% - 60px);
+    }
+  }
+}
+.zhankai-div {
+  width: 100%;
+  height: calc(100% - 55px);
+  position: absolute;
+  top: 0;
+  background: #ffffff6b;
+  margin-top: 55px;
+}
+.open {
+  width: 1215px !important;
+  opacity: 1 !important;
 }
 </style>
