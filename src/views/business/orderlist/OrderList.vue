@@ -135,12 +135,12 @@
               <el-button type="primary" size="small" icon="el-icon-success" @click="updateOrder" :loading="editLoading" v-else>修改</el-button>
               <el-button size="small" style="margin-left: 15px;" icon="el-icon-error" @click="cancelEditOrSave">取消</el-button>
               <div v-if="isNewSave" style="height: 30px;width: 72px;display: flex;align-items: center;margin-left: 30px;font-size: 14px;font-weight: 600;">引入配方：</div>
-              <el-select v-if="isNewSave" filterable placeholder="可输入汉字检索配方" @visible-change="getDictOrder" @change="selectDictOrder" size="small">
+              <el-select v-model="selectTemp" v-if="isNewSave" filterable placeholder="可输入汉字检索配方" @visible-change="getDictOrder" @change="selectDictOrder" size="small">
                 <el-option
                   v-for="(item, index) in dictOrderList"
                   :key="index"
                   :label="item.dictName"
-                  :value="item"
+                  :value="index"
                   >
                 </el-option>
               </el-select>
@@ -261,7 +261,8 @@ export default {
       isDynamicGraphShow: false,
       getOrderListLoading: false,
       nowRunOrderId: '',
-      tableMaxHeight: 0
+      tableMaxHeight: 0,
+      selectTemp: null
     };
   },
   watch: {},
@@ -291,6 +292,7 @@ export default {
       this.isEdit = false;
     },
     newOrderClick() {
+      this.selectTemp = null
       this.isNewSave = true;
       this.orderMainForm = {};
     },
@@ -483,7 +485,7 @@ export default {
       });
     },
     selectDictOrder(value) {
-      this.orderMainForm = value
+      this.orderMainForm = this.dictOrderList[value]
       this.orderMainForm.revertFlag = this.orderMainForm.revertFlag == '1' ? true : false
       this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
     }

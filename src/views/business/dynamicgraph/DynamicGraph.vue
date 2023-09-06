@@ -241,7 +241,7 @@
       :visible.sync="drawer"
       :modal-append-to-body="false"
       border
-      size="1200px">
+      size="1250px">
       <div class="drawer-left">
         <div class="content_table">
           <div class="table_head">
@@ -278,6 +278,9 @@
                     <th style="width: 60px">
                       <div>状态</div>
                     </th>
+                    <th style="width: 50px">
+                      <div>操作</div>
+                    </th>
                   </tr>
               </thead>
             </table>
@@ -304,6 +307,14 @@
                       <el-tag type="warning" v-if="item.tichuFlag === 'WAIT_PUT_OUT'" size="mini">待剔除</el-tag>
                       <el-tag type="danger" v-if="item.tichuFlag === 'HAVE_PUT_OUT'" size="mini">已剔除</el-tag>
                       <el-tag v-if="!item.xiahuoFlag && item.tichuFlag !== 'WAIT_PUT_OUT' && item.tichuFlag !== 'HAVE_PUT_OUT'" size="mini">执行中</el-tag>
+                    </td>
+                    <td style="width: 50px">
+                      <el-popconfirm
+                        :title="'确定要将' + item.boxImitateId + '在队列中删除吗？'"
+                        @confirm="deleteBoxFromArr(item.boxImitateId, index)"
+                      >
+                        <el-button type="danger" icon="el-icon-delete" size="mini" circle slot="reference"></el-button>
+                      </el-popconfirm>
                     </td>
                   </tr>
                 </tbody>
@@ -488,7 +499,10 @@ export default {
       logNotReadNumber: 0, // 日志未读数量
       errorLogNotReadNumber: 0, // 错误日志未读数量
       timers: {},
+      timersRunStatus: false,
       beltRunStatus: 0,
+      status104: '0',
+      status105: '0',
       isCanChangeOrder: false,
       dialogVisible: false,
       tableTitle:[
@@ -510,7 +524,39 @@ export default {
           }
         } else if(newVal == 1) {
           if(JSON.stringify(this.timers) != '{}') {
-            this.resumeAllTimers()
+            if(this.status104 == '1' && this.status105 == '1') {
+              this.resumeAllTimers()
+            }
+          }
+        }
+      }
+    },
+    status104: {
+      async handler(newVal, oldVal) {
+        if(newVal == 0) {
+          if(JSON.stringify(this.timers) != '{}') {
+            this.pauseAllTimers()
+          }
+        } else if(newVal == 1) {
+          if(JSON.stringify(this.timers) != '{}') {
+            if(this.beltRunStatus == 1 && this.status105 == '1') {
+              this.resumeAllTimers()
+            }
+          }
+        }
+      }
+    },
+    status105: {
+      async handler(newVal, oldVal) {
+        if(newVal == 0) {
+          if(JSON.stringify(this.timers) != '{}') {
+            this.pauseAllTimers()
+          }
+        } else if(newVal == 1) {
+          if(JSON.stringify(this.timers) != '{}') {
+            if(this.status104 == '1' && this.beltRunStatus == 1) {
+              this.resumeAllTimers()
+            }
           }
         }
       }
@@ -1172,6 +1218,39 @@ export default {
     },
     indexMethod(index) {
       return index + 1;
+    },
+    deleteBoxFromArr(boxImitateId, index) {
+      if(this.traAB) {
+        this.arrAB.splice(index, 1)
+        this.boxArr = this.arrAB;
+        this.nowInNum--;
+      } else if(this.traBC) {
+        this.arrBC.splice(index, 1)
+        this.boxArr = this.arrBC;
+        this.nowInNum--;
+        // BC需要直接把定时器删掉
+      } else if(this.traCD) {
+        this.arrCD.splice(index, 1)
+        this.boxArr = this.arrCD;
+        this.nowInNum--;
+      } else if(this.traDG) {
+        if(index > this.arrDG.length - 1) {
+          this.arrDG.splice(index, 1)
+        } else {
+          this.tempArrF.splice(index - this.arrDG.length, 1)
+        }
+        this.boxArr = [...this.arrDG, ...this.tempArrF] ;
+        this.nowInNum--;
+      } else if(this.traGH) {
+        this.arrGH.splice(index, 1)
+        this.boxArr = this.arrGH;
+        this.nowInNum--;
+      } else if(this.traF) {
+        this.arrF.splice(index, 1)
+        this.boxArr = this.arrF;
+        this.nowInNum--;
+      }
+      this.deleteTimersByBoxImitateId(boxImitateId);
     },
     showCache(transform) {
       this.boxArr = [];
@@ -1906,19 +1985,32 @@ export default {
         endTime: Date.now() + delay,
         remainingTime: delay,
       };
+      this.timersRunStatus = true;
     },
     pauseAllTimers() {
-      for (const boxImitateId in this.timers) {
-        clearTimeout(this.timers[boxImitateId].timerId);
-        this.timers[boxImitateId].remainingTime = this.timers[boxImitateId].endTime - Date.now();
+      if(this.timersRunStatus) {
+        for (const boxImitateId in this.timers) {
+          clearTimeout(this.timers[boxImitateId].timerId);
+          this.timers[boxImitateId].remainingTime = this.timers[boxImitateId].endTime - Date.now();
+          this.timersRunStatus = false;
+        }
       }
     },
     resumeAllTimers() {
-      const currentTime = Date.now();
-      for (const boxImitateId in this.timers) {
-        const remainingTime = this.timers[boxImitateId].remainingTime;
-        this.startTimerWithDelay(boxImitateId, remainingTime);
-        this.timers[boxImitateId].endTime = currentTime + remainingTime;
+      if(!this.timersRunStatus) {
+        const currentTime = Date.now();
+        for (const boxImitateId in this.timers) {
+          const remainingTime = this.timers[boxImitateId].remainingTime;
+          this.startTimerWithDelay(boxImitateId, remainingTime);
+          this.timers[boxImitateId].endTime = currentTime + remainingTime;
+        }
+        this.timersRunStatus = true;
+      }
+    },
+    deleteTimersByBoxImitateId(boxImitateId) {
+      if(this.timers[boxImitateId] != undefined) {
+        clearTimeout(this.timers[boxImitateId].timerId);
+        delete this.timers[boxImitateId];
       }
     },
     downClick() {
@@ -2030,6 +2122,8 @@ export default {
       }
       // --------无PLC测试时，这里以上代码毙掉--------
       this.dianJiStatusArr = this.PrefixZero(this.convertToWord(eventData.DBW72).toString(2), 16);
+      this.status104 = this.dianJiStatusArr[3]
+      this.status105 = this.dianJiStatusArr[2]
       this.lightBeamRealTimeSpeed = Number(eventData.DBW68);
       // 上料固定扫码
       this.loadScanCodeTemp = eventData.DBB100??'';

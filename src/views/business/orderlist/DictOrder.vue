@@ -9,7 +9,13 @@
           <div style="width: 300px;height: 100%;background-color: white;overflow: auto;">
             <div :class="['dict-list-card', activeIndex == index ? 'dict-list-card-active': '']" v-for="(item, index) in dictOrderList" :key="index" @click="clickCard(index)">
               <div class="tag-div"><el-tag>{{ index + 1 }}</el-tag></div>
-              <span class="dict-name-span">{{ item.dictName }}</span></div>
+              <span class="dict-name-span">{{ item.dictName }}</span>
+              <div class="edit-dict-div">
+                <el-tooltip class="item" effect="dark" content="修改配方名称" placement="right">
+                  <el-button icon="el-icon-edit" circle size="mini" @click="editDictOrderName"></el-button>
+                </el-tooltip>
+              </div>
+            </div>
           </div>
           <div style="width: calc(100% - 308px); margin-left: 10px; height: 100%; background-color: white; box-sizing:border-box; padding: 10px 0px 0px 20px;overflow: auto;" v-loading="dictOrderLoading">
             <el-form :inline="true" label-position="right" label-width="130px" :model="dictOrderForm" class="demo-form-inline">
@@ -137,6 +143,7 @@
       :visible.sync="dialogVisible"
       width="30%"
       append-to-body
+      :close-on-click-modal="false"
       >
       <el-input v-model="inputName" placeholder="请输入配方名称"></el-input>
       <span slot="footer" class="dialog-footer">
@@ -144,9 +151,21 @@
         <el-button type="primary" @click="save" :loading="saveLoading">确 定</el-button>
       </span>
     </el-dialog>
+    <el-dialog
+      title="修改配方名称："
+      :visible.sync="dialogEditVisible"
+      width="30%"
+      append-to-body
+      :close-on-click-modal="false"
+      >
+      <el-input v-model="dictOrderForm.dictName" placeholder="请输入配方名称"></el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogEditVisible = false">取 消</el-button>
+        <el-button type="primary" @click="updateDictOrderName" :loading="dialogEditLoading">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
-
 <script>
 import HttpUtil from '@/utils/HttpUtil'
 export default {
@@ -161,7 +180,9 @@ export default {
       dictOrderForm: {},
       saveLoading: false,
       activeIndex: 0,
-      dictOrderLoading: false
+      dictOrderLoading: false,
+      dialogEditVisible: false,
+      dialogEditLoading: false
     };
   },
   watch: {},
@@ -213,6 +234,39 @@ export default {
       setTimeout(() => {
         this.dictOrderLoading = false
       }, 500);
+    },
+    editDictOrderName() {
+      this.dialogEditVisible = true;
+    },
+    updateDictOrderName() {
+      if(this.dictOrderForm.dictName == '') {
+        this.$message.error('配方名称不可为空！');
+        return false
+      }
+      this.dialogEditLoading = true;
+      HttpUtil.post('/dict/update', { dictOrderId: this.dictOrderForm.dictOrderId, dictName: this.dictOrderForm.dictName }).then((res)=> {
+        if(res.data === 1) {
+          this.$message.success('修改成功！');
+          this.dialogEditVisible = false;
+          HttpUtil.get('/dict/getDictOrder').then((res)=> {
+            if(res.data) {
+              this.dictOrderList = res.data
+            }
+          }).catch((err)=> {
+            // 网络异常 稍后再试
+            this.$message.error('查询失败！' + err);
+          });
+        } else {
+          this.$message.error('修改失败！请重试！');
+        }
+        setTimeout(() => {
+          this.dialogEditLoading = false;
+        }, 500);
+      }).catch((err)=> {
+        // 网络异常 稍后再试
+        this.dialogEditLoading = false;
+        this.$message.error('修改失败！错误：' + err);
+      });
     },
     save() {
       if(this.inputName == '') {
@@ -279,7 +333,7 @@ export default {
       align-items: center;
       font-size: 17px;
       box-sizing: border-box;
-      padding: 0px 8px 0px 10px;
+      padding: 0px 40px 0px 10px;
       .dict-name-span {
         margin-left: 12px;
         font-weight: 600;
@@ -289,6 +343,11 @@ export default {
         height: 100%;
         display: flex;
         align-items: center;
+      }
+      .edit-dict-div {
+        width: 30px;
+        left: 280px;
+        position: absolute;
       }
     }
     .dict-list-card:hover {
