@@ -298,7 +298,7 @@ export default {
       this.dictOrderList = []
       this.activeIndex = 0;
       await HttpUtil.get('/dict/getDictOrder').then((res)=> {
-        if(res.data) {
+        if(res.data.length > 0) {
           this.dictOrderList = res.data
           this.clickCard(0)
         }

@@ -49,12 +49,12 @@
                 <div class="data-card-border-borderDown">{{ orderMainDy.numberTurns }}</div>
               </div>
             </div>
-            <!-- <div class="data-card" style="padding: 7px 10px 14px 10px;">
+            <div class="data-card" style="padding: 7px 10px 14px 10px;">
               <div class="data-card-border">
-                <div class="data-card-border-borderTop">订单圈数</div>
-                <div class="data-card-border-borderDown">{{ orderMainDy.numberTurns }}</div>
+                <div class="data-card-border-borderTop">模式</div>
+                <div class="data-card-border-borderDown">{{ orderMainDy.trayFlag === '1' ? '托盘模式': (orderMainDy.revertFlag === '翻转' ? '翻转模式' : '回流模式') }}</div>
               </div>
-            </div> -->
+            </div>
           </div>
         </div>
       </div>
@@ -222,9 +222,9 @@
             <el-link type="danger" style="position: absolute;top: 326px;right: 89px;font-size: 16px;font-weight: 600;" @click="showChuanSong('AB')">{{ '101-103区域货物缓存队列 (' + arrAB.length + ')' }}</el-link>
             <el-link type="danger" style="position: absolute;top: 86px;right: 113px;font-size: 16px;font-weight: 600;" @click="showChuanSong('BC')">{{ '104-106区域货物缓存队列 (' + arrBC.length + ')' }}</el-link>
             <el-link type="danger" style="position: absolute;top: 320px;right: 536px;font-size: 16px;font-weight: 600;" @click="showChuanSong('CD')">{{ '107-109区域货物缓存队列 (' + arrCD.length + ')' }}</el-link>
-            <el-link type="danger" style="position: absolute;top: 445px;left: 240px;font-size: 16px;font-weight: 600;" @click="showChuanSong('DG')">{{ '110-111区域货物缓存队列 (' + (arrDG.length + this.tempArrF.length) + ')' }}</el-link>
+            <el-link type="danger" style="position: absolute;top: 445px;left: 240px;font-size: 16px;font-weight: 600;" @click="showChuanSong('DG')">{{ '110-111区域货物缓存队列 (' + (arrDG.length + tempArrF.length) + ')' }}</el-link>
             <el-link type="danger" style="position: absolute;top: 395px;left: -37px;font-size: 16px;font-weight: 600;" @click="showChuanSong('F')">{{ '剔除货物缓存队列 (' + arrF.length + ')' }}</el-link>
-            <el-link type="danger" style="position: absolute;top: 689px;right: 542px;font-size: 16px;font-weight: 600;" @click="showChuanSong('GH')">{{ '下货区缓存队列 (' + arrGH.length + ')' }}</el-link>
+            <el-link type="danger" style="position: absolute;top: 689px;right: 542px;font-size: 16px;font-weight: 600;" @click="showChuanSong('GH')">{{ '下货区缓存队列 (' + (arrGH.length + thoughHArr.length) + ')' }}</el-link>
             <!-- 预警 -->
             <img src="./img/yujing.png" class="warning-img" v-show="yujingShow" style="left: 41px;top: 663px;"/>
             <img src="./img/baojing.png" class="warning-img" v-show="baojingShow" style="top: 717px;left: 352px;"/>
@@ -512,7 +512,8 @@ export default {
         {prop:"pathName",label:"路径名称",width:"150"},{prop:"artName",label:"工艺名称",width:"150"},{prop:"acceleratorKValue",label:"加速器k值",width:"150"}
       ],
       tableData: [],
-      getOrderListLoading: false
+      getOrderListLoading: false,
+      thoughHArr: []
     };
   },
   watch: {
@@ -582,6 +583,16 @@ export default {
             // 新上货物时，报警和预警先关闭
             this.yujingShow = false;
             this.baojingShow = false;
+            // 新上货物时，经过H点模拟id值赋值为arrGH 最后一个元素的值,并且给arrGH内所有元素一个作废标识，后续不处理这些作废的元素
+            if(this.arrGH.length > 0) {
+              for (let index = 0; index < this.arrGH.length; index++) {
+                this.thoughHArr.push(this.arrGH[index]);
+                this.arrGH.splice(index, 1)
+              }
+              this.lastRouteHPoint = '';
+            } else {
+              this.lastRouteHPoint = '';
+            }
             // 上货数量+1
             this.nowInNum++;
             // 模拟id数+1
@@ -595,9 +606,9 @@ export default {
             this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateId + '进入A点', 'log');
           } else {
             // 把GH队列最开始箱子加入AB对接，并修改圈数
-            if(this.arrGH[this.nowOutNum] != undefined) {
-              this.arrAB.push(this.arrGH[this.nowOutNum]);
-              this.arrGH.splice(this.nowOutNum,1)
+            if(this.arrGH[0] != undefined) {
+              this.arrAB.push(this.arrGH[0]);
+              this.arrGH.splice(0, 1)
               this.arrAB[this.arrAB.length - 1].numberTurns = this.arrAB[this.arrAB.length - 1].numberTurns + 1;
               const nowTurns = this.arrAB[this.arrAB.length - 1].numberTurns;
               this.arrAB[this.arrAB.length - 1].turnsInfoList.push({numberTurns: nowTurns, passATime: moment().format('YYYY-MM-DD HH:mm:ss')});
@@ -1085,6 +1096,7 @@ export default {
     replaceOrderData(orderMain) {
       if(orderMain.orderId === this.orderMainDy.orderId) {
         this.orderMainDy = JSON.parse(JSON.stringify(orderMain));
+        this.orderMainDy.revertFlag = this.orderMainDy.revertFlag == '1' ? '翻转' : ''
         this.$message.success('修改信息已同步到当前使用订单！')
       }
     },
@@ -1282,7 +1294,7 @@ export default {
           this.traF = true
           break;
         case 'GH':
-          this.boxArr = this.arrGH;
+          this.boxArr = [...this.arrGH, ...this.thoughHArr];
           this.traGH = true
           break;
         default:
@@ -1656,7 +1668,7 @@ export default {
           }, 500);
           this.$notify({
             title: '指令发送成功！',
-            message: '全线暂停指令已成功发送！',
+            message: '故障复位指令已成功发送！',
             type: 'success',
             duration: 2000
           });
@@ -1786,6 +1798,7 @@ export default {
       this.arrF = []; // 被剔除的箱子缓存
       // 当前点击的传送带区域内的箱子列表，一个中间变量
       this.boxArr = [];
+      this.thoughHArr = [];
       // 当前打开的是哪块传送带队列
       this.traAB = false;
       this.traBC = false;
@@ -2528,7 +2541,7 @@ export default {
     }
   }
   .drawer-left {
-    width: 1020px;
+    width: 1068px;
     height: 100%;
     float: left;
     .content_table {
