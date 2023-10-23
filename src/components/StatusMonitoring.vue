@@ -1,8 +1,12 @@
 <template>
   <div :class="['sm-main', plcStatus?'':'offline'] " v-drag>
-    <i class="el-icon-check icon" style="font-size: 28px; color: #fff" v-if="plcStatus"></i>
-    <i class="el-icon-close icon" style="font-size: 28px; color: #fff" v-else></i>
-      {{ plcStatus ? 'PLC已连接' : 'PLC未连接' }}
+    <el-tooltip class="item" effect="dark" :content="sendStr" placement="bottom">
+      <div class="inner">
+        <i class="el-icon-check icon" style="font-size: 28px; color: #fff" v-if="plcStatus"></i>
+        <i class="el-icon-close icon" style="font-size: 28px; color: #fff" v-else></i>
+          {{ plcStatus ? 'PLC已连接' : 'PLC未连接' }}
+      </div>
+    </el-tooltip>
   </div>
 </template>
 
@@ -69,7 +73,8 @@ export default {
     return {
       watchDog: '0',
       warningTimeOut: null,
-      plcStatus: false
+      plcStatus: false,
+      sendStr: ''
     };
   },
   watch: {
@@ -95,11 +100,12 @@ export default {
   created() {},
   mounted() {
     // receivedMsg接收到消息发送事件通知
-    ipcRenderer.on('receivedMsg', (event, values) => {
+    ipcRenderer.on('receivedMsg', (event, values, values2) => {
       // this.data = this.PrefixZero(values.DBW70.toString(2), 16)
       EventBus.$emit('pushPLCMessage', values)
       // 处理看门狗心跳
       this.watchDog = values.DBW60;
+      this.sendStr = values2;
       // console.log(this.watchDog)
     })
   }
@@ -127,6 +133,14 @@ export default {
   color: #fff;
   user-select: none;
   opacity: 0.85;
+  .inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 }
 .sm-main:hover {
   -moz-box-shadow: 0 0 12px black;
