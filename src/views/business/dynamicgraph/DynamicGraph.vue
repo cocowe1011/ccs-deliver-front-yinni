@@ -507,7 +507,7 @@ export default {
       dialogVisible: false,
       tableTitle:[
         {prop:"orderId",label:"任务编号",width:"200"},{prop:"revertFlag",label:"翻转",width:"150"},
-        {prop:"batchId",label:"批次编号",width:"150"},{prop:"orderNo",label:"订单编号",width:"150"},{prop:"orderName",label:"订单名称",width:"150"},
+        {prop:"batchId",label:"灭菌批号",width:"150"},{prop:"orderNo",label:"订单编号",width:"150"},{prop:"orderName",label:"订单名称",width:"150"},
         {prop:"planNum",label:"计划数量",width:"150"},{prop:"productName",label:"产品名称",width:"150"},{prop:"loadMethod",label:"装载方式",width:"150"},
         {prop:"pathName",label:"路径名称",width:"150"},{prop:"artName",label:"工艺名称",width:"150"},{prop:"acceleratorKValue",label:"加速器k值",width:"150"}
       ],

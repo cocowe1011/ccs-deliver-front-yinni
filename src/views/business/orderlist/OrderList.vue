@@ -19,8 +19,8 @@
                 <el-checkbox v-model="orderMainForm.trayFlag" :disabled="!(isNewSave || isEdit)" @change="clickTray">托盘模式</el-checkbox>
               </el-form-item>
               <br/>
-              <el-form-item label="批次编号：">
-                <el-input size="small" v-model="orderMainForm.batchId" placeholder="批次编号" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item label="灭菌批号：">
+                <el-input size="small" v-model="orderMainForm.batchId" placeholder="灭菌批号" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
               <el-form-item label="产品名称：">
                 <el-input size="small" v-model="orderMainForm.productName" placeholder="产品名称" :readonly="!(isNewSave || isEdit)"></el-input>
@@ -123,6 +123,9 @@
               </el-form-item>
               <el-form-item label="能量上限：">
                 <el-input type="number" size="small" v-model="orderMainForm.nlUpperLimit" placeholder="能量上限" :readonly="!(isNewSave || isEdit)"></el-input>
+              </el-form-item>
+              <el-form-item label="操作员：">
+                <el-input size="small" v-model="orderMainForm.creatorName" placeholder="操作员" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
             </el-form>
             <div class="content-bottom" v-show="isNewSave || isEdit">
@@ -247,7 +250,7 @@ export default {
       orderMainForm: {},
       tableTitle:[
         {prop:"orderId",label:"任务编号",width:"200"},{prop:"revertFlag",label:"翻转",width:"150"},
-        {prop:"batchId",label:"批次编号",width:"150"},{prop:"orderNo",label:"订单编号",width:"150"},{prop:"orderName",label:"订单名称",width:"150"},
+        {prop:"batchId",label:"灭菌批号",width:"150"},{prop:"orderNo",label:"订单编号",width:"150"},{prop:"orderName",label:"订单名称",width:"150"},
         {prop:"planNum",label:"计划数量",width:"150"},{prop:"productName",label:"产品名称",width:"150"},{prop:"loadMethod",label:"装载方式",width:"150"},
         {prop:"pathName",label:"路径名称",width:"150"},{prop:"artName",label:"工艺名称",width:"150"},{prop:"acceleratorKValue",label:"加速器k值",width:"150"}
       ],
@@ -305,6 +308,14 @@ export default {
       // alert(JSON.stringify(orderMain))
     },
     async saveOrder() {
+      if(this.orderMainForm.orderNo == '' || this.orderMainForm.orderNo == undefined ) {
+        this.$message.error('订单编号必须填写！');
+        return false;
+      }
+      if(this.orderMainForm.batchId == '' || this.orderMainForm.batchId == undefined ) {
+        this.$message.error('灭菌批号必须填写！');
+        return false;
+      }
       this.saveLoading = true;
       this.orderMainForm.revertFlag = this.orderMainForm.revertFlag ? '1' : '0'
       this.orderMainForm.trayFlag = this.orderMainForm.trayFlag ? '1' : '0'
@@ -314,12 +325,12 @@ export default {
           // 查询订单信息
           this.getOrderList();
         } else {
-          this.$message.error('保存失败！');
+          this.$message.error('保存失败，请检查信息是否填写完整！');
         }
         this.saveLoading = false;
       }).catch((err)=> {
         // 网络异常 稍后再试
-        this.$message.error('保存失败！' + err);
+        this.$message.error('保存失败，请检查信息是否填写完整！' + err);
         this.saveLoading = false;
       });
     },

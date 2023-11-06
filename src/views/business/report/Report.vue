@@ -14,8 +14,8 @@
           <div class="search">
             <span>订单编号</span>
             <el-input placeholder="请输入订单编号" v-model="orderNoInput" style="width: 200px;margin-left: 10px;" size="small"></el-input>
-            <span style="margin-left: 10px;">批次编号</span>
-            <el-input placeholder="请输入批次编号" v-model="batchIdInput" style="width: 200px;margin-left: 10px;" size="small"></el-input>
+            <span style="margin-left: 10px;">灭菌批号</span>
+            <el-input placeholder="请输入灭菌批号" v-model="batchIdInput" style="width: 200px;margin-left: 10px;" size="small"></el-input>
             <span style="margin-left: 10px;">箱编号</span>
             <el-input placeholder="请输入箱编号" v-model="boxImitateIdInput" style="width: 200px;margin-left: 10px;" size="small"></el-input>
             <el-button style="margin-left: 10px;" size="small" type="primary" @click="getReportSearch">查询</el-button>
@@ -43,24 +43,32 @@
                 label="订单编号">
               </el-table-column>
               <el-table-column
-                prop="orderName"
-                label="订单名称">
+                prop="batchId"
+                label="灭菌批号">
               </el-table-column>
               <el-table-column
-                prop="batchId"
-                label="批次编号">
+                prop="orderName"
+                label="订单名称">
               </el-table-column>
               <el-table-column
                 prop="boxImitateId"
                 label="箱编号">
               </el-table-column>
               <el-table-column
-                prop="address"
-                label="上货时间">
+                prop="productName"
+                label="产品名称">
               </el-table-column>
               <el-table-column
-                prop="address"
-                label="合格">
+                prop="artName"
+                label="工艺名称">
+              </el-table-column>
+              <el-table-column
+                prop="loadMethod"
+                label="装载方式">
+              </el-table-column>
+              <el-table-column
+                prop="pathName"
+                label="路径名称">
               </el-table-column>
               <el-table-column
                 fixed="right"
@@ -211,7 +219,7 @@ export default {
       });
     },
     async getOrderReportData(row) {
-      const param = {orderNo: row.orderNo}
+      const param = {orderId: row.orderId}
       await HttpUtil.post('/order/getOrderMainReport', param).then((res)=> {
         this.printObj.recordset = res.data
         this.printView(this.printObj, this.orderReportPath)

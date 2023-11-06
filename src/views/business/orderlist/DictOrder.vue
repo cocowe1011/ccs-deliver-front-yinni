@@ -119,7 +119,7 @@
               <el-form-item label="能量上限：">
                 <el-input type="number" size="small" v-model="dictOrderForm.nlUpperLimit" placeholder="能量上限"></el-input>
               </el-form-item>
-              <el-form-item label="订单箱数：">
+              <el-form-item label="订单箱数：" v-show="false">
                 <el-input type="number" size="small" v-model="dictOrderForm.orderBoxNum" placeholder="订单箱数"></el-input>
               </el-form-item>
             </el-form>
