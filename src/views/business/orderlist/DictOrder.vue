@@ -216,11 +216,15 @@ export default {
         } else {
           this.$message.error('保存失败！请重试！');
         }
+        this.dictOrderForm.revertFlag = this.dictOrderForm.revertFlag == '1' ? true : false
+        this.dictOrderForm.trayFlag = this.dictOrderForm.trayFlag == '1' ? true : false
         setTimeout(() => {
           this.dictOrderLoading = false;
         }, 500);
       }).catch((err)=> {
         // 网络异常 稍后再试
+        this.dictOrderForm.revertFlag = this.dictOrderForm.revertFlag == '1' ? true : false
+        this.dictOrderForm.trayFlag = this.dictOrderForm.trayFlag == '1' ? true : false
         this.dictOrderLoading = false;
         this.$message.error('保存失败！错误：' + err);
       });

@@ -13,10 +13,10 @@
                 <el-input size="small" v-model="orderMainForm.orderName" placeholder="订单名称" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
               <el-form-item>
-                <el-checkbox v-model="orderMainForm.revertFlag" :disabled="!(isNewSave || isEdit)" @change="clickRevert">翻转</el-checkbox>
+                <el-checkbox v-model="orderMainForm.revertFlag" :disabled="!(isNewSave || isEdit) || ((isNewSave || isEdit) && orderMainForm.trayFlag)">翻转</el-checkbox>
               </el-form-item>
               <el-form-item>
-                <el-checkbox v-model="orderMainForm.trayFlag" :disabled="!(isNewSave || isEdit)" @change="clickTray">托盘模式</el-checkbox>
+                <el-checkbox v-model="orderMainForm.trayFlag" :disabled="!(isNewSave || isEdit) || ((isNewSave || isEdit) &&orderMainForm.revertFlag)">托盘模式</el-checkbox>
               </el-form-item>
               <br/>
               <el-form-item label="灭菌批号：">
@@ -278,18 +278,6 @@ export default {
         this.zhankaiflag = true;
       }
     },
-    clickRevert(value) {
-      if(value && this.orderMainForm.trayFlag) {
-        this.$message.error('请先取消托盘模式！')
-        this.orderMainForm.revertFlag = null
-      }
-    },
-    clickTray(value) {
-      if(value && this.orderMainForm.revertFlag) {
-        this.$message.error('请先取消翻转！')
-        this.orderMainForm.trayFlag = null
-      }
-    },
     cancelEditOrSave() {
       this.isNewSave = false;
       this.isEdit = false;
@@ -325,11 +313,15 @@ export default {
           // 查询订单信息
           this.getOrderList();
         } else {
+          this.orderMainForm.revertFlag = this.orderMainForm.revertFlag == '1' ? true : false
+          this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
           this.$message.error('保存失败，请检查信息是否填写完整！');
         }
         this.saveLoading = false;
       }).catch((err)=> {
         // 网络异常 稍后再试
+        this.orderMainForm.revertFlag = this.orderMainForm.revertFlag == '1' ? true : false
+          this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
         this.$message.error('保存失败，请检查信息是否填写完整！' + err);
         this.saveLoading = false;
       });
@@ -348,11 +340,15 @@ export default {
           // 查询订单信息
           this.getOrderList();
         } else {
+          this.orderMainForm.revertFlag = this.orderMainForm.revertFlag == '1' ? true : false
+          this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
           this.$message.error('修改失败！');
         }
         this.editLoading = false;
       }).catch((err)=> {
         // 网络异常 稍后再试
+        this.orderMainForm.revertFlag = this.orderMainForm.revertFlag == '1' ? true : false
+          this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
         this.$message.error('修改失败！' + err);
         this.editLoading = false;
       });
