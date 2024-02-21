@@ -19,6 +19,7 @@
             <span style="margin-left: 10px;">箱编号</span>
             <el-input placeholder="请输入箱编号" v-model="boxImitateIdInput" style="width: 200px;margin-left: 10px;" size="small"></el-input>
             <el-button style="margin-left: 10px;" size="small" type="primary" @click="getReportSearch">查询</el-button>
+            <el-link style="position: absolute; right: 40px;" icon="el-icon-edit" type="primary" @click="showViewOrderList">修改已完成订单</el-link>
           </div>
           <div class="tableDiv">
             <el-table
@@ -97,6 +98,15 @@
         </div>
       </div>
     </div>
+    <el-dialog
+      title="修改已完成订单"
+      :visible.sync="dialogVisible"
+      width="1400px"
+      :before-close="handleClose"
+      append-to-body
+      destroy-on-close>
+      <ViewOrderList/>
+    </el-dialog>
   </div>
   
 </template>
@@ -107,9 +117,12 @@ import { Debugger, ipcRenderer } from 'electron'
 import grwebapp from '@/utils/grwebapp'
 const { exec } = require('child_process');
 const os = require('os');
+import ViewOrderList from '../orderlist/ViewOrderList.vue'
 export default {
   name: "Report",
-  components: {},
+  components: {
+    ViewOrderList
+  },
   props: {},
   data() {
     return {
@@ -124,12 +137,19 @@ export default {
       openOrderLoading: false,
       pageSize: 12,
       pageNum: 1,
-      pageTotal: 0
+      pageTotal: 0,
+      dialogVisible: false
     };
   },
   watch: {},
   computed: {},
   methods: {
+    showViewOrderList() {
+      this.dialogVisible = true
+    },
+    handleClose() {
+      this.dialogVisible = false
+    },
     openReport(filePath) {
       if (filePath == this.orderReportPath) {
         this.openOrderLoading = true
@@ -334,5 +354,8 @@ export default {
       }
     }
   }
+}
+::v-deep .el-dialog__body {
+  padding: 8px 20px;
 }
 </style>

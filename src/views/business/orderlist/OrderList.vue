@@ -49,7 +49,7 @@
               <el-form-item label="箱子重量：">
                 <el-input type="number" size="small" v-model="orderMainForm.boxWeight" placeholder="箱子重量" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="订单箱数：">
+              <el-form-item label="订单箱数：" v-show="false">
                 <el-input type="number" size="small" v-model="orderMainForm.orderBoxNum" placeholder="订单箱数" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
               <!-- <el-form-item label="剔除箱数：">

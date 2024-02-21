@@ -513,7 +513,9 @@ export default {
       ],
       tableData: [],
       getOrderListLoading: false,
-      thoughHArr: []
+      thoughHArr: [],
+      delayPointTime: 0,
+      isDelayPointTime: false
     };
   },
   watch: {
@@ -586,8 +588,12 @@ export default {
             // 新上货物时，经过H点模拟id值赋值为arrGH 最后一个元素的值,并且给arrGH内所有元素一个作废标识，后续不处理这些作废的元素
             if(this.arrGH.length > 0) {
               for (let index = 0; index < this.arrGH.length; index++) {
-                this.thoughHArr.push(this.arrGH[index]);
-                this.arrGH.splice(index, 1)
+                // 如果订单圈数和箱子当前圈数一致才会进入作废队列
+                // this.arrGH[indexHBox].numberTurns >= this.arrGH[indexHBox].totalNumberTurns
+                if(this.arrGH[index].numberTurns >= this.arrGH[index].totalNumberTurns) {
+                  this.thoughHArr.push(this.arrGH[index]);
+                  this.arrGH.splice(index, 1)
+                }
               }
               this.lastRouteHPoint = '';
             } else {
@@ -607,15 +613,18 @@ export default {
           } else {
             // 把GH队列最开始箱子加入AB对接，并修改圈数
             if(this.arrGH[0] != undefined) {
-              this.arrAB.push(this.arrGH[0]);
-              this.arrGH.splice(0, 1)
-              this.arrAB[this.arrAB.length - 1].numberTurns = this.arrAB[this.arrAB.length - 1].numberTurns + 1;
-              const nowTurns = this.arrAB[this.arrAB.length - 1].numberTurns;
-              this.arrAB[this.arrAB.length - 1].turnsInfoList.push({numberTurns: nowTurns, passATime: moment().format('YYYY-MM-DD HH:mm:ss')});
-              // 显示箱子模拟id
-              this.nowABoxImitateId = this.arrAB[this.arrAB.length - 1].boxImitateId;
-              // 生成日志
-              this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.nowABoxImitateId + '进入A点', 'log');
+              // 判断A点这个箱子是不是该下货了，如果该下货，不加入A队列
+              if(this.arrGH[0].numberTurns < this.arrGH[0].totalNumberTurns) {
+                this.arrAB.push(this.arrGH[0]);
+                this.arrGH.splice(0, 1)
+                this.arrAB[this.arrAB.length - 1].numberTurns = this.arrAB[this.arrAB.length - 1].numberTurns + 1;
+                const nowTurns = this.arrAB[this.arrAB.length - 1].numberTurns;
+                this.arrAB[this.arrAB.length - 1].turnsInfoList.push({numberTurns: nowTurns, passATime: moment().format('YYYY-MM-DD HH:mm:ss')});
+                // 显示箱子模拟id
+                this.nowABoxImitateId = this.arrAB[this.arrAB.length - 1].boxImitateId;
+                // 生成日志
+                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.nowABoxImitateId + '进入A点', 'log');
+              }
             }
           }
         } else if(this.enteringPonitA && newVal === '0' && oldVal === '1') { // 货物走出A点
@@ -1564,7 +1573,25 @@ export default {
                 });
               } else {
                 // 有货物的圈数和全局圈数一致时，则全局圈数加1
-                this.nowNumberTurns++;
+                if(this.nowNumberTurns == 1) {
+                  // 第一圈第一个箱子到达H时，此时HA传送带上还有一些上的货的但是没经过A点的，需要加个延时器，等待所有的箱子经过A点，再从GH往A拉,延时时间取配置，0或null或空串说明没有延迟
+                  if(this.delayPointTime > 0) {
+                    if(!this.isDelayPointTime) {
+                      // 当前没有延迟中
+                      this.isDelayPointTime = true
+                      this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' H点开始延迟！', 'log');
+                      setTimeout(() => {
+                        this.nowNumberTurns++;
+                        this.isDelayPointTime = false;
+                        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' H点开始延迟结束！', 'log');
+                      }, this.delayPointTime * 1000);
+                    }
+                  } else {
+                    this.nowNumberTurns++;
+                  }
+                } else {
+                  this.nowNumberTurns++;
+                }
               }
             }
           }
@@ -1855,6 +1882,7 @@ export default {
           this.l11 = res.data.oneOneLength;
           this.l2 = res.data.twoLength;
           this.judgeLoadPoint = res.data.judgeLoadPoint;
+          this.delayPointTime = res.data.delayPointTime == null ? 0 : res.data.delayPointTime;
         } else {
           this.$message.error('config error! 更新配置错误！')
         }

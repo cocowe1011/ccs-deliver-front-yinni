@@ -27,6 +27,9 @@
                 <el-option label="光电F" value="F"></el-option>
               </el-select>
             </el-form-item>
+            <el-form-item label="H点延时时间（s）：">
+              <el-input v-model="cssConfig.delayPointTime" style="width: 250px;"></el-input>
+            </el-form-item>
           </el-form>
         </div>
       </div>
@@ -53,7 +56,8 @@ export default {
         plcPort: '',
         oneOneLength: '',
         twoLength: '',
-        judgeLoadPoint: ''
+        judgeLoadPoint: '',
+        delayPointTime: ''
       },
       configId: '',
       loading: false,
