@@ -457,11 +457,13 @@ export default {
       }
     },
     generateBatchReport() {
+      this.getOrderListLoading = true;
       this.$nextTick(() => {
         this.$refs.dynamicGraph.generateBatchReport()
       });
     },
     returnGenerateBatchReport(res) {
+      this.getOrderListLoading = false;
       if (res) {
         this.$message.success('生成成功！');
         this.getOrderList();

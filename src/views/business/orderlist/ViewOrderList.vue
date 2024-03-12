@@ -47,9 +47,10 @@
         </el-table-column>
         <el-table-column
           label="操作"
-          width="90">
+          width="130">
           <template slot-scope="scope">
             <el-link type="primary" @click="updateBoxReportData(scope.row)">修改</el-link>
+            <el-link type="primary" @click="showBoxReportData(scope.row)" style="margin-left: 10px;">原始记录</el-link>
           </template>
         </el-table-column>
       </el-table>
@@ -132,11 +133,11 @@
               箱信息
             </template>
             <div style="width: 1260px; height: 400px; overflow-y: auto;" v-loading="boxLoading">
-              <div class="box-card add-card" style="border: 1px #000 dashed; display: flex; align-items:center; justify-content: center;cursor: pointer;background-color: white;" @click="addBox">
+              <div class="box-card add-card" style="border: 1px #000 dashed; display: flex; align-items:center; justify-content: center;cursor: pointer;background-color: white;" @click="addBox" v-show="!showHistory">
                 <i class="el-icon-plus" style="font-size: 18px"></i><span style="font-size: 17px; margin-left: 2px;">添加箱子</span>
               </div>
               <div v-for="(item, index) in boxList" :key="index" class="box-card">
-                <el-button type="danger" icon="el-icon-delete" circle size="mini" style="position: absolute;right:1px;top:1px;padding: 4px;" @click="deleteBox(item.boxImitateId)"></el-button>
+                <el-button type="danger" icon="el-icon-delete" circle size="mini" style="position: absolute;right:1px;top:1px;padding: 4px;" @click="deleteBox(item.boxImitateId)" :disabled="showHistory"></el-button>
                 <div class="box-row">
                   <div class="box-row-left">箱编号：</div>
                   <div class="box-row-right">{{ item.boxImitateId }}</div>
@@ -161,6 +162,7 @@
                       inactive-color="#ff4949"
                       active-text="合格"
                       inactive-text="不合格"
+                      :disabled="showHistory"
                       @change="updateBoxQualified(item)">
                     </el-switch>
                   </div>
@@ -192,7 +194,8 @@ export default {
       valuetest: true,
       updateOrderInfo: {},
       boxList: [],
-      boxLoading: false
+      boxLoading: false,
+      showHistory: false
     };
   },
   watch: {},
@@ -325,6 +328,8 @@ export default {
     async updateBoxReportData(data) {
       this.updateOrderInfo = data;
       this.dialogVisibleOrder = true;
+      this.boxLoading = true;
+      this.showHistory = false;
       this.boxList = [];
       const param = {
         orderId: data.orderId
@@ -338,6 +343,28 @@ export default {
         // 网络异常 稍后再试
         this.$message.error('查询失败！' + err);
       });
+      this.boxLoading = false;
+    },
+    // 查询原始记录只查箱子即可
+    async showBoxReportData(data) {
+      this.updateOrderInfo = data;
+      this.dialogVisibleOrder = true;
+      this.showHistory = true;
+      this.boxLoading = true;
+      this.boxList = [];
+      const param = {
+        orderId: data.orderId
+      }
+      // 通过订单id查询所有箱子信息
+      await HttpUtil.post('/box/getBoxOriginalReportByOrderId', param).then((res)=> {
+        if(res.data&&res.data.length > 0) {
+          this.boxList = res.data
+        }
+      }).catch((err)=> {
+        // 网络异常 稍后再试
+        this.$message.error('查询失败！' + err);
+      });
+      this.boxLoading = false;
     },
     currentChange(pageNum) {
       if(pageNum != undefined) {

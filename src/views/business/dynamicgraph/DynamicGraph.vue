@@ -1536,6 +1536,15 @@ export default {
                 }
               }
             }
+            // 判断是否在H点判断禁止上货
+            if(this.judgeLoadPoint === 'H') {
+              // 判断是不是符合禁止上货条件
+              if(this.arrGH[indexHBox].boxImitateId == this.judgeBanLoadBoxImitateId) {
+                this.banLoadStatus = true; // 显示禁止上货图标
+                // 给PLC发送禁止上货指令
+                ipcRenderer.send('writeValuesToPLC', 'DBW26', 1);
+              }
+            }
             this.lastRouteHPoint = this.arrGH[indexHBox].boxImitateId;
             // 不是箱子最后一圈，更新进入H点时间
             if(this.arrGH[indexHBox].numberTurns != this.arrGH[indexHBox].totalNumberTurns) {
