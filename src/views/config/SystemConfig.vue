@@ -21,13 +21,13 @@
             </el-form-item>
             <el-divider content-position="left">H-A点传送带长度</el-divider>
             <el-form-item label="J长度(mm)：">
-              <el-input v-model="cssConfig.hOneLength" style="width: 250px;"></el-input>
+              <el-input v-model="cssConfig.pointjLength" style="width: 250px;" type="number"></el-input>
             </el-form-item>
-            <el-form-item label="J长度(mm)：">
-              <el-input v-model="cssConfig.hTwoLength" style="width: 250px;"></el-input>
+            <el-form-item label="K长度(mm)：">
+              <el-input v-model="cssConfig.pointkLength" style="width: 250px;" type="number"></el-input>
             </el-form-item>
             <el-form-item label="L长度(mm)：">
-              <el-input v-model="cssConfig.hTwoLength" style="width: 250px;"></el-input>
+              <el-input v-model="cssConfig.pointlLength" style="width: 250px;" type="number"></el-input>
             </el-form-item>
             <el-divider content-position="left">点位</el-divider>
             <el-form-item label="判断禁止上货点位：">
@@ -37,9 +37,6 @@
                 <el-option label="光电F" value="F"></el-option>
                 <el-option label="光电H" value="H"></el-option>
               </el-select>
-            </el-form-item>
-            <el-form-item label="H点延时时间（s）：">
-              <el-input v-model="cssConfig.delayPointTime" style="width: 250px;"></el-input>
             </el-form-item>
           </el-form>
         </div>
@@ -68,7 +65,9 @@ export default {
         oneOneLength: '',
         twoLength: '',
         judgeLoadPoint: '',
-        delayPointTime: ''
+        pointjLength: 0,
+        pointkLength: 0,
+        pointlLength: 0
       },
       configId: '',
       loading: false,

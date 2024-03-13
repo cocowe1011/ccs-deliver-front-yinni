@@ -514,7 +514,12 @@ export default {
       tableData: [],
       getOrderListLoading: false,
       thoughHArr: [],
-      delayPointTime: 0,
+      pointjLength: 0,
+      pointkLength: 0,
+      pointlLength: 0,
+      jAreaSpeed: 0,
+      kAreaSpeed: 0,
+      lAreaSpeed: 0,
       isDelayPointTime: false
     };
   },
@@ -1598,7 +1603,8 @@ export default {
                 // 有货物的圈数和全局圈数一致时，则全局圈数加1
                 if(this.nowNumberTurns == 1) {
                   // 第一圈第一个箱子到达H时，此时HA传送带上还有一些上的货的但是没经过A点的，需要加个延时器，等待所有的箱子经过A点，再从GH往A拉,延时时间取配置，0或null或空串说明没有延迟
-                  if(this.delayPointTime > 0) {
+                  const delayPointTime = this.calculateTotalTime();
+                  if(delayPointTime > 0) {
                     if(!this.isDelayPointTime) {
                       // 当前没有延迟中
                       this.isDelayPointTime = true
@@ -1607,7 +1613,7 @@ export default {
                         this.nowNumberTurns++;
                         this.isDelayPointTime = false;
                         this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' H点开始延迟结束！', 'log');
-                      }, this.delayPointTime * 1000);
+                      }, delayPointTime);
                     }
                   } else {
                     this.nowNumberTurns++;
@@ -1621,6 +1627,37 @@ export default {
           break;
         default:
           break;
+      }
+    },
+    calculateTotalTime() {
+      const pointjLength = this.pointjLength;
+      const pointkLength = this.pointkLength;
+      const pointlLength = this.pointlLength;
+      const jAreaSpeed = this.jAreaSpeed;
+      const kAreaSpeed = this.kAreaSpeed;
+      const lAreaSpeed = this.lAreaSpeed;
+      if(!this.isDelayPointTime){
+        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' H点开始计算延迟时间，参数：J区域长度:' + pointjLength + '|K区域长度:' + pointkLength + '|L区域长度:' + pointkLength + '|J区域速度:' + jAreaSpeed + '|K区域速度:' + kAreaSpeed + '|L区域速度:' + lAreaSpeed, 'log');
+      }
+      // 检查长度是否不为负数且速度是否大于0
+      if (pointjLength >= 0 && pointkLength >= 0 && pointlLength >= 0 && 
+          jAreaSpeed > 0 && kAreaSpeed > 0 && lAreaSpeed > 0) {
+        // 计算每段传送带所需时间（单位：分钟），再转换为毫秒
+        let timeForJ = pointjLength > 0 ? (pointjLength / jAreaSpeed) * 60 * 1000 : 0;
+        let timeForK = pointkLength > 0 ? (pointkLength / kAreaSpeed) * 60 * 1000 : 0;
+        let timeForL = pointlLength > 0 ? (pointlLength / lAreaSpeed) * 60 * 1000 : 0;
+        // 计算总时间
+        let totalTime = timeForJ + timeForK + timeForL;
+        if(!this.isDelayPointTime){
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 计算的延迟时间：' + totalTime + 'ms', 'log');
+        }
+        return totalTime;
+      } else {
+        // 如果输入不合法，返回0
+        if(!this.isDelayPointTime){
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 计算的延迟时间：0', 'log');
+        }
+        return 0;
       }
     },
     judgeIfDGqualified(index) {
@@ -1905,7 +1942,9 @@ export default {
           this.l11 = res.data.oneOneLength;
           this.l2 = res.data.twoLength;
           this.judgeLoadPoint = res.data.judgeLoadPoint;
-          this.delayPointTime = res.data.delayPointTime == null ? 0 : res.data.delayPointTime;
+          this.pointjLength = res.data.pointjLength == null ? 0 : res.data.pointjLength;
+          this.pointkLength = res.data.pointkLength == null ? 0 : res.data.pointkLength;
+          this.pointlLength = res.data.pointlLength == null ? 0 : res.data.pointlLength;
         } else {
           this.$message.error('config error! 更新配置错误！')
         }
@@ -2189,6 +2228,9 @@ export default {
       this.status104 = this.dianJiStatusArr[3]
       this.status105 = this.dianJiStatusArr[2]
       this.lightBeamRealTimeSpeed = Number(eventData.DBW68);
+      this.jAreaSpeed = Number(eventData.DBW80);
+      this.kAreaSpeed = Number(eventData.DBW82);
+      this.lAreaSpeed = Number(eventData.DBW84);
       // 上料固定扫码
       this.loadScanCodeTemp = eventData.DBB100??'';
       // 迷宫出口固定扫码
@@ -2450,21 +2492,29 @@ export default {
       }
       // 滚动槽样式定义
       ::-webkit-scrollbar {
-        width: 5px;
+        width: 20px;
         height: 8px;
       }
 
       ::-webkit-scrollbar-track {
-        border-radius: 10px;
+          /*滚动条里面轨道*/
+          box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+          background: #ededed;
+          border-radius: 10px;
       }
 
       ::-webkit-scrollbar-thumb {
-        border-radius: 3px;
-        background-color: #28253b !important;
-      }
-
-      ::-webkit-scrollbar-thumb:window-inactive {
-        background-color: #28253b !important;
+        /*滚动条里面小方块*/
+        border-radius: 10px;
+        background-color: skyblue;
+        background-image: -webkit-linear-gradient(45deg,
+          rgba(255, 255, 255, 0.2) 25%,
+          transparent 25%,
+          transparent 50%,
+          rgba(255, 255, 255, 0.2) 50%,
+          rgba(255, 255, 255, 0.2) 75%,
+          transparent 75%,
+          transparent);
       }
       .card-content {
         padding: 6px 2px 0px 2px;
@@ -2715,9 +2765,6 @@ export default {
     padding: 8px;
     color: #000000;
     border-top: 1px solid #ebebeb;
-  }
-  ::-webkit-scrollbar {
-    display: none;
   }
 }
 </style>

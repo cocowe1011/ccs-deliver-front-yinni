@@ -135,9 +135,9 @@ app.on('ready', () => {
     setInterval(() => {
       if(mainWindow) {
         if(revert) {
-          mainWindow.webContents.send('receivedMsg', {DBW60:0,DBW62:0, DBW68:35580,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          ',DBW76:19}, writeStrArr.toString())
+          mainWindow.webContents.send('receivedMsg', {DBW60:0,DBW62:0, DBW68:35580,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          ',DBW76:19,DBW80:6000,DBW82:6000,DBW84:6000}, writeStrArr.toString())
         } else {
-          mainWindow.webContents.send('receivedMsg', {DBW60:1,DBW62:0, DBW68:35580,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          ',DBW76:19}, writeStrArr.toString())
+          mainWindow.webContents.send('receivedMsg', {DBW60:1,DBW62:0, DBW68:35580,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          ',DBW76:19,DBW80:6000,DBW82:6000,DBW84:6000}, writeStrArr.toString())
         }
         revert = !revert;
       }
@@ -210,6 +210,12 @@ function conPLC() {
       conn.addItems('DBB100');
       // 迷宫出口固定扫码
       conn.addItems('DBB130');
+      // J区速度
+      conn.addItems('DBW80');
+      // K区速度
+      conn.addItems('DBW82');
+      // L区速度
+      conn.addItems('DBW84');
       
       // 读DBW6和DBW62
       setInterval(() => {
@@ -323,6 +329,9 @@ var variables = {
   DBW70: 'DB101,INT70',
   DBW72: 'DB101,INT72',
   DBW76: 'DB101,INT76', // 束下前输送速度比
+  DBW80: 'DB101,INT80', // J区速度
+  DBW82: 'DB101,INT82', // K区速度
+  DBW84: 'DB101,INT84', // L区速度
   DBB100: 'DB101,C100.30',
   DBB130: 'DB101,C130.30'
 };
