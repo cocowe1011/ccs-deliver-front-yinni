@@ -41,35 +41,48 @@
               </el-table-column>
               <el-table-column
                 prop="orderNo"
-                label="订单编号">
+                label="订单编号"
+                width="150">
               </el-table-column>
               <el-table-column
                 prop="batchId"
-                label="灭菌批号">
+                label="灭菌批号"
+                width="150">
               </el-table-column>
               <el-table-column
                 prop="orderName"
-                label="订单名称">
+                label="订单名称"
+                width="150">
               </el-table-column>
               <el-table-column
                 prop="boxImitateId"
-                label="箱编号">
+                label="箱编号"
+                width="150">
               </el-table-column>
               <el-table-column
                 prop="productName"
-                label="产品名称">
+                label="产品名称"
+                width="150">
               </el-table-column>
               <el-table-column
                 prop="artName"
-                label="工艺名称">
+                label="工艺名称"
+                width="150">
               </el-table-column>
               <el-table-column
                 prop="loadMethod"
-                label="装载方式">
+                label="装载方式"
+                width="150">
               </el-table-column>
               <el-table-column
                 prop="pathName"
-                label="路径名称">
+                label="路径名称"
+                width="150">
+              </el-table-column>
+              <el-table-column
+                prop="failReason"
+                width="320"
+                label="失败原因">
               </el-table-column>
               <el-table-column
                 fixed="right"

@@ -137,10 +137,10 @@
                 <i class="el-icon-plus" style="font-size: 18px"></i><span style="font-size: 17px; margin-left: 2px;">添加箱子</span>
               </div>
               <div v-for="(item, index) in boxList" :key="index" class="box-card">
-                <el-button type="danger" icon="el-icon-delete" circle size="mini" style="position: absolute;right:1px;top:1px;padding: 4px;" @click="deleteBox(item.boxImitateId)" :disabled="showHistory"></el-button>
+                <el-button type="danger" icon="el-icon-delete" circle size="mini" style="position: absolute;right:0px;top:0px;padding: 3px;" @click="deleteBox(item.boxImitateId)" :disabled="showHistory"></el-button>
                 <div class="box-row">
                   <div class="box-row-left">箱编号：</div>
-                  <div class="box-row-right">{{ item.boxImitateId }}</div>
+                  <div class="box-row-right"><el-button type="text" icon="el-icon-edit" @click="showUpdateBoxImitateId(item)"></el-button>{{ item.boxImitateId }}</div>
                 </div>
                 <div class="box-row">
                   <div class="box-row-left">扫码：</div>
@@ -173,6 +173,19 @@
         </el-descriptions>
       </div>
     </el-dialog>
+    <el-dialog
+      title="修改箱子模拟id："
+      :visible.sync="updateBoxImitateIdPop"
+      width="30%"
+      append-to-body
+      :close-on-click-modal="false"
+      >
+      <el-input v-model="updateBoxImitateIdStr" placeholder="请输入模拟id"></el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="updateBoxImitateIdPop = false">取 消</el-button>
+        <el-button type="primary" @click="updateBoxImitateId" :loading="dialogEditLoading">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -195,7 +208,11 @@ export default {
       updateOrderInfo: {},
       boxList: [],
       boxLoading: false,
-      showHistory: false
+      showHistory: false,
+      updateBoxImitateIdPop: false,
+      updateBoxImitateIdStr: '',
+      dialogEditLoading: false,
+      aBoxImitateId: ''
     };
   },
   watch: {},
@@ -374,6 +391,42 @@ export default {
     },
     indexMethod(index) {
       return index + 1;
+    },
+    showUpdateBoxImitateId(item) {
+      this.updateBoxImitateIdPop = true;
+      this.updateBoxImitateIdStr = item.boxImitateId;
+      this.aBoxImitateId = item.boxImitateId;
+    },
+    updateBoxImitateId() {
+      this.dialogEditLoading = true;
+      const param = {
+        aboxImitateId: this.aBoxImitateId,
+        boxImitateId: this.updateBoxImitateIdStr
+      }
+      HttpUtil.post('/box/updateBoxImitateId', param).then((res)=> {
+        if(res&&res.data > 0) {
+          this.$message.success('更新成功！');
+          this.updateBoxImitateIdPop = false;
+          this.dialogEditLoading = false;
+          this.updateBoxImitateIdStr = '';
+          this.aBoxImitateId = '';
+          const param2 = {
+            orderId: this.updateOrderInfo.orderId
+          }
+          // 通过订单id查询所有箱子信息
+          HttpUtil.post('/box/getBoxReportByOrderId', param2).then((res)=> {
+            if(res.data&&res.data.length > 0) {
+              this.boxList = res.data
+            }
+          }).catch((err)=> {
+            // 网络异常 稍后再试
+            this.$message.error('查询失败！' + err);
+          });
+        }
+      }).catch((err)=> {
+        // 网络异常 稍后再试
+        this.$message.error('删除失败！' + err);
+      });
     }
   },
   created() {
