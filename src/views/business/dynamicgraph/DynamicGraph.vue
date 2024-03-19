@@ -609,10 +609,11 @@ export default {
             // 模拟id数+1
             this.beginCountNum++;
             // 判断上货数和订单箱数的数量，如果满足则锁定上货
-            if(Number(this.nowInNum) === Number(this.orderMainDy.orderBoxNum)) {
-              ipcRenderer.send('writeValuesToPLC', 'DBW26', 1); // 锁定上货电机（保留）
-              this.banLoadStatus = true; // 显示禁止上货图标
-            }
+            // 正德无需判断了
+            // if(Number(this.nowInNum) === Number(this.orderMainDy.orderBoxNum)) {
+            //   ipcRenderer.send('writeValuesToPLC', 'DBW26', 1); // 锁定上货电机（保留）
+            //   this.banLoadStatus = true; // 显示禁止上货图标
+            // }
             // 生成日志
             this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateId + '进入A点', 'log');
           } else {
@@ -730,7 +731,11 @@ export default {
           if(newVal == '1') {
             this.dealBoxLogic('G')
           } else {
-            ipcRenderer.send('writeValuesToPLC', 'DBW16', 0);
+            // 20240315修改为要下货的首箱  到达G点后  直接下货写1 ，等尾箱离开G点后 ，下货写0 ，不再是进入1离开0
+            // 判断一下当前箱子是不是尾箱
+            if (this.arrAB.length === 0 && this.arrBC.length === 0 && this.arrCD.length === 0 && this.arrDG.length === 0) {
+              ipcRenderer.send('writeValuesToPLC', 'DBW16', 0);
+            }
           }
         }
       }
@@ -902,10 +907,14 @@ export default {
     scrollToBottom() {
       const logContainer = this.$refs.logContainer;
       // logContainer.scrollTop = logContainer.scrollHeight;
-      logContainer.scrollTo({
-        top: logContainer.scrollHeight,
-        behavior: "smooth"
-      });
+      const tolerance = 120; // 容差值，可以根据需要调整
+      const isNearBottom = logContainer.scrollHeight - logContainer.scrollTop - logContainer.clientHeight < tolerance;
+      if (isNearBottom) {
+        logContainer.scrollTo({
+          top: logContainer.scrollHeight,
+          behavior: "smooth"
+        });
+      }
     },
     qualified4Box(boxImitateIdVal, status) {
       //判断箱子在哪个队列 AB BC CD DG GH,status为true为合格，false为不合格
@@ -934,98 +943,106 @@ export default {
         }
       }
     },
-    judgeAccData(accData, boxImitateIdVal, index) {
-      // 判断束流 beam
-      // console.log(accData.beam)
-      if(accData.beam != undefined && accData.beam != null) {
-        if (Number(this.orderMainDy.slLowerLimit) > Number(accData.beam) || Number(this.orderMainDy.slUpperLimit) < Number(accData.beam)) {
+    judgeAccData(accData, boxImitateIdVal) {
+      const index = this.arrBC.findIndex(item => {
+        return item.boxImitateId === boxImitateIdVal
+      })
+      if(index != -1) {
+        // 判断束流 beam
+        // console.log(accData.beam)
+        if(accData.beam != undefined && accData.beam != null) {
+          if (Number(this.orderMainDy.slLowerLimit) > Number(accData.beam) || Number(this.orderMainDy.slUpperLimit) < Number(accData.beam)) {
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束流设定最小值：' + this.orderMainDy.slLowerLimit + '，束流设定最大值：' + this.orderMainDy.slUpperLimit + '，束流读取值：' + accData.beam, 'log');
+            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束流设定最小值：' + this.orderMainDy.slLowerLimit + '，束流设定最大值：' + this.orderMainDy.slUpperLimit + '，束流读取值：' + accData.beam;
+            return false;
+          } 
+        } else {
           this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束流设定最小值：' + this.orderMainDy.slLowerLimit + '，束流设定最大值：' + this.orderMainDy.slUpperLimit + '，束流读取值：' + accData.beam, 'log');
           this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束流设定最小值：' + this.orderMainDy.slLowerLimit + '，束流设定最大值：' + this.orderMainDy.slUpperLimit + '，束流读取值：' + accData.beam;
           return false;
-        } 
-      } else {
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束流设定最小值：' + this.orderMainDy.slLowerLimit + '，束流设定最大值：' + this.orderMainDy.slUpperLimit + '，束流读取值：' + accData.beam, 'log');
-        this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束流设定最小值：' + this.orderMainDy.slLowerLimit + '，束流设定最大值：' + this.orderMainDy.slUpperLimit + '，束流读取值：' + accData.beam;
-        return false;
-      }
-      // 判断功率 power
-      // console.log(accData.power)
-      if(accData.power != undefined && accData.power != null) {
-        if (Number(this.orderMainDy.glLowerLimit) > Number(accData.power) || Number(this.orderMainDy.glUpperLimit) < Number(accData.power)) {
+        }
+        // 判断功率 power
+        // console.log(accData.power)
+        if(accData.power != undefined && accData.power != null) {
+          if (Number(this.orderMainDy.glLowerLimit) > Number(accData.power) || Number(this.orderMainDy.glUpperLimit) < Number(accData.power)) {
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！功率设定最小值：' + this.orderMainDy.glLowerLimit + '，功率设定最大值：' + this.orderMainDy.glUpperLimit + '，功率读取值：' + accData.power, 'log');
+            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！功率设定最小值：' + this.orderMainDy.glLowerLimit + '，功率设定最大值：' + this.orderMainDy.glUpperLimit + '，功率读取值：' + accData.power;
+            return false;
+          } 
+        } else {
           this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！功率设定最小值：' + this.orderMainDy.glLowerLimit + '，功率设定最大值：' + this.orderMainDy.glUpperLimit + '，功率读取值：' + accData.power, 'log');
           this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！功率设定最小值：' + this.orderMainDy.glLowerLimit + '，功率设定最大值：' + this.orderMainDy.glUpperLimit + '，功率读取值：' + accData.power;
           return false;
-        } 
-      } else {
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！功率设定最小值：' + this.orderMainDy.glLowerLimit + '，功率设定最大值：' + this.orderMainDy.glUpperLimit + '，功率读取值：' + accData.power, 'log');
-        this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！功率设定最小值：' + this.orderMainDy.glLowerLimit + '，功率设定最大值：' + this.orderMainDy.glUpperLimit + '，功率读取值：' + accData.power;
-        return false;
-      }
-      // 判断扫宽 scanW
-      // console.log(accData.scanW)
-      if(accData.scanW != undefined && accData.scanW != null) {
-        if (Number(this.orderMainDy.skLowerLimit) > Number(accData.scanW) || Number(this.orderMainDy.skUpperLimit) < Number(accData.scanW)) {
+        }
+        // 判断扫宽 scanW
+        // console.log(accData.scanW)
+        if(accData.scanW != undefined && accData.scanW != null) {
+          if (Number(this.orderMainDy.skLowerLimit) > Number(accData.scanW) || Number(this.orderMainDy.skUpperLimit) < Number(accData.scanW)) {
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫宽设定最小值：' + this.orderMainDy.skLowerLimit + '，扫宽设定最大值：' + this.orderMainDy.skUpperLimit + '，扫宽读取值：' + accData.scanW, 'log');
+            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫宽设定最小值：' + this.orderMainDy.skLowerLimit + '，扫宽设定最大值：' + this.orderMainDy.skUpperLimit + '，扫宽读取值：' + accData.scanW;
+            return false;
+          } 
+        } else {
           this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫宽设定最小值：' + this.orderMainDy.skLowerLimit + '，扫宽设定最大值：' + this.orderMainDy.skUpperLimit + '，扫宽读取值：' + accData.scanW, 'log');
           this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫宽设定最小值：' + this.orderMainDy.skLowerLimit + '，扫宽设定最大值：' + this.orderMainDy.skUpperLimit + '，扫宽读取值：' + accData.scanW;
           return false;
-        } 
-      } else {
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫宽设定最小值：' + this.orderMainDy.skLowerLimit + '，扫宽设定最大值：' + this.orderMainDy.skUpperLimit + '，扫宽读取值：' + accData.scanW, 'log');
-        this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫宽设定最小值：' + this.orderMainDy.skLowerLimit + '，扫宽设定最大值：' + this.orderMainDy.skUpperLimit + '，扫宽读取值：' + accData.scanW;
-        return false;
-      }
-      // 判断扫描频率 scanF
-      // console.log(accData.scanF)
-      if(accData.scanF != undefined && accData.scanF != null) {
-        if (Number(this.orderMainDy.smplLowerLimit) > Number(accData.scanF) || Number(this.orderMainDy.smplUpperLimit) < Number(accData.scanF)) {
+        }
+        // 判断扫描频率 scanF
+        // console.log(accData.scanF)
+        if(accData.scanF != undefined && accData.scanF != null) {
+          if (Number(this.orderMainDy.smplLowerLimit) > Number(accData.scanF) || Number(this.orderMainDy.smplUpperLimit) < Number(accData.scanF)) {
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫描频率设定最小值：' + this.orderMainDy.smplLowerLimit + '，扫描频率设定最大值：' + this.orderMainDy.smplUpperLimit + '，扫描频率读取值：' + accData.scanF, 'log');
+            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫描频率设定最小值：' + this.orderMainDy.smplLowerLimit + '，扫描频率设定最大值：' + this.orderMainDy.smplUpperLimit + '，扫描频率读取值：' + accData.scanF;
+            return false;
+          } 
+        } else {
           this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫描频率设定最小值：' + this.orderMainDy.smplLowerLimit + '，扫描频率设定最大值：' + this.orderMainDy.smplUpperLimit + '，扫描频率读取值：' + accData.scanF, 'log');
           this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫描频率设定最小值：' + this.orderMainDy.smplLowerLimit + '，扫描频率设定最大值：' + this.orderMainDy.smplUpperLimit + '，扫描频率读取值：' + accData.scanF;
           return false;
-        } 
-      } else {
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫描频率设定最小值：' + this.orderMainDy.smplLowerLimit + '，扫描频率设定最大值：' + this.orderMainDy.smplUpperLimit + '，扫描频率读取值：' + accData.scanF, 'log');
-        this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫描频率设定最小值：' + this.orderMainDy.smplLowerLimit + '，扫描频率设定最大值：' + this.orderMainDy.smplUpperLimit + '，扫描频率读取值：' + accData.scanF;
-        return false;
-      }
-      // 判断PFN电压 pfn
-      // console.log(accData.pfn)
-      if(accData.pfn != undefined && accData.pfn != null) {
-        if (Number(this.orderMainDy.pfnLowerLimit) > Number(accData.pfn) || Number(this.orderMainDy.pfnUpperLimit) < Number(accData.pfn)) {
+        }
+        // 判断PFN电压 pfn
+        // console.log(accData.pfn)
+        if(accData.pfn != undefined && accData.pfn != null) {
+          if (Number(this.orderMainDy.pfnLowerLimit) > Number(accData.pfn) || Number(this.orderMainDy.pfnUpperLimit) < Number(accData.pfn)) {
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！PFN电压设定最小值：' + this.orderMainDy.pfnLowerLimit + '，PFN电压设定最大值：' + this.orderMainDy.pfnUpperLimit + '，PFN电压读取值：' + accData.pfn, 'log');
+            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！PFN电压设定最小值：' + this.orderMainDy.pfnLowerLimit + '，PFN电压设定最大值：' + this.orderMainDy.pfnUpperLimit + '，PFN电压读取值：' + accData.pfn;
+            return false;
+          } 
+        } else {
           this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！PFN电压设定最小值：' + this.orderMainDy.pfnLowerLimit + '，PFN电压设定最大值：' + this.orderMainDy.pfnUpperLimit + '，PFN电压读取值：' + accData.pfn, 'log');
           this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！PFN电压设定最小值：' + this.orderMainDy.pfnLowerLimit + '，PFN电压设定最大值：' + this.orderMainDy.pfnUpperLimit + '，PFN电压读取值：' + accData.pfn;
           return false;
-        } 
-      } else {
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！PFN电压设定最小值：' + this.orderMainDy.pfnLowerLimit + '，PFN电压设定最大值：' + this.orderMainDy.pfnUpperLimit + '，PFN电压读取值：' + accData.pfn, 'log');
-        this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！PFN电压设定最小值：' + this.orderMainDy.pfnLowerLimit + '，PFN电压设定最大值：' + this.orderMainDy.pfnUpperLimit + '，PFN电压读取值：' + accData.pfn;
-        return false;
-      }
-      // 判断能量 energy
-      // console.log(accData.energy)
-      if(accData.energy != undefined && accData.energy != null) {
-        if (Number(this.orderMainDy.nlLowerLimit) > Number(accData.energy) || Number(this.orderMainDy.nlUpperLimit) < Number(accData.energy)) {
+        }
+        // 判断能量 energy
+        // console.log(accData.energy)
+        if(accData.energy != undefined && accData.energy != null) {
+          if (Number(this.orderMainDy.nlLowerLimit) > Number(accData.energy) || Number(this.orderMainDy.nlUpperLimit) < Number(accData.energy)) {
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！能量设定最小值：' + this.orderMainDy.nlLowerLimit + '，能量设定最大值：' + this.orderMainDy.nlUpperLimit + '，能量读取值：' + accData.energy, 'log');
+            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！能量设定最小值：' + this.orderMainDy.nlLowerLimit + '，能量设定最大值：' + this.orderMainDy.nlUpperLimit + '，能量读取值：' + accData.energy;
+            return false;
+          } 
+        } else {
           this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！能量设定最小值：' + this.orderMainDy.nlLowerLimit + '，能量设定最大值：' + this.orderMainDy.nlUpperLimit + '，能量读取值：' + accData.energy, 'log');
           this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！能量设定最小值：' + this.orderMainDy.nlLowerLimit + '，能量设定最大值：' + this.orderMainDy.nlUpperLimit + '，能量读取值：' + accData.energy;
           return false;
-        } 
-      } else {
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！能量设定最小值：' + this.orderMainDy.nlLowerLimit + '，能量设定最大值：' + this.orderMainDy.nlUpperLimit + '，能量读取值：' + accData.energy, 'log');
-        this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！能量设定最小值：' + this.orderMainDy.nlLowerLimit + '，能量设定最大值：' + this.orderMainDy.nlUpperLimit + '，能量读取值：' + accData.energy;
-        return false;
-      }
-      // 判断束下速度 speed
-      // console.log(accData.speed)
-      if(accData.speed != undefined && accData.speed != null) {
-        if (Number(this.orderMainDy.sxSpeedLowerLimit) > (Number(accData.speed) * 1000) || Number(this.orderMainDy.sxSpeedUpperLimit) < (Number(accData.speed) * 1000)) {
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束下速度设定最小值：' + this.orderMainDy.sxSpeedLowerLimit + '，束下速度设定最大值：' + this.orderMainDy.sxSpeedUpperLimit + '，束下速度读取值：' + (Number(accData.speed) * 1000), 'log');
+        }
+        // 判断束下速度 speed
+        // console.log(accData.speed)
+        if(accData.speed != undefined && accData.speed != null) {
+          if (Number(this.orderMainDy.sxSpeedLowerLimit) > (Number(accData.speed) * 1000) || Number(this.orderMainDy.sxSpeedUpperLimit) < (Number(accData.speed) * 1000)) {
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束下速度设定最小值：' + this.orderMainDy.sxSpeedLowerLimit + '，束下速度设定最大值：' + this.orderMainDy.sxSpeedUpperLimit + '，束下速度读取值：' + (Number(accData.speed) * 1000), 'log');
+            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束下速度设定最小值：' + this.orderMainDy.sxSpeedLowerLimit + '，束下速度设定最大值：' + this.orderMainDy.sxSpeedUpperLimit + '，束下速度读取值：' + (Number(accData.speed) * 1000);
+            return false;
+          } 
+        } else {
           this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束下速度设定最小值：' + this.orderMainDy.sxSpeedLowerLimit + '，束下速度设定最大值：' + this.orderMainDy.sxSpeedUpperLimit + '，束下速度读取值：' + (Number(accData.speed) * 1000);
           return false;
-        } 
+        }
+        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺合格！', 'log');
       } else {
-        this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束下速度设定最小值：' + this.orderMainDy.sxSpeedLowerLimit + '，束下速度设定最大值：' + this.orderMainDy.sxSpeedUpperLimit + '，束下速度读取值：' + (Number(accData.speed) * 1000);
-        return false;
+        // 找不着直接默认合格
+        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺合格！', 'log');
       }
-      this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺合格！', 'log');
       return true;
     },
     testAcc() {
@@ -1068,7 +1085,7 @@ export default {
           this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].nlRead = res.data.energy;
           this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].sxSpeedRead = (Number(res.data.speed) * 1000);
         }
-        if(res.data&&JSON.stringify(this.orderMainDy) != '{}' && this.judgeAccData(res.data, boxImitateIdVal, index)) {
+        if(res.data&&JSON.stringify(this.orderMainDy) != '{}' && this.judgeAccData(res.data, boxImitateIdVal)) {
           this.$message({
             type: 'success',
             message: '箱子id' + boxImitateIdVal + '工艺合格！更新状态！'
@@ -1086,12 +1103,11 @@ export default {
           type: 'warning',
           message: '箱子id' + boxImitateIdVal + '工艺不合格！更新状态！'
         });
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！数据异常，未读取到加速器数值！'+ err, 'log');
+        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！数据异常！'+ err, 'log');
         this.qualified4Box(boxImitateIdVal, false)
       });
     },
     analogOptoelectronics(point) {
-      console.log(point)
       switch (point) {
         case 'A':
           this.pointA = this.pointA === '1' ? '0' : '1'
@@ -1609,11 +1625,7 @@ export default {
                       // 当前没有延迟中
                       this.isDelayPointTime = true
                       this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' H点开始延迟！', 'log');
-                      setTimeout(() => {
-                        this.nowNumberTurns++;
-                        this.isDelayPointTime = false;
-                        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' H点开始延迟结束！', 'log');
-                      }, delayPointTime);
+                      this.startTimerWithDelay(9999, delayPointTime)
                     }
                   } else {
                     this.nowNumberTurns++;
@@ -1637,7 +1649,7 @@ export default {
       const kAreaSpeed = this.kAreaSpeed;
       const lAreaSpeed = this.lAreaSpeed;
       if(!this.isDelayPointTime){
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' H点开始计算延迟时间，参数：J区域长度:' + pointjLength + '|K区域长度:' + pointkLength + '|L区域长度:' + pointkLength + '|J区域速度:' + jAreaSpeed + '|K区域速度:' + kAreaSpeed + '|L区域速度:' + lAreaSpeed, 'log');
+        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' H点开始计算延迟时间，参数：J区域长度:' + pointjLength + '|K区域长度:' + pointkLength + '|L区域长度:' + pointlLength + '|J区域速度:' + jAreaSpeed + '|K区域速度:' + kAreaSpeed + '|L区域速度:' + lAreaSpeed, 'log');
       }
       // 检查长度是否不为负数且速度是否大于0
       if (pointjLength >= 0 && pointkLength >= 0 && pointlLength >= 0 && 
@@ -1815,7 +1827,7 @@ export default {
     async generateBatchReport() {
       // 生成批报告，并且更新一下所有箱子
       const param = {
-        boxMainDTOList: [...this.arrAB, ...this.arrBC, ...this.arrCD, ...this.arrDG, ...this.arrGH, ...this.arrF],
+        boxMainDTOList: [...this.arrAB, ...this.arrBC, ...this.arrCD, ...this.arrDG, ...this.arrGH, ...this.arrF, ...this.thoughHArr],
         finishOrder: true,
         orderId: this.orderMainDy.orderId
       }
@@ -2076,10 +2088,19 @@ export default {
         return value; // 非负数保持不变
       }
     },
+    delayHpoint() {
+      this.nowNumberTurns++;
+      this.isDelayPointTime = false;
+      this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' H点开始延迟结束！', 'log');
+    },
     startTimerWithDelay(boxImitateId, delay) {
       const timerId = setTimeout(() => {
-        // 执行逻辑
-        this.getUndercutProcess(boxImitateId);
+        // 执行逻辑,9999代表H点延迟时间，非9999代表B点到束下的计算时间
+        if(Number(boxImitateId) === 9999) {
+          this.delayHpoint()
+        } else {
+          this.getUndercutProcess(boxImitateId);
+        }
         // 执行完删除定时器 delete 操作符用于删除对象的某个属性
         delete this.timers[boxImitateId];
       }, delay);
@@ -2154,7 +2175,7 @@ export default {
           // 完成
           // 生成批报告，并且更新一下所有箱子
           const param = {
-            boxMainDTOList: [...this.arrAB, ...this.arrBC, ...this.arrCD, ...this.arrDG, ...this.arrGH],
+            boxMainDTOList: [...this.arrAB, ...this.arrBC, ...this.arrCD, ...this.arrDG, ...this.arrGH, ...this.arrF, ...this.thoughHArr],
             finishOrder: true,
             orderId: this.orderMainDy.orderId
           }

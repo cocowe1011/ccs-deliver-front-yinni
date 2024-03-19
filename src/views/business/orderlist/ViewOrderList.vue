@@ -140,7 +140,7 @@
                 <el-button type="danger" icon="el-icon-delete" circle size="mini" style="position: absolute;right:0px;top:0px;padding: 3px;" @click="deleteBox(item.boxImitateId)" :disabled="showHistory"></el-button>
                 <div class="box-row">
                   <div class="box-row-left">箱编号：</div>
-                  <div class="box-row-right"><el-button type="text" icon="el-icon-edit" @click="showUpdateBoxImitateId(item)"></el-button>{{ item.boxImitateId }}</div>
+                  <div class="box-row-right"><el-button type="text" icon="el-icon-edit" @click="showUpdateBoxImitateId(item)" :disabled="showHistory"></el-button>{{ item.boxImitateId }}</div>
                 </div>
                 <div class="box-row">
                   <div class="box-row-left">扫码：</div>
@@ -151,7 +151,17 @@
                   <div class="box-row-right">{{ item.numberTurns }}</div>
                 </div>
                 <div class="box-row">
-                  <div class="box-row-left">质量：</div>
+                  <div class="box-row-left">
+                    <el-popover
+                      v-if="item.qualified !== '1'&&item.failReason!==null&&item.failReason!==''"
+                      placement="bottom"
+                      width="300"
+                      trigger="click"
+                      :content="item.failReason">
+                      <i class="el-icon-warning" style="color:#f56c6c; cursor:pointer; margin-right: 4px;" slot="reference" title="点击查看不合格原因"></i>
+                    </el-popover>
+                    质量：
+                  </div>
                   <div class="box-row-right">
                     <el-switch
                       style="display: block"
