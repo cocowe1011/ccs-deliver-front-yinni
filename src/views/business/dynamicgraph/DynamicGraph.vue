@@ -1824,10 +1824,22 @@ export default {
         this.beginCountNum = num
       }
     },
-    async generateBatchReport() {
+    async saveOriginal() {
       // 生成批报告，并且更新一下所有箱子
       const param = {
         boxMainDTOList: [...this.arrAB, ...this.arrBC, ...this.arrCD, ...this.arrDG, ...this.arrGH, ...this.arrF, ...this.thoughHArr],
+        orderId: this.orderMainDy.orderId
+      }
+      await HttpUtil.post('/box/saveOriginal', param).then((res)=> {
+        this.$message.success('原始记录同步保存成功！');
+      })
+    },
+    async generateBatchReport() {
+      // 先保存原始记录
+      this.saveOriginal();
+      // 生成批报告，并且更新一下所有箱子
+      const param = {
+        boxMainDTOList: [...this.arrAB, ...this.arrBC, ...this.arrCD, ...this.arrDG, ...this.arrGH],
         finishOrder: true,
         orderId: this.orderMainDy.orderId
       }
@@ -2173,9 +2185,11 @@ export default {
         })
         .then(async () => {
           // 完成
+          // 先保存原始记录
+          this.saveOriginal();
           // 生成批报告，并且更新一下所有箱子
           const param = {
-            boxMainDTOList: [...this.arrAB, ...this.arrBC, ...this.arrCD, ...this.arrDG, ...this.arrGH, ...this.arrF, ...this.thoughHArr],
+            boxMainDTOList: [...this.arrAB, ...this.arrBC, ...this.arrCD, ...this.arrDG, ...this.arrGH],
             finishOrder: true,
             orderId: this.orderMainDy.orderId
           }
