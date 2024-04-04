@@ -9,8 +9,8 @@
           <div class="card-content">
             <div class="data-card" style="padding:14px 10px 7px 20px">
               <div class="data-card-border">
-                <div class="data-card-border-borderTop granient-text">订单号</div>
-                <div class="data-card-border-borderDown" style="font-size: 1.3vw;">{{ orderMainDy.orderNo }}</div>
+                <div class="data-card-border-borderTop granient-text">灭菌批号</div>
+                <div class="data-card-border-borderDown" style="font-size: 1.3vw;">{{ orderMainDy.batchId }}</div>
               </div>
             </div>
             <div class="data-card" style="padding: 14px 10px 7px 10px;">
@@ -432,10 +432,6 @@ export default {
       nowNumberTurns: 1,
       // 束下实际数据
       lightBeamRealTimeSpeed: 0,
-      // 是否正在进入A点
-      enteringPonitA: false,
-      // 是否正在进入B点
-      enteringPonitB: false,
       // 是否正在进入E点
       enteringPonitE: false,
       // 上料固定扫码
@@ -571,10 +567,9 @@ export default {
     },
     pointA: {
       async handler(newVal, oldVal) {
-        if(!this.enteringPonitA && newVal === '1' && oldVal === '0') { //货物开始进入A点
+        if(newVal === '1') { //货物开始进入A点
           // 碰到A，清零读码信息
           this.loadScanCode = ''
-          this.enteringPonitA = true
           if(this.nowNumberTurns == 1) {
             // 第一圈，仍然是新增，按照要求生成模拟id策略
             const boxImitateId = await this.getCurrentTimeSort();
@@ -633,22 +628,16 @@ export default {
               }
             }
           }
-        } else if(this.enteringPonitA && newVal === '0' && oldVal === '1') { // 货物走出A点
-          this.enteringPonitA = false
+        } else { // 货物走出A点
           if(this.arrAB[this.arrAB.length - 1] != undefined) {
             this.dealBoxLogic('A')
           }
-        } else {
-          // 先暂定报警吧，因为肯定不会出现这种情况，出现了视为异常，不做任何处理
-          alert('异常！程序走到一个不该走到的地方！')
         }
       }
     },
     pointB: {
       handler(newVal, oldVal) {
-        // enteringPonitB
-        if(!this.enteringPonitB && newVal === '1' && oldVal === '0') { //货物开始进入B点
-          this.enteringPonitB = true
+        if(newVal === '1') { //货物开始进入B点
           if(this.arrAB.length > 0) {
             // 进入B的下降沿，获取AB队列第一个，开始计算时间，到时间后，进行工艺对比，判断货物是否合格
             const boxImitateId = this.arrAB[0].boxImitateId;
@@ -656,14 +645,10 @@ export default {
             const times = this.calculateMilliseconds(((Number(this.l11) + Number(this.orderMainDy.boxWidth))/Number(this.lightBeamRealTimeSpeed)).toFixed(2),(Number(this.l2)/(Number(this.lightBeamRealTimeSpeed)  * (this.shuxiaSpeedProportion/10)) ).toFixed(2));
             this.startTimerWithDelay(boxImitateId, times)
           }
-        } else if(this.enteringPonitB && newVal === '0' && oldVal === '1') { // 货物走出B点
-          this.enteringPonitB = false
+        } else { // 货物走出B点
           if(this.arrAB.length > 0) {
             this.dealBoxLogic('B')
           }
-        } else {
-          // 先暂定报警吧，因为肯定不会出现这种情况，出现了视为异常，不做任何处理
-          alert('异常！程序走到一个不该走到的地方！')
         }
       }
     },
@@ -930,12 +915,14 @@ export default {
                 this.arrBC[index + 1].qualified = '0';
                 // 给当前圈也赋值合格
                 this.arrBC[index + 1].turnsInfoList[this.arrBC[index + 1].numberTurns - 1].qualified = '0';
+                this.arrBC[index + 1].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物前后出现不合格箱子，疑似不合格！';
               }
               // 给前一个箱子赋值不合格  
               if(index >= 1) {
                 this.arrBC[index - 1].qualified = '0';
                 // 给当前圈也赋值合格
                 this.arrBC[index - 1].turnsInfoList[this.arrBC[index - 1].numberTurns - 1].qualified = '0';
+                this.arrBC[index - 1].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物前后出现不合格箱子，疑似不合格！';
               }  
             }
           }
@@ -1055,6 +1042,7 @@ export default {
     // 拿到模拟id去判断箱子的工艺是否合格
     getUndercutProcess(boxImitateIdVal) {
       this.nowShuXiaid = boxImitateIdVal;
+      this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '到达束下，开始读取加速器数值！', 'log');
       // 无加速器时放开此注释********************************************
       // this.qualified4Box(boxImitateIdVal, true)
       // this.$message.success(this.nowShuXiaid + '合格！');
@@ -1070,7 +1058,7 @@ export default {
       // 测试一个箱子不合格，，前后两个箱子都不合格*************************
 
       // 获取当前加速器工艺，和系统设置工艺做比较
-      HttpUtil.get('/box/getAccData').then((res)=> {
+      HttpUtil.get('/box/getAccDataByLocal').then((res)=> {
         // 给当前箱子赋值acc读取值
         const index = this.arrBC.findIndex(item => {
           return item.boxImitateId === boxImitateIdVal
@@ -1925,10 +1913,6 @@ export default {
       this.dianJiStatusArr = '';
       // 当前圈数
       this.nowNumberTurns = 1;
-      // 是否正在进入A点
-      this.enteringPonitA = false;
-      // 是否正在进入B点
-      this.enteringPonitB = false;
       this.lastRouteEPoint = '';
       this.lastRouteHPoint = '';
       this.lastRouteFPoint = '';
