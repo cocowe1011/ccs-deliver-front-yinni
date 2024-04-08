@@ -135,9 +135,9 @@ app.on('ready', () => {
     setInterval(() => {
       if(mainWindow) {
         if(revert) {
-          mainWindow.webContents.send('receivedMsg', {DBW60:0,DBW62:0, DBW68:35580,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          ',DBW76:19,DBW80:6000,DBW82:6000,DBW84:6000}, writeStrArr.toString())
+          mainWindow.webContents.send('receivedMsg', {DBW60:0,DBW62:0, DBW68:35580,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          ',DBW76:195,DBW80:6000,DBW82:6000,DBW84:6000}, writeStrArr.toString())
         } else {
-          mainWindow.webContents.send('receivedMsg', {DBW60:1,DBW62:0, DBW68:35580,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          ',DBW76:19,DBW80:6000,DBW82:6000,DBW84:6000}, writeStrArr.toString())
+          mainWindow.webContents.send('receivedMsg', {DBW60:1,DBW62:0, DBW68:35580,DBW70:512,DBW72: -1793,DBB100:'HF800SR-1-H                   ',DBB130:'83048880004868800784          ',DBW76:195,DBW80:6000,DBW82:6000,DBW84:6000}, writeStrArr.toString())
         }
         revert = !revert;
       }

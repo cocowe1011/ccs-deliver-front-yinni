@@ -642,7 +642,8 @@ export default {
             // 进入B的下降沿，获取AB队列第一个，开始计算时间，到时间后，进行工艺对比，判断货物是否合格
             const boxImitateId = this.arrAB[0].boxImitateId;
             // 计算时间 改为任务管理
-            const times = this.calculateMilliseconds(((Number(this.l11) + Number(this.orderMainDy.boxWidth))/Number(this.lightBeamRealTimeSpeed)).toFixed(2),(Number(this.l2)/(Number(this.lightBeamRealTimeSpeed)  * (this.shuxiaSpeedProportion/10)) ).toFixed(2));
+            const times = this.calculateMilliseconds(((Number(this.l11))/Number(this.lightBeamRealTimeSpeed)).toFixed(2),(Number(this.l2)/(Number(this.orderMainDy.sxSpeedSet)  * (this.shuxiaSpeedProportion/100)) ).toFixed(2));
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateId + '开始进入B点，计算时间-L1长度：' + this.l11  + ' 束下速度：' + this.lightBeamRealTimeSpeed  + ' 束下设置速度：' + this.orderMainDy.sxSpeedSet + ' L2长度：' + this.l2 + ' 束下速度比' + this.shuxiaSpeedProportion + ' 总时间：' + times, 'log');
             this.startTimerWithDelay(boxImitateId, times)
           }
         } else { // 货物走出B点
@@ -1033,7 +1034,7 @@ export default {
       return true;
     },
     testAcc() {
-      HttpUtil.get('/box/getAccData').then((res)=> {
+      HttpUtil.get('/box/getAccDataByLocal').then((res)=> {
         this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 加速器返回数据：' + JSON.stringify(res), 'log');
       }).catch((err)=> {
         this.$message.success('连接加速器失败！原因：' + err)
