@@ -20,6 +20,7 @@ const fs = require('fs');
 var appTray = null;
 let closeStatus = false;
 var conn = new nodes7;
+var pollingST = null;
 // electron 开启热更新
 try {
   require('electron-reloader')(module,{});
@@ -167,7 +168,24 @@ app.on('ready', () => {
   ipcMain.on('writeLogToLocal', (event, arg) => {
     fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + ".txt").replaceAll('/','-'), arg + '\n', function(err) {});
   })
+  // 同步映射加速器数据
+  synAccData();
 });
+
+function synAccData() {
+  HttpUtil.get('/box/synAccData').then(() => {
+    pollingST = setTimeout(() => {
+      clearTimeout(pollingST);
+      synAccData();
+    }, 2000);
+  }).catch((err)=> {
+    HttpUtil.get('/box/recoverAccData').catch(()=> {});
+    pollingST = setTimeout(() => {
+      clearTimeout(pollingST);
+      synAccData();
+    }, 2000);
+  });
+}
 
 function conPLC() {
   logger.info('开始连接PLC')

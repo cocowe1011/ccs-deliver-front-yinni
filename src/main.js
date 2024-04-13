@@ -12,7 +12,7 @@ Vue.use(VueCookies)
 Vue.config.productionTip = false;
 Vue.use(ElementUI); //全局注入element
 Vue.prototype.$axios = axios;
-axios.defaults.timeout = 300000;
+axios.defaults.timeout = 20000;
 
 new Vue({
   router,

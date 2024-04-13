@@ -1034,10 +1034,11 @@ export default {
       return true;
     },
     testAcc() {
-      HttpUtil.get('/box/getAccDataByLocal').then((res)=> {
+      HttpUtil.get('/box/getAccData').then((res)=> {
         this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 加速器返回数据：' + JSON.stringify(res), 'log');
       }).catch((err)=> {
-        this.$message.success('连接加速器失败！原因：' + err)
+        this.$message.error('连接加速器失败！原因：' + err)
+        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 连接加速器失败！原因：' + err, 'log');
       });
     },
     // 拿到模拟id去判断箱子的工艺是否合格
@@ -1584,6 +1585,7 @@ export default {
               // 更新全局圈数 和 报警信号
               if (this.arrGH[indexHBox].numberTurns >= this.arrGH[indexHBox].totalNumberTurns) {
                 this.baojingShow = true;
+                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 下货报警!', 'error')
                 // 发送报警信号
                 ipcRenderer.send('writeValuesToPLC', 'DBW38', 1);
                 const param = {
