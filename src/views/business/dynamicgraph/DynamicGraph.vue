@@ -516,7 +516,12 @@ export default {
       jAreaSpeed: 0,
       kAreaSpeed: 0,
       lAreaSpeed: 0,
-      isDelayPointTime: false
+      isDelayPointTime: false,
+      speedOne: 1, // G-H V1比例系数
+      speedTwo: 1, // G-H V2比例系数
+      newDelayPointTime: 0, // GH延迟时间
+      lengthOne: 0, // G-H X1长度
+      lengthTwo: 0 // G-H X2长度
     };
   },
   watch: {
@@ -587,7 +592,7 @@ export default {
             this.baojingShow = false;
             // 新上货物时，经过H点模拟id值赋值为arrGH 最后一个元素的值,并且给arrGH内所有元素一个作废标识，后续不处理这些作废的元素
             if(this.arrGH.length > 0) {
-              for (let index = 0; index < this.arrGH.length; index++) {
+              for (let index = this.arrGH.length - 1; index >= 0; index--) {
                 // 如果订单圈数和箱子当前圈数一致才会进入作废队列
                 // this.arrGH[indexHBox].numberTurns >= this.arrGH[indexHBox].totalNumberTurns
                 if(this.arrGH[index].numberTurns >= this.arrGH[index].totalNumberTurns) {
@@ -1362,6 +1367,18 @@ export default {
             this.loadScanCode = this.loadScanCodeTemp.replace(/\s/g,'');
             this.arrAB[this.arrAB.length - 1].loadScanCode = this.loadScanCode;
           } else {
+            // 判断是否满足可上货条件，就是当前这批消毒的箱子，最后一个满足圈数并且离开A，即可上货 - 2024/04/25正德修改
+            if(this.arrAB[this.arrAB.length - 1].boxImitateId == this.lastNewBoxPassABoxImitateId) {
+              if(this.arrAB[this.arrAB.length - 1].numberTurns == this.arrAB[this.arrAB.length - 1].totalNumberTurns) {
+                // 开始上新货，当前箱子圈数变成1
+                this.nowNumberTurns = 1;
+                this.ifNextPassABoxIsFirst = true;
+                this.judgeBanLoadBoxImitateId = ''
+                // 给PLC发送允许上货命令
+                ipcRenderer.send('writeValuesToPLC', 'DBW26', 0);
+                this.banLoadStatus = false; // 隐藏禁止上货图标
+              }
+            }
             // 走出A 读码
             this.loadScanCode = this.loadScanCodeTemp.replace(/\s/g,'');
             // 判断当前箱子的二维码和扫出来的码是否一致
@@ -1373,7 +1390,6 @@ export default {
                 ipcRenderer.send('writeValuesToPLC', 'DBW34', 1);
               }
             }
-            this.arrAB[this.arrAB.length - 1].loadScanCode;
           }
           this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrAB[this.arrAB.length - 1].boxImitateId + '离开A点，扫码信息：' + this.loadScanCode, 'log');
           break;
@@ -1384,21 +1400,6 @@ export default {
           this.arrBC[this.arrBC.length - 1].turnsInfoList[this.arrBC[this.arrBC.length - 1].numberTurns - 1].passBTime = moment().format('YYYY-MM-DD HH:mm:ss');
           // 删除AB队列第一个
           this.arrAB.splice(0,1)
-          // 判断是否满足可上货条件，就是当前这批消毒的箱子，最后一个满足圈数并且离开B，即可上货
-          if(this.arrBC[this.arrBC.length - 1].boxImitateId == this.lastNewBoxPassABoxImitateId) {
-            if(this.arrBC[this.arrBC.length - 1].numberTurns == this.arrBC[this.arrBC.length - 1].totalNumberTurns) {
-              // 开始上新货，当前箱子圈数变成1
-              this.nowNumberTurns = 1;
-              this.ifNextPassABoxIsFirst = true;
-              this.judgeBanLoadBoxImitateId = ''
-              // 判断上货数和订单箱数的数量，如果满足则还是不允许上货
-              if(Number(this.nowInNum) < Number(this.orderMainDy.orderBoxNum)) {
-                // 给PLC发送允许上货命令
-                ipcRenderer.send('writeValuesToPLC', 'DBW26', 0);
-                this.banLoadStatus = false; // 隐藏禁止上货图标
-              }
-            }
-          }
           // 生成日志
           this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrBC[this.arrBC.length - 1].boxImitateId + '经过B点，扫码信息：' + this.arrBC[this.arrBC.length - 1].loadScanCode, 'log');
           break;
@@ -1537,6 +1538,17 @@ export default {
             }
             // 判断此箱子是否还属于当前订单
             if(this.arrDG[0].orderId === this.orderMainDy.orderId) {
+              // 判断当前箱子是不是订单的第一箱，并且不是下货圈数
+              if ((this.arrDG[0].boxImitateId === this.judgeBanLoadBoxImitateId) && (this.arrDG[0].numberTurns < this.arrDG[0].totalNumberTurns)) {
+                // 计算本箱子到达H点的时间（ms）
+                // 计算时间 改为任务管理
+                const times = this.calculateMilliseconds((Number(this.lengthOne)/(Number(this.orderMainDy.sxSpeedSet)  * Number(this.speedOne)) ).toFixed(2), (Number(this.lengthTwo)/(Number(this.orderMainDy.sxSpeedSet)  * Number(this.speedTwo)) ).toFixed(2)) + this.newDelayPointTime;
+                setTimeout(() => {
+                  this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 首箱到达H点！', 'log');
+                  this.judgeIfBoxOnH();
+                }, times);
+                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrDG[0].boxImitateId + '，是本次上货的第一箱，经过G点，束下设定速度：' + this.orderMainDy.sxSpeedSet + '，X1长度：' + this.lengthOne + '，V1速度比：' + this.speedOne + '，X2长度：'+ this.lengthTwo +'，V2速度比：' + this.speedTwo + '，到达H点延迟时间：' + this.newDelayPointTime + '计算到达H点共需时间：' + times, 'log');
+              }
               // 把DG队列第一个货物出列，进入GH
               this.arrGH.push(this.arrDG[0]);
               this.arrGH[this.arrGH.length - 1].turnsInfoList[this.arrGH[this.arrGH.length - 1].numberTurns - 1].passGTime = moment().format('YYYY-MM-DD HH:mm:ss');
@@ -1606,30 +1618,45 @@ export default {
                   this.$message.error('货物：' + this.arrGH[indexHBox].boxImitateId + '，更新箱报告失败！' + err)
                   this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrGH[indexHBox].boxImitateId + '，更新箱报告失败！' + err, 'log');
                 });
-              } else {
-                // 有货物的圈数和全局圈数一致时，则全局圈数加1
-                if(this.nowNumberTurns == 1) {
-                  // 第一圈第一个箱子到达H时，此时HA传送带上还有一些上的货的但是没经过A点的，需要加个延时器，等待所有的箱子经过A点，再从GH往A拉,延时时间取配置，0或null或空串说明没有延迟
-                  const delayPointTime = this.calculateTotalTime();
-                  if(delayPointTime > 0) {
-                    if(!this.isDelayPointTime) {
-                      // 当前没有延迟中
-                      this.isDelayPointTime = true
-                      this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' H点开始延迟！', 'log');
-                      this.startTimerWithDelay(9999, delayPointTime)
-                    }
-                  } else {
-                    this.nowNumberTurns++;
-                  }
-                } else {
-                  this.nowNumberTurns++;
-                }
               }
             }
           }
           break;
         default:
           break;
+      }
+    },
+    judgeIfBoxOnH() {
+      // 新上货物时，经过H点模拟id值赋值为arrGH 最后一个元素的值,并且给arrGH内所有元素一个作废标识，后续不处理这些作废的元素
+      if(this.arrGH.length > 0) {
+        for (let index = this.arrGH.length - 1; index >= 0; index--) {
+          // 如果订单圈数和箱子当前圈数一致才会进入作废队列
+          // this.arrGH[indexHBox].numberTurns >= this.arrGH[indexHBox].totalNumberTurns
+          if(this.arrGH[index].numberTurns >= this.arrGH[index].totalNumberTurns) {
+            this.thoughHArr.push(this.arrGH[index]);
+            this.arrGH.splice(index, 1)
+          }
+        }
+        this.lastRouteHPoint = '';
+      } else {
+        this.lastRouteHPoint = '';
+      }
+      // 有货物的圈数和全局圈数一致时，则全局圈数加1
+      if(this.nowNumberTurns == 1) {
+        // 第一圈第一个箱子到达H时，此时HA传送带上还有一些上的货的但是没经过A点的，需要加个延时器，等待所有的箱子经过A点，再从GH往A拉,延时时间取配置，0或null或空串说明没有延迟
+        const delayPointTime = this.calculateTotalTime();
+        if(delayPointTime > 0) {
+          if(!this.isDelayPointTime) {
+            // 当前没有延迟中
+            this.isDelayPointTime = true
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' H点开始延迟！', 'log');
+            this.startTimerWithDelay(9999, delayPointTime)
+          }
+        } else {
+          this.nowNumberTurns++;
+        }
+      } else {
+        this.nowNumberTurns++;
       }
     },
     calculateTotalTime() {
@@ -1718,7 +1745,7 @@ export default {
       return this.minutesToMilliseconds(Number(A) + Number(B));
     },
     minutesToMilliseconds(minutes) {
-      return minutes * 60 * 1000;
+      return Math.round(minutes * 60 * 1000);
     },
     async sendMsgToPLC(command) {
       switch (command) {
@@ -1956,6 +1983,11 @@ export default {
           this.pointjLength = res.data.pointjLength == null ? 0 : res.data.pointjLength;
           this.pointkLength = res.data.pointkLength == null ? 0 : res.data.pointkLength;
           this.pointlLength = res.data.pointlLength == null ? 0 : res.data.pointlLength;
+          this.speedOne = res.data.speedOne == null ? 1 : res.data.speedOne;
+          this.speedTwo = res.data.speedTwo == null ? 1 : res.data.speedTwo;
+          this.newDelayPointTime = res.data.newDelayPointTime == null ? 0 : res.data.newDelayPointTime;
+          this.lengthOne = res.data.lengthOne == null ? 0 : res.data.lengthOne;
+          this.lengthTwo = res.data.lengthTwo == null ? 0 : res.data.lengthTwo;
         } else {
           this.$message.error('config error! 更新配置错误！')
         }

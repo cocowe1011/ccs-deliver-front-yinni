@@ -38,6 +38,22 @@
                 <el-option label="光电H" value="H"></el-option>
               </el-select>
             </el-form-item>
+            <el-divider content-position="left">G-H光电配置</el-divider>
+            <el-form-item label="X1长度(mm)：">
+              <el-input v-model="cssConfig.lengthOne" style="width: 250px;" type="number"></el-input>
+            </el-form-item>
+            <el-form-item label="X2长度(mm)：">
+              <el-input v-model="cssConfig.lengthTwo" style="width: 250px;" type="number"></el-input>
+            </el-form-item>
+            <el-form-item label="V1系数比：">
+              <el-input v-model="cssConfig.speedOne" style="width: 250px;" type="number"></el-input>
+            </el-form-item>
+            <el-form-item label="V2系数比：">
+              <el-input v-model="cssConfig.speedTwo" style="width: 250px;" type="number"></el-input>
+            </el-form-item>
+            <el-form-item label="G点延迟时间(ms)：">
+              <el-input v-model="cssConfig.newDelayPointTime" style="width: 250px;" type="number"></el-input>
+            </el-form-item>
           </el-form>
         </div>
       </div>
@@ -150,6 +166,7 @@ export default {
     box-shadow: 0px 60px 90px 0px rgba(0, 0, 0, 0.2);
     position: relative;
     .formDiv {
+      height: 100%;
       .card-title {
         height: 30px;
         width: 100%;
@@ -163,10 +180,11 @@ export default {
         padding-left: 23px;
       }
       .card-content {
-        height: calc(100% - 37px);
+        height: calc(100% - 103px);
         width: 100%;
         padding: 0px 32px;
         box-sizing: border-box;
+        overflow: auto;
         > div {
           height: 43px;
           width: 100%;
