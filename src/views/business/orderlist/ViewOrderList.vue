@@ -137,7 +137,7 @@
                 <i class="el-icon-plus" style="font-size: 18px"></i><span style="font-size: 17px; margin-left: 2px;">添加箱子</span>
               </div>
               <div v-for="(item, index) in boxList" :key="index" class="box-card">
-                <el-button type="danger" icon="el-icon-delete" circle size="mini" style="position: absolute;right:0px;top:0px;padding: 3px;" @click="deleteBox(item.boxImitateId)" :disabled="showHistory"></el-button>
+                <el-button type="danger" icon="el-icon-delete" circle size="mini" style="position: absolute;right:0px;top:0px;padding: 3px;" @click="deleteBox(item.orderId, item.boxImitateId)" :disabled="showHistory"></el-button>
                 <div class="box-row">
                   <div class="box-row-left">箱编号：</div>
                   <div class="box-row-right"><el-button type="text" icon="el-icon-edit" @click="showUpdateBoxImitateId(item)" :disabled="showHistory"></el-button>{{ item.boxImitateId }}</div>
@@ -242,13 +242,14 @@ export default {
         this.$message.error('删除失败！' + err);
       });
     },
-    deleteBox(boxImitateId) {
+    deleteBox(orderId, boxImitateId) {
       this.$confirm('此操作将永久删除该箱子的数据，请谨慎删除！ 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         const param = {
+          orderId: orderId,
           boxImitateId: boxImitateId
         }
         HttpUtil.post('/box/deleteBox', param).then((res)=> {
