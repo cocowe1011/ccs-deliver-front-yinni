@@ -153,11 +153,11 @@
                 <div class="box-row">
                   <div class="box-row-left">
                     <el-popover
-                      v-if="item.qualified !== '1'&&item.failReason!==null&&item.failReason!==''"
+                      v-if="item.qualified !== '1'"
                       placement="bottom"
                       width="300"
                       trigger="click"
-                      :content="item.failReason">
+                      :content="item.failReason==null?'疑似存在误触情况，未读取到加速器数据！':item.failReason">
                       <i class="el-icon-warning" style="color:#f56c6c; cursor:pointer; margin-right: 4px;" slot="reference" title="点击查看不合格原因"></i>
                     </el-popover>
                     质量：
