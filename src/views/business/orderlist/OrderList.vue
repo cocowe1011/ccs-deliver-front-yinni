@@ -13,6 +13,9 @@
                 <el-input size="small" v-model="orderMainForm.orderName" :placeholder="$t('processParameters.dingdanmingcheng')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
               <el-form-item>
+                <el-checkbox v-model="orderMainForm.photoFlag" :disabled="!(isNewSave || isEdit)">{{ $t('processParameters.paizhao') }}</el-checkbox>
+              </el-form-item>
+              <el-form-item>
                 <el-checkbox v-model="orderMainForm.revertFlag" :disabled="!(isNewSave || isEdit) || ((isNewSave || isEdit) && orderMainForm.trayFlag)">{{ $t('processParameters.fanzhuan') }}</el-checkbox>
               </el-form-item>
               <el-form-item>
@@ -298,37 +301,41 @@ export default {
       this.orderMainForm = JSON.parse(JSON.stringify(val));
       this.orderMainForm.revertFlag = this.orderMainForm.revertFlag == '翻转' ? true : false
       this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
+      this.orderMainForm.photoFlag = this.orderMainForm.photoFlag == '1' ? true : false
       this.currentSelect = val;
       // alert(JSON.stringify(orderMain))
     },
     async saveOrder() {
       if(this.orderMainForm.orderNo == '' || this.orderMainForm.orderNo == undefined ) {
-        this.$message.error('订单编号必须填写！');
+        this.$message.error(this.$i18n.locale === 'zh'?'订单编号必须填写！':'Order number must be filled in!');
         return false;
       }
       if(this.orderMainForm.batchId == '' || this.orderMainForm.batchId == undefined ) {
-        this.$message.error('灭菌批号必须填写！');
+        this.$message.error(this.$i18n.locale === 'zh'?'灭菌批号必须填写！':'Batch number must be filled in!');
         return false;
       }
       this.saveLoading = true;
       this.orderMainForm.revertFlag = this.orderMainForm.revertFlag ? '1' : '0'
       this.orderMainForm.trayFlag = this.orderMainForm.trayFlag ? '1' : '0'
+      this.orderMainForm.photoFlag = this.orderMainForm.photoFlag ? '1' : '0'
       await HttpUtil.post('/order/save', this.orderMainForm).then((res)=> {
         if(res.data === 1) {
-          this.$message.success('保存成功！');
+          this.$message.success(this.$i18n.locale === 'zh'?'保存成功！':'Save successful!');
           // 查询订单信息
           this.getOrderList();
         } else {
           this.orderMainForm.revertFlag = this.orderMainForm.revertFlag == '1' ? true : false
           this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
-          this.$message.error('保存失败，请检查信息是否填写完整！');
+          this.orderMainForm.photoFlag = this.orderMainForm.photoFlag == '1' ? true : false
+          this.$message.error(this.$i18n.locale === 'zh'?'保存失败，请检查信息是否填写完整！':'Save failed. Please check if all information is filled in completely!');
         }
         this.saveLoading = false;
       }).catch((err)=> {
         // 网络异常 稍后再试
         this.orderMainForm.revertFlag = this.orderMainForm.revertFlag == '1' ? true : false
-          this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
-        this.$message.error('保存失败，请检查信息是否填写完整！' + err);
+        this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
+        this.orderMainForm.photoFlag = this.orderMainForm.photoFlag == '1' ? true : false
+        this.$message.error(this.$i18n.locale === 'zh'?'保存失败，请检查信息是否填写完整！':'Save failed. Please check if all information is filled in completely!' + err);
         this.saveLoading = false;
       });
     },
@@ -336,9 +343,10 @@ export default {
       this.editLoading = true;
       this.orderMainForm.revertFlag = this.orderMainForm.revertFlag ? '1' : '0'
       this.orderMainForm.trayFlag = this.orderMainForm.trayFlag ? '1' : '0'
+      this.orderMainForm.photoFlag = this.orderMainForm.photoFlag ? '1' : '0'
       await HttpUtil.post('/order/update', this.orderMainForm).then((res)=> {
         if(res.data === 1) {
-          this.$message.success('修改成功！');
+          this.$message.success(this.$i18n.locale === 'zh'?'修改成功！':'Modification successful!');
           // 将修改的订单信息同步到动态图组件
           this.$nextTick(() => {
             this.$refs.dynamicGraph.replaceOrderData(this.orderMainForm);
@@ -348,14 +356,16 @@ export default {
         } else {
           this.orderMainForm.revertFlag = this.orderMainForm.revertFlag == '1' ? true : false
           this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
-          this.$message.error('修改失败！');
+          this.orderMainForm.photoFlag = this.orderMainForm.photoFlag == '1' ? true : false
+          this.$message.error(this.$i18n.locale === 'zh'?'修改失败！':'Modification failed!');
         }
         this.editLoading = false;
       }).catch((err)=> {
         // 网络异常 稍后再试
         this.orderMainForm.revertFlag = this.orderMainForm.revertFlag == '1' ? true : false
-          this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
-        this.$message.error('修改失败！' + err);
+        this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
+        this.orderMainForm.photoFlag = this.orderMainForm.photoFlag == '1' ? true : false
+        this.$message.error(this.$i18n.locale === 'zh'?'修改失败！':'Modification failed!' + err);
         this.editLoading = false;
       });
     },
@@ -377,7 +387,7 @@ export default {
           this.getOrderListLoading = false
         }, 500);
         // 网络异常 稍后再试
-        this.$message.error('查询失败！' + err);
+        this.$message.error(this.$i18n.locale === 'zh'?'查询失败！':'Query failed!' + err);
       });
       // this.tableData = [{revertFlag: '翻转', orderId: '202306160001', orderName: '威高一次性管路'}];
     },
@@ -406,7 +416,7 @@ export default {
       try {
         await this.getId();
       } catch (error) {
-        this.$message.error('获取模拟id方法错误！请重新尝试！');
+        this.$message.error(this.$i18n.locale === 'zh'?'获取模拟id方法错误！请重新尝试！':'Error retrieving simulation ID! Please try again!');
         throw new Error("A 方法异常");
       }
       const param = {
@@ -417,14 +427,14 @@ export default {
       // 更新订单开始时间
       HttpUtil.post('/order/update', param).then((res)=> {
         if(res.data == 1) {
-          this.$message.success('开始订单！更新订单开始时间成功！')
+          this.$message.success(this.$i18n.locale === 'zh'?'开始订单！更新订单开始时间成功！':'Starting order! Successfully updated order start time!')
           // 运行
           this.nowRunOrderId = obj.orderId;
         } else {
-          this.$message.error('开始失败！更新订单开始时间失败！')
+          this.$message.error(this.$i18n.locale === 'zh'?'开始失败！更新订单开始时间失败！':'Start failed! Failed to update order start time!')
         }
       }).catch((err)=> {
-        this.$message.error('开始失败！更新订单开始时间失败！')
+        this.$message.error(this.$i18n.locale === 'zh'?'开始失败！更新订单开始时间失败！':'Start failed! Failed to update order start time!')
       });
       // 将订单信息同步到动态图组件
       this.$nextTick(() => {
@@ -440,13 +450,13 @@ export default {
       // 更新300状态
       HttpUtil.post('/order/update', param).then((res)=> {
         if(res.data != 1) {
-          this.$message.error('更新订单运行状态失败！')
+          this.$message.error(this.$i18n.locale === 'zh'?'更新订单运行状态失败！':'Failed to update order running status!')
         } else {
-          this.$message.success('已停止！更新订单运行状态！')
+          this.$message.success(this.$i18n.locale === 'zh'?'已停止！更新订单运行状态！':'Stopped! Updated order running status!')
           this.nowRunOrderId = '';
         }
       }).catch((err)=> {
-        this.$message.error('更新订单运行状态失败！')
+        this.$message.error(this.$i18n.locale === 'zh'?'更新订单运行状态失败！':'Failed to update order running status!')
       });
     },
     indexMethod(index) {
@@ -457,6 +467,7 @@ export default {
         this.orderMainForm = JSON.parse(JSON.stringify(val));
         this.orderMainForm.revertFlag = this.orderMainForm.revertFlag == '翻转' ? true : false
         this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
+        this.orderMainForm.photoFlag = this.orderMainForm.photoFlag == '1' ? true : false
         this.currentSelect = val;
         this.isNewSave = false;
         this.isEdit = false;
@@ -471,11 +482,11 @@ export default {
     returnGenerateBatchReport(res) {
       this.getOrderListLoading = false;
       if (res) {
-        this.$message.success('生成成功！');
+        this.$message.success(this.$i18n.locale === 'zh'?'生成成功！':'Generation successful!');
         this.getOrderList();
         this.nowRunOrderId = '';
       } else {
-        this.$message.error('生成失败！请重试！');
+        this.$message.error(this.$i18n.locale === 'zh'?'生成失败！请重试！':'Generation failed! Please try again!');
       }
     },
     positionOrder() {
@@ -496,13 +507,14 @@ export default {
         }
       }).catch((err)=> {
         // 网络异常 稍后再试
-        this.$message.error('获取配方失败！' + err);
+        this.$message.error(this.$i18n.locale === 'zh'?'获取配方失败！':'Failed to retrieve template!' + err);
       });
     },
     selectDictOrder(value) {
       this.orderMainForm = this.dictOrderList[value]
       this.orderMainForm.revertFlag = this.orderMainForm.revertFlag == '1' ? true : false
       this.orderMainForm.trayFlag = this.orderMainForm.trayFlag == '1' ? true : false
+      this.orderMainForm.photoFlag = this.orderMainForm.photoFlag == '1' ? true : false
     }
   },
   created() {

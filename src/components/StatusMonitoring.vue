@@ -89,7 +89,7 @@ export default {
           // 说明已经2s没有更新数据，PLC断连了，报警
           this.plcStatus = false
           if(this.$route.path != '/login') {
-            this.$message.error('PLC断开连接！');
+            this.$message.error(this.$i18n.locale === 'zh' ? 'PLC断开连接！': 'PLC Disconnect！');
           }
         }, 3000);
       }

@@ -18,7 +18,9 @@ const messages = {
       noUser: "Don't have an account？",
       nowRegister: 'Sign up',
       forgetPassword: 'forget the password？',
-      loginword: 'log in'
+      loginword: 'log in',
+      xitongqidong: 'System is starting up',
+      qingshaohou: 'Please wait'
     },
     register: {
       title: 'Create Account',
@@ -58,6 +60,7 @@ const messages = {
       dingdanmingcheng: 'Order Name',
       fanzhuan: 'Rotate',
       tuopan: 'Pallet',
+      paizhao: 'Photo Mode',
       miejunpihao: 'Batch Number',
       chanpinmingcheng: 'Product Name',
       gongyimingcheng: 'Process Name',
@@ -229,6 +232,9 @@ const messages = {
       shuxiashishi: 'Real-time Speed',
       dingdanquanshu: 'Order Turns',
       mode: 'Mode',
+      photoMode: 'Photo Mode',
+      photoModeOn: 'On',
+      photoModeOff: 'Off',
       tuopanmoshi: 'Tray Mode',
       fanzhuanmoshi: 'Flip Mode',
       huiliumoshi: 'Return Mode',
@@ -243,7 +249,7 @@ const messages = {
       qiehuan: 'Switch',
       dingdan: 'Order',
       caozuorizhi:'Log',
-      baojingrizhi: 'Error Log',
+      baojingrizhi: 'ErrorLog',
       shishijiankong: 'Real-time Status Monitoring',
       idinfo: 'ID',
       shanghuosaoma: 'Load Scan',
@@ -320,7 +326,9 @@ const messages = {
       nowRegister: '立即注册',
       forgetPassword: '忘记密码？',
       loginword: '登录',
-      register: '立即注册'
+      register: '立即注册',
+      xitongqidong: '系统正在启动中',
+      qingshaohou: '请稍后'
     },
     register: {
       title: '创建账户',
@@ -359,6 +367,7 @@ const messages = {
       dingdanmingcheng: '订单名称',
       fanzhuan: '翻转',
       tuopan: '托盘',
+      paizhao: '拍照模式',
       miejunpihao: '灭菌批号',
       chanpinmingcheng: '产品名称',
       gongyimingcheng: '工艺名称',
@@ -530,6 +539,9 @@ const messages = {
       shuxiashishi: '束下实时速度',
       dingdanquanshu: '订单圈数',
       mode: '模式',
+      photoMode: '拍照模式',
+      photoModeOn: '开启',
+      photoModeOff: '关闭',
       tuopanmoshi: '托盘模式',
       fanzhuanmoshi: '翻转模式',
       huiliumoshi: '回流模式',

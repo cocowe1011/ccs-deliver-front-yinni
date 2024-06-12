@@ -41,7 +41,7 @@
           <div></div>
         </div>
         <div id="lodtext">
-          系统正在启动中...&nbsp;请稍后...
+          {{ $t('login.xitongqidong') }}...&nbsp;{{ $t('login.qingshaohou') }}...
         </div>
       </div>
     </transition>
@@ -59,8 +59,8 @@ export default {
   props: {},
   data() {
     return {
-      userCode: '',
-      userPassword: '',
+      userCode: 'admin',
+      userPassword: '2',
       loadingStatus: false,
       pageMark: 'login',
       showUserNameTips: false,

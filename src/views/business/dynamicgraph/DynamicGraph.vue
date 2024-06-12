@@ -2,6 +2,7 @@
   <div class="dynamic">
     <el-button type="danger" icon="el-icon-close" style="position: absolute;z-index: 999;right: 35px;top: 70px;" @click="closeDynamicGraphShow"></el-button>
     <el-button type="primary" plain style="position: absolute;z-index: 999;right: 130px;top: 75px;" @click="testAcc">{{ $t('dynamicGraph.ceshijiasuqi') }}</el-button>
+    <!-- <el-button type="primary" plain style="position: absolute;z-index: 999;right: 130px;top: 75px;" @click="testAcc">测试首箱</el-button> -->
     <div class="dynamic-left">
       <div class="dynamic-left-top">
         <div>
@@ -53,6 +54,15 @@
               <div class="data-card-border">
                 <div class="data-card-border-borderTop">{{ $t('dynamicGraph.mode') }}</div>
                 <div class="data-card-border-borderDown">{{ orderMainDy.trayFlag === '1' ? $t('dynamicGraph.tuopanmoshi'): (orderMainDy.revertFlag === '翻转' ? $t('dynamicGraph.fanzhuanmoshi') : $t('dynamicGraph.huiliumoshi')) }}</div>
+              </div>
+            </div>
+            <div class="data-card" style="padding: 7px 20px 14px 10px;">
+              <el-tooltip class="item" effect="dark" content="打印首尾箱标签" placement="top">
+                <el-button type="primary" icon="el-icon-printer" circle style="position: absolute;margin-top: 6px;margin-left: 189px;" @click="printLabel" v-show="orderMainDy.photoFlag === '1'"></el-button>
+              </el-tooltip>
+              <div class="data-card-border">
+                <div class="data-card-border-borderTop">{{ $t('dynamicGraph.photoMode') }}</div>
+                <div class="data-card-border-borderDown">{{ orderMainDy.photoFlag === '1' ? $t('dynamicGraph.photoModeOn'): $t('dynamicGraph.photoModeOff')}}</div>
               </div>
             </div>
           </div>
@@ -120,6 +130,18 @@
               <img src="./img/deng.png" class="fusheguang" v-show="dengShow"/>
             </transition>
             <img src="./img/chuansongdai.png" style="width: 889.67px;height: 682.66px;margin-top:60px" />
+            <div class="show-data-area" style="position: absolute;left: 0px;top: 15px;width: 260px;" v-show="orderMainDy.photoFlag === '1'">
+              <div class="show-data-area-top">首箱标签</div>
+              <div class="show-data-area-content" style="width: 160px;">
+                <el-input readonly size="small" v-model="firstLabelCode"></el-input>
+              </div>
+            </div>
+            <div class="show-data-area" style="position: absolute;left: 0px;top: 53px;width: 260px;" v-show="orderMainDy.photoFlag === '1'">
+              <div class="show-data-area-top">尾箱标签</div>
+              <div class="show-data-area-content" style="width: 160px;">
+                <el-input readonly size="small" v-model="secLabelCode"></el-input>
+              </div>
+            </div>
             <div class="show-data-area" style="position: absolute;right: 80px;top: 490px;">
               <div class="show-data-area-top">{{ $t('dynamicGraph.idinfo') }}</div>
               <div class="show-data-area-content">
@@ -527,7 +549,9 @@ export default {
       speedTwo: 1, // G-H V2比例系数
       newDelayPointTime: 0, // GH延迟时间
       lengthOne: 0, // G-H X1长度
-      lengthTwo: 0 // G-H X2长度
+      lengthTwo: 0, // G-H X2长度
+      firstLabelCode: '', // 首标签
+      secLabelCode: '' // 尾标签
     };
   },
   watch: {
@@ -876,6 +900,13 @@ export default {
           this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 加速器紧急停机!', 'error')
         }
       }
+    },
+    loadScanCodeTemp: {
+      handler(newVal, oldVal){
+        if(newVal == this.firstLabelCode) {
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 首箱经过A点,扫码信息：' + newVal, 'log')
+        }
+      }
     }
   },
   computed: {},
@@ -1048,7 +1079,7 @@ export default {
       HttpUtil.get('/box/getAccData').then((res)=> {
         this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 加速器返回数据：' + JSON.stringify(res), 'log');
       }).catch((err)=> {
-        this.$message.error('连接加速器失败！原因：' + err)
+        this.$message.error(this.$i18n.locale === 'zh' ? '连接加速器失败！原因：' : 'Failed to connect to the accelerator! Reason：' + err)
         this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 连接加速器失败！原因：' + err, 'log');
       });
     },
@@ -1089,20 +1120,20 @@ export default {
         if(res.data&&JSON.stringify(this.orderMainDy) != '{}' && this.judgeAccData(res.data, boxImitateIdVal)) {
           this.$message({
             type: 'success',
-            message: '箱子id' + boxImitateIdVal + '工艺合格！更新状态！'
+            message: this.$i18n.locale === 'zh' ? ('箱子id' + boxImitateIdVal + '工艺合格！更新状态！') : ('box id' + boxImitateIdVal + 'Process qualified! Update status!')
           });
           this.qualified4Box(boxImitateIdVal, true)
         } else {
           this.$message({
             type: 'warning',
-            message: '箱子id' + boxImitateIdVal + '工艺不合格！更新状态！'
+            message: this.$i18n.locale === 'zh' ? ('箱子id' + boxImitateIdVal + '工艺不合格！更新状态！') : ('box id' + boxImitateIdVal + 'Process not qualified! Update status!')
           });
           this.qualified4Box(boxImitateIdVal, false)
         }
       }).catch((err)=> {
         this.$message({
           type: 'warning',
-          message: '箱子id' + boxImitateIdVal + '工艺不合格！更新状态！'
+          message: this.$i18n.locale === 'zh' ? ('箱子id' + boxImitateIdVal + '工艺不合格！更新状态！'): 'box id' + boxImitateIdVal + 'Process not qualified! Update status!'
         });
         this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！数据异常！'+ err, 'log');
         this.qualified4Box(boxImitateIdVal, false)
@@ -1142,7 +1173,7 @@ export default {
       if(orderMain.orderId === this.orderMainDy.orderId) {
         this.orderMainDy = JSON.parse(JSON.stringify(orderMain));
         this.orderMainDy.revertFlag = this.orderMainDy.revertFlag == '1' ? '翻转' : ''
-        this.$message.success('修改信息已同步到当前使用订单！')
+        this.$message.success(this.$i18n.locale === 'zh' ? 'Changes have been synced to the current active order!': '')
       }
     },
     showOrderInfo(orderMain, changeFlag) {
@@ -1494,14 +1525,11 @@ export default {
               // 生成箱报告
               await HttpUtil.post('/box/save', param).then((res)=> {
                 if(res.data == 1) {
-                  this.$message.success('货物：' + this.arrF[this.arrF.length - 1].boxImitateId + '，已生成箱报告！')
                   this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrF[this.arrF.length - 1].boxImitateId + '，已生成箱报告！', 'log');
                 } else {
-                  this.$message.error('货物：' + this.arrF[this.arrF.length - 1].boxImitateId + '，生成箱报告失败！')
                   this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrF[this.arrF.length - 1].boxImitateId + '，生成箱报告失败！', 'log');
                 }
               }).catch((err)=> {
-                this.$message.error('货物：' + this.arrF[this.arrF.length - 1].boxImitateId + '，生成箱报告失败！' + err)
                 this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrF[this.arrF.length - 1].boxImitateId + '，生成箱报告失败！' + err, 'log');
               });
             }
@@ -1531,14 +1559,11 @@ export default {
               // 生成箱报告
               await HttpUtil.post('/box/save', param).then((res)=> {
                 if(res.data == 1) {
-                  this.$message.success('货物：' + this.arrDG[0].boxImitateId + '，已生成箱报告！')
                   this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrDG[0].boxImitateId + '，已生成箱报告！', 'log');
                 } else {
-                  this.$message.error('货物：' + this.arrDG[0].boxImitateId + '，生成箱报告失败！')
                   this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrDG[0].boxImitateId + '，生成箱报告失败！', 'log');
                 }
               }).catch((err)=> {
-                this.$message.error('货物：' + this.arrDG[0].boxImitateId + '，生成箱报告失败！' + err)
                 this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrDG[0].boxImitateId + '，生成箱报告失败！' + err, 'log');
               });
             }
@@ -1614,14 +1639,11 @@ export default {
                 // 更新箱报告的H点的时间
                 await HttpUtil.post('/box/save', param).then((res)=> {
                   if(res.data == 1) {
-                    this.$message.success('货物：' + this.arrGH[indexHBox].boxImitateId + '，已更新箱报告！')
                     this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrGH[indexHBox].boxImitateId + '，已更新箱报告！', 'log');
                   } else {
-                    this.$message.error('货物：' + this.arrGH[indexHBox].boxImitateId + '，更新箱报告失败！')
                     this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrGH[indexHBox].boxImitateId + '，更新箱报告失败！', 'log');
                   }
                 }).catch((err)=> {
-                  this.$message.error('货物：' + this.arrGH[indexHBox].boxImitateId + '，更新箱报告失败！' + err)
                   this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrGH[indexHBox].boxImitateId + '，更新箱报告失败！' + err, 'log');
                 });
               }
@@ -1761,8 +1783,8 @@ export default {
             ipcRenderer.send('writeValuesToPLC', 'DBW6', 0);
           }, 500);
           this.$notify({
-            title: '指令发送成功！',
-            message: '全线暂停指令已成功发送！',
+            title: this.$i18n.locale === 'zh' ?'指令发送成功！':'Command sent successfully!',
+            message: this.$i18n.locale === 'zh' ?'全线暂停指令已成功发送！':'The instruction to pause the entire line has been successfully sent!',
             type: 'success',
             duration: 2000
           });
@@ -1778,8 +1800,8 @@ export default {
             ipcRenderer.send('writeValuesToPLC', 'DBW10', 0);
           }, 500);
           this.$notify({
-            title: '指令发送成功！',
-            message: '全线停止指令已成功发送！',
+            title: this.$i18n.locale === 'zh' ?'指令发送成功！':'Command sent successfully!',
+            message: this.$i18n.locale === 'zh' ?'全线停止指令已成功发送！':'The instruction to stop the entire line has been successfully sent!',
             type: 'success',
             duration: 2000
           });
@@ -1790,8 +1812,8 @@ export default {
             ipcRenderer.send('writeValuesToPLC', 'DBW42', 0);
           }, 500);
           this.$notify({
-            title: '指令发送成功！',
-            message: '故障复位指令已成功发送！',
+            title: this.$i18n.locale === 'zh' ?'指令发送成功！':'Command sent successfully!',
+            message: this.$i18n.locale === 'zh' ?'故障复位指令已成功发送！':'The fault reset instruction has been successfully sent!',
             type: 'success',
             duration: 2000
           });
@@ -1837,8 +1859,8 @@ export default {
       // DB101.DBW24 纸箱长度
       ipcRenderer.send('writeValuesToPLC', 'DBW24', Number(this.orderMainDy.boxLength));
       this.$notify({
-        title: '指令发送成功！',
-        message: '全线启动指令已成功发送！',
+        title: this.$i18n.locale === 'zh' ?'指令发送成功！':'Command sent successfully!',
+        message: this.$i18n.locale === 'zh' ?'全线启动指令已成功发送！':'The instruction to start the entire line has been successfully sent!',
         type: 'success',
         duration: 2000
       });
@@ -1855,7 +1877,7 @@ export default {
         orderId: this.orderMainDy.orderId
       }
       await HttpUtil.post('/box/saveOriginal', param).then((res)=> {
-        this.$message.success('原始记录同步保存成功！');
+        this.$message.success(this.$i18n.locale === 'zh' ? '原始记录同步保存成功！': 'Changes have been synced to the current active order!');
       })
     },
     async generateBatchReport() {
@@ -1925,7 +1947,7 @@ export default {
             throw new Error();
           });
         } catch (error) {
-          this.$message.error('获取模拟id方法错误！请重新尝试！');
+          this.$message.error(this.$i18n.locale === 'zh' ? '获取模拟id方法错误！请重新尝试！': 'Error retrieving simulation ID! Please try again!');
         }
       }
       
@@ -1976,7 +1998,7 @@ export default {
       if(!isChangeOrder) {
         ipcRenderer.send('writeValuesToPLC', 'DBW18', 0); // 剔除(切换订单不可清空)
         ipcRenderer.send('writeValuesToPLC', 'DBW16', 0); // 下货(切换订单不可清空)
-        this.$message.success('全线清空成功!')
+        this.$message.success(this.$i18n.locale === 'zh' ? '全线清空成功!': 'All cleared successfully!')
       }
     },
     getConfig() {
@@ -1995,10 +2017,10 @@ export default {
           this.lengthOne = res.data.lengthOne == null ? 0 : res.data.lengthOne;
           this.lengthTwo = res.data.lengthTwo == null ? 0 : res.data.lengthTwo;
         } else {
-          this.$message.error('config error! 更新配置错误！')
+          this.$message.error('config error！')
         }
       }).catch((err)=> {
-        this.$message.error('config error! 更新配置错误！')
+        this.$message.error('config error！')
       });
     },
     showRunlog() {
@@ -2019,9 +2041,9 @@ export default {
     operationConfirm(command) {
       switch (command) {
         case 'suspend':
-          this.$confirm('此操作将全线暂停, 是否继续?', '警告！', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+          this.$confirm(this.$i18n.locale === 'zh' ? '此操作将全线暂停, 是否继续?': 'This operation will pause the entire line. Do you want to continue?', this.$i18n.locale === 'zh' ? '警告！': 'Warning!', {
+            confirmButtonText: this.$i18n.locale === 'zh' ? '确定' : 'OK',
+            cancelButtonText: this.$i18n.locale === 'zh' ? '取消': 'Cancel',
             type: 'warning'
           }).then(() => {
             this.fullPause = true
@@ -2031,14 +2053,18 @@ export default {
           }).catch(() => {
             this.$message({
               type: 'info',
-              message: '取消操作！'
+              message: this.$i18n.locale === 'zh' ? '取消操作！' : 'Operation canceled!'
             });          
           });
           break;
         case 'run':
-          this.$confirm('此操作将全线启动, 是否继续?', '警告！', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+          if(this.orderMainDy.photoFlag === '1'&&(this.firstLabelCode == '' || this.secLabelCode == '')) {
+            this.$message.warning(this.$i18n.locale === 'zh' ? '请先打印首尾箱标签再启动生产线！': 'Please print the first and last box labels before starting the production line!')
+            return false
+          }
+          this.$confirm(this.$i18n.locale === 'zh' ? '此操作将全线启动, 是否继续?' : 'This operation will start the entire line. Do you want to continue?', this.$i18n.locale === 'zh' ? '警告！': 'Warning!', {
+            confirmButtonText: this.$i18n.locale === 'zh' ? '确定' : 'OK',
+            cancelButtonText: this.$i18n.locale === 'zh' ? '取消': 'Cancel',
             type: 'warning'
           }).then(() => {
             this.fullPause = false
@@ -2048,14 +2074,14 @@ export default {
           }).catch(() => {
             this.$message({
               type: 'info',
-              message: '取消操作！'
+              message: this.$i18n.locale === 'zh' ? '取消操作！' : 'Operation canceled!'
             });          
           });
           break;
         case 'stop':
-          this.$confirm('此操作将全线停止, 是否继续?', '警告！', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+          this.$confirm(this.$i18n.locale === 'zh' ? '此操作将全线停止, 是否继续?': 'This operation will stop the entire line. Do you want to continue?', this.$i18n.locale === 'zh' ? '警告！': 'Warning!ß', {
+            confirmButtonText: this.$i18n.locale === 'zh' ? '确定' : 'OK',
+            cancelButtonText: this.$i18n.locale === 'zh' ? '取消': 'Cancel',
             type: 'warning'
           }).then(() => {
             this.fullPause = false
@@ -2067,14 +2093,14 @@ export default {
           }).catch(() => {
             this.$message({
               type: 'info',
-              message: '取消操作！'
+              message: this.$i18n.locale === 'zh' ? '取消操作！' : 'Operation canceled!'
             });          
           });
           break;
         case 'clear':
-          this.$prompt('请输入登录账号的密码：', '敏感操作！验证用户！', {
-            confirmButtonText: '验证',
-            cancelButtonText: '取消',
+          this.$prompt(this.$i18n.locale === 'zh' ? '请输入登录账号的密码：': 'Please enter the password for your login account:',this.$i18n.locale === 'zh' ? '敏感操作！验证用户！': 'Sensitive operation! Please verify the user!', {
+            confirmButtonText: this.$i18n.locale === 'zh'? '验证': 'Verification',
+            cancelButtonText: this.$i18n.locale === 'zh'? '取消': 'Cancel',
             inputType: 'password'
           }).then(({ value }) => {
             // 验证姓名是否正确
@@ -2084,33 +2110,33 @@ export default {
             }
             HttpUtil.post('/userInfo/verifyPassword', param).then((res)=> {
               if(res.data) {
-                this.$message.success('验证通过！');
+                this.$message.success(this.$i18n.locale === 'zh'?'验证通过！': 'Verification Successful!');
                 this.clearAllData(false);
                 this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 用户：' + remote.getGlobal('sharedObject').userInfo.userName + '进行了全线清空操作！', 'log');
               } else {
-                this.$message.error('验证未通过！');
+                this.$message.error(this.$i18n.locale === 'zh' ? '验证未通过！': 'Verification unsuccessful!');
               }
             }).catch((err)=> {
-              this.$message.error('验证未通过！请重试！');
+              this.$message.error(this.$i18n.locale === 'zh' ? '验证未通过！请重试！': 'Verification unsuccessful! Please try again!');
             });
           }).catch(() => {
             this.$message({
               type: 'info',
-              message: '取消验证！'
+              message: this.$i18n.locale === 'zh' ? '取消验证！' : 'Cancel Verification!'
             });       
           });
           break;
         case 'reset':
-          this.$confirm('此操作将发送故障复位信息, 是否继续?', '警告！', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+          this.$confirm(this.$i18n.locale === 'zh' ? '此操作将发送故障复位信息, 是否继续?': 'This operation will send a fault reset message. Do you want to continue?', this.$i18n.locale === 'zh' ? '警告！': 'Warning！', {
+            confirmButtonText: this.$i18n.locale === 'zh' ? '确定' : 'OK',
+            cancelButtonText: this.$i18n.locale === 'zh' ? '取消': 'Cancel',
             type: 'warning'
           }).then(() => {
             this.sendMsgToPLC('reset');
           }).catch(() => {
             this.$message({
               type: 'info',
-              message: '取消操作！'
+              message: this.$i18n.locale === 'zh' ? '取消操作！' : 'Operation canceled!'
             });          
           });
           break;
@@ -2195,16 +2221,16 @@ export default {
         }, 500);
         this.$message({
           type: 'success',
-          message: '操作成功!'
+          message: this.$i18n.locale === 'zh'? '操作成功!': 'Operation Successful!'
         });
       }).catch(() => {});
     },
     handleCurrentChange(val) {
       if(val != null) {
-        this.$confirm('即将切换订单，请先处理当前订单状态！', '确认信息', {
+        this.$confirm(this.$i18n.locale === 'zh'? '即将切换订单，请先处理当前订单状态！': 'Order switching imminent, please handle the current order status first!', this.$i18n.locale === 'zh'?'确认信息':'Confirm the information', {
           distinguishCancelAndClose: true,
-          confirmButtonText: '当前订单完成',
-          cancelButtonText: '当前订单暂停',
+          confirmButtonText: this.$i18n.locale === 'zh'?'当前订单完成':'Current order completed',
+          cancelButtonText: this.$i18n.locale === 'zh'?'当前订单暂停':'Current order paused',
           type: 'warning',
           cancelButtonClass: 'el-button--info'
         })
@@ -2256,17 +2282,54 @@ export default {
           this.getOrderListLoading = false
         }, 500);
         // 网络异常 稍后再试
-        this.$message.error('查询失败！' + err);
+        this.$message.error(this.$i18n.locale === 'zh'?'查询失败！': 'Query failed!' + err);
       });
+    },
+    printLabel() {
+      // 自动生成一个首尾箱标签
+      this.$confirm(this.$i18n.locale === 'zh'?'此操作将生成首尾箱条码并打印标签, 是否继续?':'This operation will generate first and last box barcodes and print labels. Do you want to continue?', this.$i18n.locale === 'zh'?'提示':'Tip', {
+        confirmButtonText: this.$i18n.locale === 'zh' ? '确定' : 'OK',
+        cancelButtonText: this.$i18n.locale === 'zh' ? '取消': 'Cancel',
+        type: 'warning'
+      }).then(() => {
+        const result = this.generateTimestamp();
+        this.firstLabelCode = result[0];
+        this.secLabelCode = result[1];
+        // 把首尾箱标签在数据库存储一下
+        this.$message({
+          type: 'success',
+          message: this.$i18n.locale === 'zh'?'打印成功！':'Printing successful!'
+        });
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: this.$i18n.locale === 'zh'?'已取消打印':'Printing canceled.'
+        });          
+      });
+    },
+    generateTimestamp() {
+      // 获取当前时间
+      let now = new Date();
+      // 格式化各个时间部分
+      let year = now.getFullYear();
+      let month = (now.getMonth() + 1).toString().padStart(2, '0'); // 月份从0开始，需要加1
+      let day = now.getDate().toString().padStart(2, '0');
+      let hour = now.getHours().toString().padStart(2, '0');
+      let minute = now.getMinutes().toString().padStart(2, '0');
+      let second = now.getSeconds().toString().padStart(2, '0');
+      // 拼接时间戳
+      let timestamp1 = `${year}${month}${day}${hour}${minute}${second}1`;
+      let timestamp2 = `${year}${month}${day}${hour}${minute}${second}2`;
+      return [timestamp1, timestamp2];
     }
   },
   created() {
     this.getConfig()
   },
   mounted() {
-    setInterval(() => {
-      this.dengShow = !this.dengShow;
-    }, 1000);
+    // setInterval(() => {
+    //   this.dengShow = !this.dengShow;
+    // }, 1000);
     // 订阅<状态球>eventBus发布的消息
     EventBus.$on('pushPLCMessage', eventData => {
       // --------无PLC测试时，这里以下代码毙掉--------
