@@ -1,58 +1,58 @@
 <template>
   <div class="dynamic">
     <el-button type="danger" icon="el-icon-close" style="position: absolute;z-index: 999;right: 35px;top: 70px;" @click="closeDynamicGraphShow"></el-button>
-    <el-button type="primary" plain style="position: absolute;z-index: 999;right: 130px;top: 75px;" @click="testAcc">测试加速器</el-button>
+    <el-button type="primary" plain style="position: absolute;z-index: 999;right: 130px;top: 75px;" @click="testAcc">{{ $t('dynamicGraph.ceshijiasuqi') }}</el-button>
     <div class="dynamic-left">
       <div class="dynamic-left-top">
         <div>
-          <div class="card-title">实时数据监控</div>
+          <div class="card-title">{{ $t('dynamicGraph.shishishuju') }}</div>
           <div class="card-content">
             <div class="data-card" style="padding:14px 10px 7px 20px">
               <div class="data-card-border">
-                <div class="data-card-border-borderTop granient-text">灭菌批号</div>
+                <div class="data-card-border-borderTop granient-text">{{ $t('dynamicGraph.miejunpihao') }}</div>
                 <div class="data-card-border-borderDown" style="font-size: 1.3vw;">{{ orderMainDy.batchId }}</div>
               </div>
             </div>
             <div class="data-card" style="padding: 14px 10px 7px 10px;">
               <div class="data-card-border">
-                <div class="data-card-border-borderTop">箱子长度</div>
+                <div class="data-card-border-borderTop">{{ $t('dynamicGraph.xiangzichangdu') }}</div>
                 <div class="data-card-border-borderDown">{{ orderMainDy.boxLength }}mm</div>
               </div>
             </div>
             <div class="data-card" style="padding: 14px 20px 7px 10px;">
               <div class="data-card-border">
-                <div class="data-card-border-borderTop">箱子宽度</div>
+                <div class="data-card-border-borderTop">{{ $t('dynamicGraph.xiangzikuandu') }}</div>
                 <div class="data-card-border-borderDown">{{ orderMainDy.boxWidth }}mm</div>
               </div>
             </div>
             <div class="data-card" style="padding: 7px 10px 7px 20px;">
               <div class="data-card-border">
-                <div class="data-card-border-borderTop">箱子高度</div>
+                <div class="data-card-border-borderTop">{{ $t('dynamicGraph.xiangzigaodu') }}</div>
                 <div class="data-card-border-borderDown">{{ orderMainDy.boxHeight }}mm</div>
               </div>
             </div>
             <div class="data-card" style="padding: 7px 10px 7px 10px;">
               <div class="data-card-border">
-                <div class="data-card-border-borderTop">束下设置速度</div>
-                <div class="data-card-border-borderDown">{{ orderMainDy.sxSpeedSet }}mm/分钟</div>
+                <div class="data-card-border-borderTop">{{ $t('dynamicGraph.shuxiashezhisudu') }}</div>
+                <div class="data-card-border-borderDown">{{ orderMainDy.sxSpeedSet }}mm/{{ $t('dynamicGraph.fenzhong') }}</div>
               </div>
             </div>
             <div class="data-card" style="padding: 7px 20px 7px 10px;">
               <div class="data-card-border">
-                <div class="data-card-border-borderTop granient-text">束下实时速度</div>
-                <div class="data-card-border-borderDown">{{ lightBeamRealTimeSpeed }}mm/分钟</div>
+                <div class="data-card-border-borderTop granient-text">{{ $t('dynamicGraph.shuxiashishi') }}</div>
+                <div class="data-card-border-borderDown">{{ lightBeamRealTimeSpeed }}mm/{{ $t('dynamicGraph.fenzhong') }}</div>
               </div>
             </div>
             <div class="data-card" style="padding: 7px 10px 14px 20px;">
               <div class="data-card-border">
-                <div class="data-card-border-borderTop granient-text">订单圈数</div>
+                <div class="data-card-border-borderTop granient-text">{{ $t('dynamicGraph.dingdanquanshu') }}</div>
                 <div class="data-card-border-borderDown">{{ orderMainDy.numberTurns }}</div>
               </div>
             </div>
             <div class="data-card" style="padding: 7px 10px 14px 10px;">
               <div class="data-card-border">
-                <div class="data-card-border-borderTop">模式</div>
-                <div class="data-card-border-borderDown">{{ orderMainDy.trayFlag === '1' ? '托盘模式': (orderMainDy.revertFlag === '翻转' ? '翻转模式' : '回流模式') }}</div>
+                <div class="data-card-border-borderTop">{{ $t('dynamicGraph.mode') }}</div>
+                <div class="data-card-border-borderDown">{{ orderMainDy.trayFlag === '1' ? $t('dynamicGraph.tuopanmoshi'): (orderMainDy.revertFlag === '翻转' ? $t('dynamicGraph.fanzhuanmoshi') : $t('dynamicGraph.huiliumoshi')) }}</div>
               </div>
             </div>
           </div>
@@ -60,26 +60,26 @@
       </div>
       <div class="dynamic-left-middle">
         <div>
-          <div class="card-title">操作区</div>
+          <div class="card-title">{{ $t('dynamicGraph.caozuoqu') }}</div>
           <div class="card-content" style="display: flex;align-items: center;">
             <!-- 操作按钮 -->
             <div :class="['img', fullPause?'img-active':'']" @click="operationConfirm('suspend')">
-              全线<br/>暂停
+              {{ $t('dynamicGraph.quanxian') }}<br/>{{ $t('dynamicGraph.zanting') }}
             </div>
             <div :class="['img', fullRun?'img-active':'']" @click="operationConfirm('run')">
-              全线<br/>启动
+              {{ $t('dynamicGraph.quanxian') }}<br/>{{ $t('dynamicGraph.qidong') }}
             </div>
             <div :class="['img', fullStop?'img-active':'']" @click="operationConfirm('stop')">
-              全线<br/>停止
+              {{ $t('dynamicGraph.quanxian') }}<br/>{{ $t('dynamicGraph.tingzhi') }}
             </div>
             <div class="img" @click="operationConfirm('reset')">
-              故障<br/>复位
+              {{ $t('dynamicGraph.guzhang') }}<br/>{{ $t('dynamicGraph.fuwei') }}
             </div>
             <div class="img" @click="operationConfirm('clear')">
-              全线<br/>清空
+              {{ $t('dynamicGraph.quanxian') }}<br/>{{ $t('dynamicGraph.qingkong') }}
             </div>
             <div class="img" v-show="isCanChangeOrder" @click="getOrderList()">
-              切换<br/>订单
+              {{ $t('dynamicGraph.qiehuan') }}<br/>{{ $t('dynamicGraph.dingdan') }}
             </div>
           </div>
         </div>
@@ -88,11 +88,11 @@
         <div>
           <div class="card-title">
             <el-badge :value="logNotReadNumber" :max="99" class="item" :hidden="logNotReadNumber==0">
-              <div :class="['log-class', logPageFlag == 'log'?'log-class-active':'']" @click="showRunlog">操作日志</div>
+              <div :class="['log-class', logPageFlag == 'log'?'log-class-active':'']" @click="showRunlog">{{ $t('dynamicGraph.caozuorizhi') }}</div>
             </el-badge>
             &nbsp;/&nbsp;
             <el-badge :value="errorLogNotReadNumber" :max="99" class="item" :hidden="errorLogNotReadNumber==0">
-              <div :class="['log-class', logPageFlag == 'error-log'?'log-class-active':'']" @click="showErrorlog">报警日志</div>
+              <div :class="['log-class', logPageFlag == 'error-log'?'log-class-active':'']" @click="showErrorlog">{{ $t('dynamicGraph.baojingrizhi') }}</div>
             </el-badge>
           </div>
           <div class="card-content" ref="logContainer">
@@ -112,7 +112,7 @@
     </div>
     <div class="dynamic-right">
       <div>
-        <div class="card-title">实时状态监控</div>
+        <div class="card-title">{{ $t('dynamicGraph.shishijiankong') }}</div>
         <div class="card-content" style="display: flex;justify-content: center;" ref="parent">
           <div class="dyscare chuansongpadding" style="width: 900px;height: 100%;position: relative;" ref="child">
             <img src="./img/fushe2x.png" class="fusheIcon"/>
@@ -121,49 +121,49 @@
             </transition>
             <img src="./img/chuansongdai.png" style="width: 889.67px;height: 682.66px;margin-top:60px" />
             <div class="show-data-area" style="position: absolute;right: 80px;top: 490px;">
-              <div class="show-data-area-top">ID信息</div>
+              <div class="show-data-area-top">{{ $t('dynamicGraph.idinfo') }}</div>
               <div class="show-data-area-content">
                 <el-input readonly size="small" v-model="nowABoxImitateId"></el-input>
               </div>
             </div>
             <div class="show-data-area" style="position: absolute;right: 80px;top: 528px;">
-              <div class="show-data-area-top">上货扫码信息</div>
+              <div class="show-data-area-top">{{ $t('dynamicGraph.shanghuosaoma') }}</div>
               <div class="show-data-area-content">
                 <el-input v-model="loadScanCode" readonly size="small"></el-input>
               </div>
             </div>
             <div class="show-data-area" style="position: absolute;right: 80px;top: 569px;">
-              <div class="show-data-area-top">当前上货数量</div>
+              <div class="show-data-area-top">{{ $t('dynamicGraph.dangqianshanghuo') }}</div>
               <div class="show-data-area-content">
                 <el-input v-model="nowInNum" readonly size="small"></el-input>
               </div>
             </div>
             <div class="show-data-area" style="position: absolute;left: 178px;top: 475px;">
-              <div class="show-data-area-top">ID信息</div>
+              <div class="show-data-area-top">{{ $t('dynamicGraph.idinfo') }}</div>
               <div class="show-data-area-content">
                 <el-input readonly size="small" v-model="nowEBoxImitateId"></el-input>
               </div>
             </div>
             <div class="show-data-area" style="position: absolute;left: 178px;top: 513px;">
-              <div class="show-data-area-top">下货扫码信息</div>
+              <div class="show-data-area-top">{{ $t('dynamicGraph.xiahuosaoma') }}</div>
               <div class="show-data-area-content">
                 <el-input v-model="labyrinthScanCode" readonly size="small"></el-input>
               </div>
             </div>
             <div class="show-data-area" style="position: absolute;left: 194px;top: 560px;">
-              <div class="show-data-area-top">当前下货数量</div>
+              <div class="show-data-area-top">{{ $t('dynamicGraph.dangqianxiahuo') }}</div>
               <div class="show-data-area-content">
                 <el-input v-model="nowOutNum" readonly size="small"></el-input>
               </div>
             </div>
             <div class="show-data-area" style="position: absolute;left: 436px;top: 185px;width: 150px;height: 58px;">
-              <div class="show-data-area-top" style="width: 100%;height: 26px;">束下当前货物ID</div>
+              <div class="show-data-area-top" style="width: 100%;height: 26px;">{{ $t('dynamicGraph.shuxiadangqianhuowu') }}</div>
               <div class="show-data-area-content" style="width: 100%;height: 26px;">
                 <el-input v-model="nowShuXiaid" readonly size="small"></el-input>
               </div>
             </div>
             <div class="show-data-area" style="position: absolute;left: -35px;top: 428px;width: 150px;height: 58px;">
-              <div class="show-data-area-top" style="width: 100%;height: 26px;">当前剔除数量</div>
+              <div class="show-data-area-top" style="width: 100%;height: 26px;">{{ $t('dynamicGraph.dangqiantichu') }}</div>
               <div class="show-data-area-content" style="width: 100%;height: 26px;">
                 <el-input v-model="nowTiChuNum" readonly size="small"></el-input>
               </div>
@@ -202,42 +202,42 @@
               <div class="pointText">H</div>
             </div>
             <!-- 电机状态 -->
-            <div :class="['dianji', dianJiStatusArr[7] == '1' ? 'dianji-active' : '']" style="top: 640px;right: 133px;">100#电机</div>
-            <div :class="['dianji', dianJiStatusArr[6] == '1' ? 'dianji-active' : '']" style="top: 416px;right: 6px;">101#电机</div>
-            <div :class="['dianji', dianJiStatusArr[5] == '1' ? 'dianji-active' : '']" style="top: 386px;right: 190px;">102#电机</div>
-            <div :class="['dianji', dianJiStatusArr[4] == '1' ? 'dianji-active' : '']" style="top: 258px;right: 190px;">103#电机</div>
-            <div :class="['dianji', dianJiStatusArr[3] == '1' ? 'dianji-active' : '']" style="top: 132px;right: 190px;">104#电机</div>
-            <div :class="['dianji', dianJiStatusArr[2] == '1' ? 'dianji-active' : '']" style="top: 88px;right: 450px;">105#电机</div>
-            <div :class="['dianji', dianJiStatusArr[1] == '1' ? 'dianji-active' : '']" style="top: 131px;right: 538px;">106#电机</div>
-            <div :class="['dianji', dianJiStatusArr[0] == '1' ? 'dianji-active' : '']" style="top: 259px;right: 516px;">107#电机</div>
-            <div :class="['dianji', dianJiStatusArr[15] == '1' ? 'dianji-active' : '']" style="top: 379px;right: 516px;">108#电机</div>
-            <div :class="['dianji', dianJiStatusArr[14] == '1' ? 'dianji-active' : '']" style="top: 379px;right: 641px;">109#电机</div>
-            <div :class="['dianji', dianJiStatusArr[13] == '1' ? 'dianji-active' : '']" style="top: 420px;right: 727px;">110#电机</div>
-            <div :class="['dianji', dianJiStatusArr[12] == '1' ? 'dianji-active' : '']" style="top: 638px;right: 730px;">111#电机</div>
-            <div :class="['dianji', dianJiStatusArr[11] == '1' ? 'dianji-active' : '']" style="top: 639px;right: 627px;">112#电机</div>
-            <div :class="['dianji', dianJiStatusArr[10] == '1' ? 'dianji-active' : '']" style="top: 596px;right: 450px;">113#电机</div>
-            <div :class="['dianji', dianJiStatusArr[9] == '1' ? 'dianji-active' : '']" style="top: 596px;right: 264px;">114#电机</div>
-            <div :class="['dianji', dianJiStatusArr[8] == '1' ? 'dianji-active' : '']" style="top: 690px;right: 367px;">115#电机</div>
+            <div :class="['dianji', dianJiStatusArr[7] == '1' ? 'dianji-active' : '']" style="top: 640px;right: 133px;">100#{{ $t('dynamicGraph.dianji') }}</div>
+            <div :class="['dianji', dianJiStatusArr[6] == '1' ? 'dianji-active' : '']" style="top: 416px;right: 6px;">101#{{ $t('dynamicGraph.dianji') }}</div>
+            <div :class="['dianji', dianJiStatusArr[5] == '1' ? 'dianji-active' : '']" style="top: 386px;right: 190px;">102#{{ $t('dynamicGraph.dianji') }}</div>
+            <div :class="['dianji', dianJiStatusArr[4] == '1' ? 'dianji-active' : '']" style="top: 258px;right: 190px;">103#{{ $t('dynamicGraph.dianji') }}</div>
+            <div :class="['dianji', dianJiStatusArr[3] == '1' ? 'dianji-active' : '']" style="top: 132px;right: 190px;">104#{{ $t('dynamicGraph.dianji') }}</div>
+            <div :class="['dianji', dianJiStatusArr[2] == '1' ? 'dianji-active' : '']" style="top: 88px;right: 450px;">105#{{ $t('dynamicGraph.dianji') }}</div>
+            <div :class="['dianji', dianJiStatusArr[1] == '1' ? 'dianji-active' : '']" style="top: 131px;right: 538px;">106#{{ $t('dynamicGraph.dianji') }}</div>
+            <div :class="['dianji', dianJiStatusArr[0] == '1' ? 'dianji-active' : '']" style="top: 259px;right: 516px;">107#{{ $t('dynamicGraph.dianji') }}</div>
+            <div :class="['dianji', dianJiStatusArr[15] == '1' ? 'dianji-active' : '']" style="top: 379px;right: 516px;">108#{{ $t('dynamicGraph.dianji') }}</div>
+            <div :class="['dianji', dianJiStatusArr[14] == '1' ? 'dianji-active' : '']" style="top: 379px;right: 641px;">109#{{ $t('dynamicGraph.dianji') }}</div>
+            <div :class="['dianji', dianJiStatusArr[13] == '1' ? 'dianji-active' : '']" style="top: 420px;right: 727px;">110#{{ $t('dynamicGraph.dianji') }}</div>
+            <div :class="['dianji', dianJiStatusArr[12] == '1' ? 'dianji-active' : '']" style="top: 638px;right: 730px;">111#{{ $t('dynamicGraph.dianji') }}</div>
+            <div :class="['dianji', dianJiStatusArr[11] == '1' ? 'dianji-active' : '']" style="top: 639px;right: 627px;">112#{{ $t('dynamicGraph.dianji') }}</div>
+            <div :class="['dianji', dianJiStatusArr[10] == '1' ? 'dianji-active' : '']" style="top: 596px;right: 450px;">113#{{ $t('dynamicGraph.dianji') }}</div>
+            <div :class="['dianji', dianJiStatusArr[9] == '1' ? 'dianji-active' : '']" style="top: 596px;right: 264px;">114#{{ $t('dynamicGraph.dianji') }}</div>
+            <div :class="['dianji', dianJiStatusArr[8] == '1' ? 'dianji-active' : '']" style="top: 690px;right: 367px;">115#{{ $t('dynamicGraph.dianji') }}</div>
             <!-- 队列信息 -->
-            <el-link type="danger" style="position: absolute;top: 326px;right: 89px;font-size: 16px;font-weight: 600;" @click="showChuanSong('AB')">{{ '101-103区域货物缓存队列 (' + arrAB.length + ')' }}</el-link>
-            <el-link type="danger" style="position: absolute;top: 86px;right: 113px;font-size: 16px;font-weight: 600;" @click="showChuanSong('BC')">{{ '104-106区域货物缓存队列 (' + arrBC.length + ')' }}</el-link>
-            <el-link type="danger" style="position: absolute;top: 320px;right: 536px;font-size: 16px;font-weight: 600;" @click="showChuanSong('CD')">{{ '107-109区域货物缓存队列 (' + arrCD.length + ')' }}</el-link>
-            <el-link type="danger" style="position: absolute;top: 445px;left: 240px;font-size: 16px;font-weight: 600;" @click="showChuanSong('DG')">{{ '110-111区域货物缓存队列 (' + (arrDG.length + tempArrF.length) + ')' }}</el-link>
-            <el-link type="danger" style="position: absolute;top: 395px;left: -37px;font-size: 16px;font-weight: 600;" @click="showChuanSong('F')">{{ '剔除货物缓存队列 (' + arrF.length + ')' }}</el-link>
-            <el-link type="danger" style="position: absolute;top: 689px;right: 542px;font-size: 16px;font-weight: 600;" @click="showChuanSong('GH')">{{ '下货区缓存队列 (' + (arrGH.length + thoughHArr.length) + ')' }}</el-link>
+            <el-link type="danger" style="position: absolute;top: 326px;right: 89px;font-size: 16px;font-weight: 600;" @click="showChuanSong('AB')">{{ '101-103' + $t('dynamicGraph.cacheQu') + '(' + arrAB.length + ')' }}</el-link>
+            <el-link type="danger" style="position: absolute;top: 86px;right: 113px;font-size: 16px;font-weight: 600;" @click="showChuanSong('BC')">{{ '104-106' + $t('dynamicGraph.cacheQu') + '(' + arrBC.length + ')' }}</el-link>
+            <el-link type="danger" style="position: absolute;top: 320px;right: 536px;font-size: 16px;font-weight: 600;" @click="showChuanSong('CD')">{{ '107-109' + $t('dynamicGraph.cacheQu') + '(' + arrCD.length + ')' }}</el-link>
+            <el-link type="danger" style="position: absolute;top: 445px;left: 240px;font-size: 16px;font-weight: 600;" @click="showChuanSong('DG')">{{ '110-111' + $t('dynamicGraph.cacheQu') + '(' + (arrDG.length + tempArrF.length) + ')' }}</el-link>
+            <el-link type="danger" style="position: absolute;top: 395px;left: -37px;font-size: 16px;font-weight: 600;" @click="showChuanSong('F')">{{ $t('dynamicGraph.tichuhuancun') + '(' + arrF.length + ')' }}</el-link>
+            <el-link type="danger" style="position: absolute;top: 689px;right: 542px;font-size: 16px;font-weight: 600;" @click="showChuanSong('GH')">{{ $t('dynamicGraph.xiahuohuancun') + '(' + (arrGH.length + thoughHArr.length) + ')' }}</el-link>
             <!-- 预警 -->
             <img src="./img/yujing.png" class="warning-img" v-show="yujingShow" style="left: 41px;top: 663px;"/>
             <img src="./img/baojing.png" class="warning-img" v-show="baojingShow" style="top: 717px;left: 352px;"/>
             <div style="width: 70px;height: 70px;left: 695px; position: absolute;background-color: lightcoral;color: white;display: flex;justify-content: center;align-items: center;" v-show="banLoadStatus">
-              禁止上货
+              {{ $t('dynamicGraph.jinzhishanghuo') }}
             </div>
-            <el-button type="success" icon="el-icon-check" v-show="baojingShow" @click="downClick" style="position: absolute;right: 271px;top: 744px;" plain>下货完成</el-button>
+            <el-button type="success" icon="el-icon-check" v-show="baojingShow" @click="downClick" style="position: absolute;right: 271px;top: 744px;" plain>{{ $t('dynamicGraph.xiahuowancheng') }}</el-button>
           </div>
         </div>
       </div>
     </div>
     <el-drawer
-      title="快捷移动-拖动表格切换队列"
+      :title="$t('dynamicGraph.yidongtitle')"
       :visible.sync="drawer"
       :modal-append-to-body="false"
       border
@@ -249,37 +249,37 @@
               <thead>
                 <tr>
                     <th style="width:40px;">
-                      <div>序号</div>
+                      <div>{{ $t('dynamicGraph.drawerTitle.xuhao') }}</div>
                     </th>
                     <th style="width: 150px">
-                      <div>订单号</div>
+                      <div>{{ $t('dynamicGraph.drawerTitle.dingdanhao') }}</div>
                     </th>
                     <th style="width: 120px">
-                      <div>箱编号</div>
+                      <div>{{ $t('dynamicGraph.drawerTitle.xiangbianhao') }}</div>
                     </th>
                     <th style="width: 150px">
-                      <div>一维/二维码信息</div>
+                      <div>{{ $t('dynamicGraph.drawerTitle.erweima') }}</div>
                     </th>
                     <th style="width: 130px">
-                      <div>进入时间</div>
+                      <div>{{ $t('dynamicGraph.drawerTitle.jinrushijian') }}</div>
                     </th>
                     <th style="width: 60px">
-                      <div>圈数</div>
+                      <div>{{ $t('dynamicGraph.drawerTitle.quanshu') }}</div>
                     </th>
                     <th style="width: 60px">
-                      <div>翻转</div>
+                      <div>{{ $t('dynamicGraph.drawerTitle.fanzhuan') }}</div>
                     </th>
                     <th style="width: 60px">
-                      <div>已完成</div>
+                      <div>{{ $t('dynamicGraph.drawerTitle.yiwancheng') }}</div>
                     </th>
                     <th style="width: 60px">
-                      <div>合格</div>
+                      <div>{{ $t('dynamicGraph.drawerTitle.hege') }}</div>
                     </th>
                     <th style="width: 60px">
-                      <div>状态</div>
+                      <div>{{ $t('dynamicGraph.drawerTitle.zhuangtai') }}</div>
                     </th>
                     <th style="width: 50px">
-                      <div>操作</div>
+                      <div>{{ $t('dynamicGraph.drawerTitle.caozuo') }}</div>
                     </th>
                   </tr>
               </thead>
@@ -298,19 +298,19 @@
                     <td style="width: 60px">{{ item.revertFlag == '翻转' ? '√': 'X' }}</td>
                     <td style="width: 60px">{{ item.xiahuoFlag ? '√': '' }}</td>
                     <td style="width: 60px">
-                      <el-tag type="success" v-if="item.qualified === '1'" size="mini">合格</el-tag>
-                      <el-tag type="danger" v-else-if="item.qualified === '0'" size="mini">不合格</el-tag>
+                      <el-tag type="success" v-if="item.qualified === '1'" size="mini">{{ $t('dynamicGraph.drawerTitle.hegem') }}</el-tag>
+                      <el-tag type="danger" v-else-if="item.qualified === '0'" size="mini">{{ $t('dynamicGraph.drawerTitle.buhegem') }}</el-tag>
                       <div v-else></div>
                     </td>
                     <td style="width: 60px">
-                      <el-tag type="success" v-if="item.xiahuoFlag" size="mini">已下货</el-tag>
-                      <el-tag type="warning" v-if="item.tichuFlag === 'WAIT_PUT_OUT'" size="mini">待剔除</el-tag>
-                      <el-tag type="danger" v-if="item.tichuFlag === 'HAVE_PUT_OUT'" size="mini">已剔除</el-tag>
-                      <el-tag v-if="!item.xiahuoFlag && item.tichuFlag !== 'WAIT_PUT_OUT' && item.tichuFlag !== 'HAVE_PUT_OUT'" size="mini">执行中</el-tag>
+                      <el-tag type="success" v-if="item.xiahuoFlag" size="mini">{{ $t('dynamicGraph.drawerTitle.yixiahuo') }}</el-tag>
+                      <el-tag type="warning" v-if="item.tichuFlag === 'WAIT_PUT_OUT'" size="mini">{{ $t('dynamicGraph.drawerTitle.daitichu') }}</el-tag>
+                      <el-tag type="danger" v-if="item.tichuFlag === 'HAVE_PUT_OUT'" size="mini">{{ $t('dynamicGraph.drawerTitle.yitichu') }}</el-tag>
+                      <el-tag v-if="!item.xiahuoFlag && item.tichuFlag !== 'WAIT_PUT_OUT' && item.tichuFlag !== 'HAVE_PUT_OUT'" size="mini">{{ $t('dynamicGraph.drawerTitle.zhixingzhong') }}</el-tag>
                     </td>
                     <td style="width: 50px">
                       <el-popconfirm
-                        :title="'确定要将' + item.boxImitateId + '在队列中删除吗？'"
+                        :title="$t('dynamicGraph.drawerTitle.quedingyaojiang') + item.boxImitateId + $t('dynamicGraph.drawerTitle.zaiduilieshanchu')"
                         @confirm="deleteBoxFromArr(item.boxImitateId, index)"
                       >
                         <el-button type="danger" icon="el-icon-delete" size="mini" circle slot="reference"></el-button>
@@ -323,16 +323,16 @@
         </div>
       </div>
       <div class="drawer-right">
-        <div :class="['transform-card',traAB?'transform-card-active':'']" @dragover.prevent @drop="dropItem('AB', $event)" @click="showCache('AB')" @dragenter="dragEnter" @dragleave="dragLeave">101-103区域队列</div>
-        <div :class="['transform-card',traBC?'transform-card-active':'']" @dragover.prevent @drop="dropItem('BC', $event)" @click="showCache('BC')" @dragenter="dragEnter" @dragleave="dragLeave">104-106区域队列</div>
-        <div :class="['transform-card',traCD?'transform-card-active':'']" @dragover.prevent @drop="dropItem('CD', $event)" @click="showCache('CD')" @dragenter="dragEnter" @dragleave="dragLeave">107-109区域队列</div>
-        <div :class="['transform-card',traDG?'transform-card-active':'']" @dragover.prevent @drop="dropItem('DG', $event)" @click="showCache('DG')" @dragenter="dragEnter" @dragleave="dragLeave">110-111区域队列</div>
-        <div :class="['transform-card',traF?'transform-card-active':'']" @dragover.prevent @drop="dropItem('F', $event)" @click="showCache('F')" @dragenter="dragEnter" @dragleave="dragLeave">剔除货物缓存队列</div>
-        <div :class="['transform-card',traGH?'transform-card-active':'']" @dragover.prevent @drop="dropItem('GH', $event)" @click="showCache('GH')" @dragenter="dragEnter" @dragleave="dragLeave">下货区缓存队列</div>
+        <div :class="['transform-card',traAB?'transform-card-active':'']" @dragover.prevent @drop="dropItem('AB', $event)" @click="showCache('AB')" @dragenter="dragEnter" @dragleave="dragLeave">101-103{{ $t('dynamicGraph.drawerTitle.quyuduilie') }}</div>
+        <div :class="['transform-card',traBC?'transform-card-active':'']" @dragover.prevent @drop="dropItem('BC', $event)" @click="showCache('BC')" @dragenter="dragEnter" @dragleave="dragLeave">104-106{{ $t('dynamicGraph.drawerTitle.quyuduilie') }}</div>
+        <div :class="['transform-card',traCD?'transform-card-active':'']" @dragover.prevent @drop="dropItem('CD', $event)" @click="showCache('CD')" @dragenter="dragEnter" @dragleave="dragLeave">107-109{{ $t('dynamicGraph.drawerTitle.quyuduilie') }}</div>
+        <div :class="['transform-card',traDG?'transform-card-active':'']" @dragover.prevent @drop="dropItem('DG', $event)" @click="showCache('DG')" @dragenter="dragEnter" @dragleave="dragLeave">110-111{{ $t('dynamicGraph.drawerTitle.quyuduilie') }}</div>
+        <div :class="['transform-card',traF?'transform-card-active':'']" @dragover.prevent @drop="dropItem('F', $event)" @click="showCache('F')" @dragenter="dragEnter" @dragleave="dragLeave">{{ $t('dynamicGraph.drawerTitle.tichuhuancun') }}</div>
+        <div :class="['transform-card',traGH?'transform-card-active':'']" @dragover.prevent @drop="dropItem('GH', $event)" @click="showCache('GH')" @dragenter="dragEnter" @dragleave="dragLeave">{{ $t('dynamicGraph.drawerTitle.xiahuohuancun') }}</div>
       </div>
     </el-drawer>
     <el-dialog
-      title="切换订单"
+      :title="$t('dynamicGraph.qiehuandingdan.title')"
       :visible.sync="dialogVisible"
       append-to-body
       width="80%">
@@ -343,7 +343,7 @@
         :max-height="500"
         highlight-current-row
         v-loading="getOrderListLoading">
-        <el-table-column type="index" width="80" :index="indexMethod" fixed="left" label="序号">
+        <el-table-column type="index" width="80" :index="indexMethod" fixed="left" :label="$t('dynamicGraph.qiehuandingdan.xuhao')">
         </el-table-column>
         <el-table-column v-for="item in tableTitle"
           :key="item.prop"
@@ -353,20 +353,20 @@
         </el-table-column>
         <el-table-column
           prop="tag"
-          label="来源"
+          :label="$t('dynamicGraph.qiehuandingdan.laiyuan')"
           width="100"
           fixed="right">
           <template>
-            <el-tag type="success" disable-transitions>手动</el-tag>
+            <el-tag type="success" disable-transitions>{{ $t('dynamicGraph.qiehuandingdan.shoudong') }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column
           fixed="right"
-          label="操作"
+          :label="$t('dynamicGraph.qiehuandingdan.caozuo')"
           width="150">
           <template slot-scope="scope">
-            <el-link type="success" icon="el-icon-loading" v-if="orderMainDy.orderId == scope.row.orderId">当前运行订单</el-link>
-            <el-link type="primary" @click="handleCurrentChange(scope.row)" v-else>切换</el-link>
+            <el-link type="success" icon="el-icon-loading" v-if="orderMainDy.orderId == scope.row.orderId">{{ $t('dynamicGraph.qiehuandingdan.dangqianyunxing') }}</el-link>
+            <el-link type="primary" @click="handleCurrentChange(scope.row)" v-else>{{ $t('dynamicGraph.qiehuandingdan.qiehuan') }}</el-link>
           </template>
         </el-table-column>
       </el-table>
@@ -502,10 +502,16 @@ export default {
       isCanChangeOrder: false,
       dialogVisible: false,
       tableTitle:[
-        {prop:"orderId",label:"任务编号",width:"200"},{prop:"revertFlag",label:"翻转",width:"150"},
-        {prop:"batchId",label:"灭菌批号",width:"150"},{prop:"orderNo",label:"订单编号",width:"150"},{prop:"orderName",label:"订单名称",width:"150"},
-        {prop:"planNum",label:"计划数量",width:"150"},{prop:"productName",label:"产品名称",width:"150"},{prop:"loadMethod",label:"装载方式",width:"150"},
-        {prop:"pathName",label:"路径名称",width:"150"},{prop:"artName",label:"工艺名称",width:"150"},{prop:"acceleratorKValue",label:"加速器k值",width:"150"}
+        {prop:"orderId",label: this.$t('dynamicGraph.qiehuandingdan.tableTitle.orderId'),width:"200"},
+        {prop:"revertFlag",label: this.$t('dynamicGraph.qiehuandingdan.tableTitle.revertFlag'),width:"150"},
+        {prop:"batchId",label: this.$t('dynamicGraph.qiehuandingdan.tableTitle.batchId'),width:"150"},
+        {prop:"orderNo",label: this.$t('dynamicGraph.qiehuandingdan.tableTitle.orderNo'),width:"150"},
+        {prop:"orderName",label: this.$t('dynamicGraph.qiehuandingdan.tableTitle.orderName'),width:"150"},
+        {prop:"planNum",label: this.$t('dynamicGraph.qiehuandingdan.tableTitle.planNum'),width:"150"},
+        {prop:"productName",label: this.$t('dynamicGraph.qiehuandingdan.tableTitle.productName'),width:"150"},
+        {prop:"loadMethod",label: this.$t('dynamicGraph.qiehuandingdan.tableTitle.loadMethod'),width:"150"},
+        {prop:"pathName",label: this.$t('dynamicGraph.qiehuandingdan.tableTitle.pathName'),width:"150"},
+        {prop:"artName",label: this.$t('dynamicGraph.qiehuandingdan.tableTitle.artName'),width:"150"}
       ],
       tableData: [],
       getOrderListLoading: false,

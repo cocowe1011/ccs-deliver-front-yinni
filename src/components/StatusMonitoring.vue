@@ -4,7 +4,7 @@
       <div class="inner">
         <i class="el-icon-check icon" style="font-size: 28px; color: #fff" v-if="plcStatus"></i>
         <i class="el-icon-close icon" style="font-size: 28px; color: #fff" v-else></i>
-          {{ plcStatus ? 'PLC已连接' : 'PLC未连接' }}
+          {{ plcStatus ? $t('plcStatus.connected') : $t('plcStatus.disconnected') }}
       </div>
     </el-tooltip>
   </div>

@@ -1,13 +1,13 @@
 <template>
   <div class="welcome">
     <div>
-      <p class="main-left-user center"> {{ userName }} 您好 </p>
-      <p class="center main-left-title">欢迎使用全自动束下输送CCS系统</p>
+      <p class="main-left-user center" :style="{'width': this.$i18n.locale === 'zh' ? '37%': '45%'}"> {{ userName }} {{ $t('welcome.hello') }} </p>
+      <p class="center main-left-title" :style="{'width': this.$i18n.locale === 'zh' ? '37%': '45%'}">{{ $t('welcome.hello1') }}</p>
       <div class="content">
-        <p class="center main-left-content">简单易用 高效稳定</p>
-        <p class="center main-left-content">我们将竭诚为您服务</p>
-        <p class="center main-left-content">您的满意是我们最大的追求</p>
-        <p class="center main-left-content">祝您身体健康 工作顺利</p>
+        <p class="center main-left-content" :style="{'width': this.$i18n.locale === 'zh' ? '37%': '45%'}">{{ $t('welcome.hello2') }}</p>
+        <p class="center main-left-content" :style="{'width': this.$i18n.locale === 'zh' ? '37%': '45%'}">{{ $t('welcome.hello3') }}</p>
+        <p class="center main-left-content" :style="{'width': this.$i18n.locale === 'zh' ? '37%': '45%'}">{{ $t('welcome.hello4') }}</p>
+        <p class="center main-left-content" :style="{'width': this.$i18n.locale === 'zh' ? '37%': '45%'}">{{ $t('welcome.hello5') }}</p>
       </div>
     </div>
   </div>

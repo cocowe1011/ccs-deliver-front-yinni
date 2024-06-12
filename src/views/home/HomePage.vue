@@ -5,17 +5,17 @@
         <div class="maskDiv-top-left">
           <img src="../../../build/icons/64x64.png" style="width:38px;height:38px;" />
           <div style="margin-left:10px;height:100%;">
-            <div class="maskDiv-top-left-top-title">全自动束下输送系统</div>
+            <div class="maskDiv-top-left-top-title">{{ $t('homePage.title') }}</div>
             <div class="maskDiv-top-left-top-title2">ccs</div>
           </div>
         </div>
         <div class="maskDiv-top-mid">
           <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
-            <el-menu-item index="1">首页</el-menu-item>
-            <el-menu-item index="2">业务处理</el-menu-item>
-            <el-menu-item index="3">报表管理</el-menu-item>
-            <el-menu-item index="4">配置管理</el-menu-item>
-            <el-menu-item index="5">关于</el-menu-item>
+            <el-menu-item index="1">{{ $t('homePage.index1') }}</el-menu-item>
+            <el-menu-item index="2">{{ $t('homePage.index2') }}</el-menu-item>
+            <el-menu-item index="3">{{ $t('homePage.index3') }}</el-menu-item>
+            <el-menu-item index="4">{{ $t('homePage.index4') }}</el-menu-item>
+            <el-menu-item index="5">{{ $t('homePage.index5') }}</el-menu-item>
           </el-menu>
         </div>
         <div class="version-view">
@@ -29,15 +29,15 @@
             <el-dropdown trigger="click" style="line-height: 0;" @command="setCommand">
               <i class="el-icon-setting" style="font-size: 18px;margin-right: 14px;"></i>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item icon="el-icon-full-screen" command="full_screen">全屏/取消全屏&nbsp;&nbsp;Ctrl+F11</el-dropdown-item>
+                <el-dropdown-item icon="el-icon-full-screen" command="full_screen">{{ $t('homePage.full') }}&nbsp;&nbsp;Ctrl+F11</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
             <el-dropdown trigger="click" @command="handelCommand" style="line-height: 0;">
               <el-avatar :src="require('./img/header.png')" size="small" style="margin-right:10px;"></el-avatar>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item icon="el-icon-close" style="color: #f04134;">注销用户</el-dropdown-item>
-                <el-dropdown-item icon="el-icon-key" command="updatePassword">修改密码</el-dropdown-item>
-                <el-dropdown-item icon="el-icon-upload2" command="logout">退出登录</el-dropdown-item>
+                <el-dropdown-item icon="el-icon-close" style="color: #f04134;">{{ $t('homePage.zhuxiao') }}</el-dropdown-item>
+                <el-dropdown-item icon="el-icon-key" command="updatePassword">{{ $t('homePage.xiugai') }}</el-dropdown-item>
+                <el-dropdown-item icon="el-icon-upload2" command="logout">{{ $t('homePage.tuichu') }}</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
             <div class="el-divider el-divider--vertical"></div>

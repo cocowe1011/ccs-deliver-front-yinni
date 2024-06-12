@@ -9,27 +9,27 @@
         <div class="login-right-top-min" style="z-index: 12;" @click="minWindow"><i class="el-icon-minus" style="font-size:18px;font-weight:600;"></i></div>
         <div class="login-right-top-close" style="z-index: 12;" @click="closewindow"><i class="el-icon-close" style="font-size:18px;font-weight:600;"></i></div>
       </div>
-      <div class="login-right-down" v-if="pageMark == 'login'">
-        <p class="title">全自动束下输送CCS系统</p>
-        <p class="intro">欢迎使用全自动束下输送系统。简洁、易用的操作页面，全自动化管理全力帮助您提高效率。</p>
+      <div class="login-right-down" :style="{'margin-top': this.$i18n.locale === 'zh' ? '75px': '45px'}" v-if="pageMark == 'login'">
+        <p class="title">{{ $t('login.loginTitle') }}</p>
+        <p class="intro">{{ $t('login.loginIntroduce') }}</p>
         <div class="login-form">
-          <el-input placeholder="请输入用户名" class="user-code" v-model="userCode"></el-input>
-          <el-input placeholder="请输入密码" class="user-password" type="password" v-model="userPassword" autocomplete="off"></el-input>
-          <p class="tips">没有帐户？<span id="look-help" @click="registerPage">立即注册</span><span style="margin-left:185px;">忘记密码?</span> </p>
-          <el-button class="user-login-button" type="primary" @click="login" :loading="loadingStatus">立即登录</el-button>
+          <el-input :placeholder="$t('login.userNameWord')" class="user-code" v-model="userCode"></el-input>
+          <el-input :placeholder="$t('login.userPasswordWord')" class="user-password" type="password" v-model="userPassword" autocomplete="off"></el-input>
+          <p class="tips">{{ $t('login.noUser') }}<span id="look-help" @click="registerPage">{{ $t('login.nowRegister') }}</span><span :style="{'margin-left': this.$i18n.locale === 'zh' ? '183px': '59px'}">{{ $t('login.forgetPassword') }}</span> </p>
+          <el-button class="user-login-button" type="primary" @click="login" :loading="loadingStatus">{{ $t('login.loginword') }}</el-button>
         </div>
       </div>
-      <div class="login-right-down" v-else-if="pageMark == 'register'">
-        <p class="title" style="text-align: center;">创建账户</p>
-        <p class="intro" style="width: 100%;text-align: center;">已有帐户？<span id="look-help" @click="loginPage">登录</span></p>
+      <div class="login-right-down" :style="{'margin-top': this.$i18n.locale === 'zh' ? '75px': '45px'}" v-else-if="pageMark == 'register'">
+        <p class="title" style="text-align: center;">{{ $t('register.title') }}</p>
+        <p class="intro" style="width: 100%;text-align: center;">{{ $t('register.haveAccount') }}<span id="look-help" @click="loginPage">{{ $t('register.loginword') }}</span></p>
         <div class="login-form">
-          <el-input placeholder="请输入姓名" ref="userNameRegRef" class="user-code-register" v-model="userNameReg" @blur="showUserNameTips = false" @focus="showUserNameTips = true"></el-input>
-          <p class="tips" style="margin-bottom: 0;line-height: 3px;" v-show="showUserNameTips">登录人姓名，用于记录订单操作人。</p>
-          <el-input placeholder="请输入注册账号" ref="userCodeRegRef" class="user-code-register" v-model="userCodeReg" style="margin-top: 15px;" @blur="showUserCodeTips = false" @focus="showUserCodeTips = true" @input="restrictInput"></el-input>
-          <p class="tips" style="margin-bottom: 0;line-height: 3px;" v-show="showUserCodeTips">注册账号为数字字母下划线，用于登录系统</p>
-          <el-input placeholder="请输入密码" class="user-password-register" type="password" v-model="userPasswordReg" autocomplete="off" style="margin-top: 15px;"></el-input>
-          <el-input placeholder="确认密码" ref="userPasswordAgainRef" class="user-password-register" type="password" v-model="userPasswordAgain" autocomplete="off" style="margin-top: 15px;"></el-input>
-          <el-button class="user-login-button" type="primary" @click="registerUser" :loading="registerStatus" style="margin-top: 15px;">立即注册</el-button>
+          <el-input :placeholder="$t('register.userNameWord')" ref="userNameRegRef" class="user-code-register" v-model="userNameReg" @blur="showUserNameTips = false" @focus="showUserNameTips = true"></el-input>
+          <p class="tips" :style="{'margin-bottom': '0px', 'line-height': this.$i18n.locale === 'zh' ? '3px': '18px'}" v-show="showUserNameTips">{{ $t('register.userNameTip') }}</p>
+          <el-input :placeholder="$t('register.registerWord')" ref="userCodeRegRef" class="user-code-register" v-model="userCodeReg" style="margin-top: 15px;" @blur="showUserCodeTips = false" @focus="showUserCodeTips = true" @input="restrictInput"></el-input>
+          <p class="tips" :style="{'margin-bottom': '0px', 'line-height': this.$i18n.locale === 'zh' ? '3px': '18px'}" v-show="showUserCodeTips">{{ $t('register.userCodeTip') }}</p>
+          <el-input :placeholder="$t('register.passwordWord')" class="user-password-register" type="password" v-model="userPasswordReg" autocomplete="off" style="margin-top: 15px;"></el-input>
+          <el-input :placeholder="$t('register.confirmPasswordWord')" ref="userPasswordAgainRef" class="user-password-register" type="password" v-model="userPasswordAgain" autocomplete="off" style="margin-top: 15px;"></el-input>
+          <el-button class="user-login-button" type="primary" @click="registerUser" :loading="registerStatus" style="margin-top: 15px;">{{ $t('register.register') }}</el-button>
         </div>
       </div>
       <div class="login-right-down" v-else>
@@ -191,10 +191,17 @@ export default {
         this.$message.error('登录账户只能设置为数字，字母及下划线！')
       }
     },
+    setLocate() {
+      // 查询配置
+      HttpUtil.get('/cssConfig/getConfig').then((res)=> {
+        this.$i18n.locale = res.data.languageSet&&res.data.languageSet==='1'?'en': 'zh'
+      })
+    },
     checkJavaAppStatus(retries = 0) {
       axios.get(this.javaAppUrl).then((response) => {
         console.log(response)
         if (response.data === 'OK') {
+          this.setLocate()
           this.javaAppStarted = true;
           this.$message.success('已启动！')
           // 给主进程发消息，启动PLC连接
@@ -282,7 +289,7 @@ export default {
       .title {
         font-weight: 400;
         font-size: 32px;
-        line-height: 25px;
+        line-height: 30px;
         color: #262626;
       }
       .intro {
@@ -397,7 +404,7 @@ export default {
     z-index: 4;
     width: 100%;
     height: 100%;
-    opacity: .9;
+    opacity: 1;
     pointer-events: auto;
     background: #fff;
   }

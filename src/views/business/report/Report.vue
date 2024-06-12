@@ -3,23 +3,23 @@
     <div class="orderlist">
       <div>
         <div class="formDiv">
-          <div class="card-title">报表设计</div>
+          <div class="card-title">{{ $t('report.reportTitle') }}</div>
           <div class="card-content">
-            <div>箱报告模板<el-input placeholder="文件路径" v-model="boxReportPath" style="width: 300px;margin-left: 10px;" size="small" readonly></el-input><el-button style="margin-left: 10px;" size="small" @click="openReport(boxReportPath)" :loading="openBoxLoading">箱设计</el-button></div>
-            <div>批报告模板<el-input placeholder="文件路径" v-model="orderReportPath" style="width: 300px;margin-left: 10px;" size="small" readonly></el-input><el-button style="margin-left: 10px;" size="small" @click="openReport(orderReportPath)" :loading="openOrderLoading">批设计</el-button></div>
+            <div>{{ $t('report.xiangbaogaomuban') }}<el-input :placeholder="$t('report.wenjianlujing')" v-model="boxReportPath" style="width: 300px;margin-left: 10px;" size="small" readonly></el-input><el-button style="margin-left: 10px;" size="small" @click="openReport(boxReportPath)" :loading="openBoxLoading">{{ $t('report.xiangsheji') }}</el-button></div>
+            <div>{{ $t('report.pibaogaomuban') }}<el-input :placeholder="$t('report.wenjianlujing')" v-model="orderReportPath" style="width: 300px;margin-left: 10px;" size="small" readonly></el-input><el-button style="margin-left: 10px;" size="small" @click="openReport(orderReportPath)" :loading="openOrderLoading">{{ $t('report.pisheji') }}</el-button></div>
           </div>
         </div>
         <el-divider></el-divider>
         <div class="listDiv">
           <div class="search">
-            <span>订单编号</span>
-            <el-input placeholder="请输入订单编号" v-model="orderNoInput" style="width: 200px;margin-left: 10px;" size="small"></el-input>
-            <span style="margin-left: 10px;">灭菌批号</span>
-            <el-input placeholder="请输入灭菌批号" v-model="batchIdInput" style="width: 200px;margin-left: 10px;" size="small"></el-input>
-            <span style="margin-left: 10px;">箱编号</span>
-            <el-input placeholder="请输入箱编号" v-model="boxImitateIdInput" style="width: 200px;margin-left: 10px;" size="small"></el-input>
-            <el-button style="margin-left: 10px;" size="small" type="primary" @click="getReportSearch">查询</el-button>
-            <el-link style="position: absolute; right: 40px;" icon="el-icon-edit" type="primary" @click="showViewOrderList">修改已完成订单</el-link>
+            <span>{{ $t('report.dingdanbianhao') }}</span>
+            <el-input :placeholder="$t('report.qingshurudingdanbianhao')" v-model="orderNoInput" style="width: 200px;margin-left: 10px;" size="small"></el-input>
+            <span style="margin-left: 10px;">{{ $t('report.pihao') }}</span>
+            <el-input :placeholder="$t('report.qingshurupihao')" v-model="batchIdInput" style="width: 200px;margin-left: 10px;" size="small"></el-input>
+            <span style="margin-left: 10px;">{{ $t('report.xiangbianhao') }}</span>
+            <el-input :placeholder="$t('report.qingshuruxiangbianhao')" v-model="boxImitateIdInput" style="width: 200px;margin-left: 10px;" size="small"></el-input>
+            <el-button style="margin-left: 10px;" size="small" type="primary" @click="getReportSearch">{{ $t('report.chaxun') }}</el-button>
+            <el-link style="position: absolute; right: 40px;" icon="el-icon-edit" type="primary" @click="showViewOrderList">{{ $t('report.xiugaiyiwanchengdingdan') }}</el-link>
           </div>
           <div class="tableDiv">
             <el-table
@@ -27,57 +27,57 @@
               border
               height="100%"
               style="width: 100%">
-              <el-table-column type="index" width="80" :index="indexMethod" fixed="left" label="序号">
+              <el-table-column type="index" width="50" :index="indexMethod" fixed="left" :label="$t('report.xuhao')">
               </el-table-column>
               <el-table-column
                 prop="orderId"
-                label="任务编号"
+                :label="$t('report.orderId')"
                 width="180">
               </el-table-column>
               <el-table-column
                 prop="createTime"
-                label="订单日期"
-                width="180">
+                :label="$t('report.createTime')"
+                width="150">
               </el-table-column>
               <el-table-column
                 prop="orderNo"
-                label="订单编号">
+                :label="$t('processParameters.dingdanbianhao')">
               </el-table-column>
               <el-table-column
                 prop="batchId"
-                label="灭菌批号">
+                :label="$t('processParameters.miejunpihao')">
               </el-table-column>
               <el-table-column
                 prop="orderName"
-                label="订单名称">
+                :label="$t('processParameters.dingdanmingcheng')">
               </el-table-column>
               <el-table-column
                 prop="boxImitateId"
-                label="箱编号">
+                :label="$t('report.xiangbianhao')">
               </el-table-column>
               <el-table-column
                 prop="productName"
-                label="产品名称">
+                :label="$t('processParameters.chanpinmingcheng')">
               </el-table-column>
               <el-table-column
                 prop="artName"
-                label="工艺名称">
+                :label="$t('processParameters.gongyimingcheng')">
               </el-table-column>
               <el-table-column
                 prop="loadMethod"
-                label="装载方式">
+                :label="$t('processParameters.zhuangzaifangshi')">
               </el-table-column>
               <el-table-column
                 prop="pathName"
-                label="路径名称">
+                :label="$t('processParameters.lujingmingcheng')">
               </el-table-column>
               <el-table-column
                 fixed="right"
-                label="操作"
-                width="180">
+                :label="$t('report.caozuo')"
+                :width="this.$i18n.locale === 'zh' ? 180: 240">
                 <template slot-scope="scope">
-                  <el-link type="primary" icon="el-icon-tickets" @click="getOrderReportData(scope.row)">批报告</el-link>
-                  <el-link type="primary" icon="el-icon-receiving" @click="getBoxReportData(scope.row)" style="margin-left: 15px;">箱报告</el-link>
+                  <el-link type="primary" icon="el-icon-tickets" @click="getOrderReportData(scope.row)">{{ $t('report.pibaogao') }}</el-link>
+                  <el-link type="primary" icon="el-icon-receiving" @click="getBoxReportData(scope.row)" style="margin-left: 15px;">{{ $t('report.xiangbaogao') }}</el-link>
                 </template>
               </el-table-column>
             </el-table>
@@ -99,7 +99,7 @@
       </div>
     </div>
     <el-dialog
-      title="修改已完成订单"
+      :title="$t('report.xiugaiyiwanchengdingdan')"
       :visible.sync="dialogVisible"
       width="1400px"
       :before-close="handleClose"

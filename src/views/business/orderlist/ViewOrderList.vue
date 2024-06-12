@@ -1,11 +1,11 @@
 <template>
   <div style="width: 100%; height: 600px;">
     <div class="search">
-      <span>订单编号</span>
-      <el-input placeholder="请输入订单编号" v-model="orderNoInput" style="width: 200px;margin-left: 10px;" size="small"></el-input>
-      <span style="margin-left: 10px;">灭菌批号</span>
-      <el-input placeholder="请输入灭菌批号" v-model="batchIdInput" style="width: 200px;margin-left: 10px;" size="small"></el-input>
-      <el-button style="margin-left: 10px;" size="small" type="primary" @click="getOrderListSearch">查询</el-button>
+      <span>{{ $t('viewOrderlist.dingdanbianhao') }}</span>
+      <el-input :placeholder="$t('viewOrderlist.qingshurudingdanbianhao')" v-model="orderNoInput" style="width: 200px;margin-left: 10px;" size="small"></el-input>
+      <span style="margin-left: 10px;">{{ $t('viewOrderlist.pihao') }}</span>
+      <el-input :placeholder="$t('viewOrderlist.qingshurupihao')" v-model="batchIdInput" style="width: 200px;margin-left: 10px;" size="small"></el-input>
+      <el-button style="margin-left: 10px;" size="small" type="primary" @click="getOrderListSearch">{{ $t('viewOrderlist.chaxun') }}</el-button>
     </div>
     <div class="tableDiv">
       <el-table
@@ -13,44 +13,44 @@
         border
         height="100%"
         style="width: 100%">
-        <el-table-column type="index" width="60" :index="indexMethod" label="序号">
+        <el-table-column type="index" width="60" :index="indexMethod" :label="$t('viewOrderlist.xuhao')">
         </el-table-column>
         <el-table-column
           prop="orderId"
-          label="任务编号"
+          :label="$t('viewOrderlist.orderId')"
           width="180">
         </el-table-column>
         <el-table-column
           prop="createTime"
-          label="订单日期"
+          :label="$t('viewOrderlist.createTime')"
           width="160">
         </el-table-column>
         <el-table-column
           prop="orderNo"
-          label="订单编号">
+          :label="$t('processParameters.dingdanbianhao')">
         </el-table-column>
         <el-table-column
           prop="batchId"
-          label="灭菌批号">
+          :label="$t('processParameters.miejunpihao')">
         </el-table-column>
         <el-table-column
           prop="orderName"
-          label="订单名称">
+          :label="$t('processParameters.dingdanmingcheng')">
         </el-table-column>
         <el-table-column
           prop="productName"
-          label="产品名称">
+          :label="$t('processParameters.chanpinmingcheng')">
         </el-table-column>
         <el-table-column
           prop="artName"
-          label="工艺名称">
+          :label="$t('processParameters.gongyimingcheng')">
         </el-table-column>
         <el-table-column
-          label="操作"
-          width="130">
+          :label="$t('viewOrderlist.caozuo')"
+          :width="this.$i18n.locale === 'zh' ? 130: 190">
           <template slot-scope="scope">
-            <el-link type="primary" @click="updateBoxReportData(scope.row)">修改</el-link>
-            <el-link type="primary" @click="showBoxReportData(scope.row)" style="margin-left: 10px;">原始记录</el-link>
+            <el-link type="primary" @click="updateBoxReportData(scope.row)">{{ $t('viewOrderlist.update') }}</el-link>
+            <el-link type="primary" @click="showBoxReportData(scope.row)" style="margin-left: 10px;">{{ $t('viewOrderlist.yuanshijilu') }}</el-link>
           </template>
         </el-table-column>
       </el-table>
@@ -67,7 +67,7 @@
       </el-pagination>
     </div>
     <el-dialog
-      title="订单详细信息"
+      :title="$t('viewOrderlist.dingdanxiangxi')"
       :visible.sync="dialogVisibleOrder"
       width="1400px"
       append-to-body
@@ -76,78 +76,78 @@
         <el-descriptions class="margin-top" :column="3" border>
           <el-descriptions-item style="width:150px;">
             <template slot="label">
-              订单编号
+              {{ $t('viewOrderlist.dingdanbianhao') }}
             </template>
             {{ this.updateOrderInfo.orderNo }}
           </el-descriptions-item>
           <el-descriptions-item>
             <template slot="label">
-              灭菌批号
+              {{ $t('viewOrderlist.pihao') }}
             </template>
             {{ this.updateOrderInfo.batchId }}
           </el-descriptions-item>
           <el-descriptions-item>
             <template slot="label">
-              订单时间
+              {{ $t('viewOrderlist.dingdanshijian') }}
             </template>
             {{ this.updateOrderInfo.createTime }}
           </el-descriptions-item>
           <el-descriptions-item>
             <template slot="label">
-              订单名称
+              {{ $t('processParameters.dingdanmingcheng') }}
             </template>
             {{ this.updateOrderInfo.orderName }}
           </el-descriptions-item>
           <el-descriptions-item>
             <template slot="label">
-              产品名称
+              {{ $t('processParameters.chanpinmingcheng') }}
             </template>
             {{ this.updateOrderInfo.productName }}
           </el-descriptions-item>
           <el-descriptions-item>
             <template slot="label">
-              工艺名称
+              {{ $t('processParameters.gongyimingcheng') }}
             </template>
             {{ this.updateOrderInfo.artName }}
           </el-descriptions-item>
           <el-descriptions-item>
             <template slot="label">
-              圈数
+              {{ $t('processParameters.quanshu') }}
             </template>
             {{ this.updateOrderInfo.numberTurns }}
           </el-descriptions-item>
           <el-descriptions-item>
             <template slot="label">
-              操作员
+              {{ $t('processParameters.caozuoyuan') }}
             </template>
             {{ this.updateOrderInfo.creatorName }}
           </el-descriptions-item>
           <el-descriptions-item>
             <template slot="label">
-              辐照数量
+              {{ $t('viewOrderlist.fuzhaoshuliang') }}
             </template>
             {{ this.boxList.length }}
           </el-descriptions-item>
           <el-descriptions-item>
             <template slot="label">
-              箱信息
+              {{ $t('viewOrderlist.xiangxinxi') }}
             </template>
             <div style="width: 1260px; height: 400px; overflow-y: auto;" v-loading="boxLoading">
               <div class="box-card add-card" style="border: 1px #000 dashed; display: flex; align-items:center; justify-content: center;cursor: pointer;background-color: white;" @click="addBox" v-show="!showHistory">
-                <i class="el-icon-plus" style="font-size: 18px"></i><span style="font-size: 17px; margin-left: 2px;">添加箱子</span>
+                <i class="el-icon-plus" style="font-size: 18px"></i><span style="font-size: 17px; margin-left: 2px;">{{ $t('viewOrderlist.tianjiaxiangzi') }}</span>
               </div>
               <div v-for="(item, index) in boxList" :key="index" class="box-card">
                 <el-button type="danger" icon="el-icon-delete" circle size="mini" style="position: absolute;right:0px;top:0px;padding: 3px;" @click="deleteBox(item.orderId, item.boxImitateId)" :disabled="showHistory"></el-button>
                 <div class="box-row">
-                  <div class="box-row-left">箱编号：</div>
+                  <div class="box-row-left">{{ $t('viewOrderlist.xiangbianhao') }}</div>
                   <div class="box-row-right"><el-button type="text" icon="el-icon-edit" @click="showUpdateBoxImitateId(item)" :disabled="showHistory"></el-button>{{ item.boxImitateId }}</div>
                 </div>
                 <div class="box-row">
-                  <div class="box-row-left">扫码：</div>
+                  <div class="box-row-left">{{ $t('viewOrderlist.saoma') }}</div>
                   <div class="box-row-right">{{ item.loadScanCode }}</div>
                 </div>
                 <div class="box-row">
-                  <div class="box-row-left">圈数：</div>
+                  <div class="box-row-left">{{ $t('viewOrderlist.quanshu') }}</div>
                   <div class="box-row-right">{{ item.numberTurns }}</div>
                 </div>
                 <div class="box-row">
@@ -157,10 +157,10 @@
                       placement="bottom"
                       width="300"
                       trigger="click"
-                      :content="item.failReason==null?'疑似存在误触情况，未读取到加速器数据！':item.failReason">
-                      <i class="el-icon-warning" style="color:#f56c6c; cursor:pointer; margin-right: 4px;" slot="reference" title="点击查看不合格原因"></i>
+                      :content="item.failReason==null?$t('viewOrderlist.yisicunzai'):item.failReason">
+                      <i class="el-icon-warning" style="color:#f56c6c; cursor:pointer; margin-right: 4px;" slot="reference" :title="$t('viewOrderlist.dianjichakan')"></i>
                     </el-popover>
-                    质量：
+                    {{ $t('viewOrderlist.zhiliang') }}
                   </div>
                   <div class="box-row-right">
                     <el-switch
@@ -170,8 +170,8 @@
                       inactive-value="0"
                       active-color="#13ce66"
                       inactive-color="#ff4949"
-                      active-text="合格"
-                      inactive-text="不合格"
+                      :active-text="$t('viewOrderlist.hege')"
+                      :inactive-text="$t('viewOrderlist.buhege')"
                       :disabled="showHistory"
                       @change="updateBoxQualified(item)">
                     </el-switch>
@@ -184,16 +184,16 @@
       </div>
     </el-dialog>
     <el-dialog
-      title="修改箱子模拟id："
+      :title="$t('viewOrderlist.xiugaimoniid')"
       :visible.sync="updateBoxImitateIdPop"
       width="30%"
       append-to-body
       :close-on-click-modal="false"
       >
-      <el-input v-model="updateBoxImitateIdStr" placeholder="请输入模拟id"></el-input>
+      <el-input v-model="updateBoxImitateIdStr" :placeholder="$t('viewOrderlist.qingshuru')"></el-input>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="updateBoxImitateIdPop = false">取 消</el-button>
-        <el-button type="primary" @click="updateBoxImitateId" :loading="dialogEditLoading">确 定</el-button>
+        <el-button @click="updateBoxImitateIdPop = false">{{ $t('viewOrderlist.quxiao') }}</el-button>
+        <el-button type="primary" @click="updateBoxImitateId" :loading="dialogEditLoading">{{ $t('viewOrderlist.queding') }}</el-button>
       </span>
     </el-dialog>
   </div>

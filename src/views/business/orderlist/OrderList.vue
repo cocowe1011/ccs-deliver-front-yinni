@@ -3,51 +3,51 @@
     <div class="orderlist" v-show="!isDynamicGraphShow">
       <div>
         <div class="formDiv">
-          <div class="card-title">工艺参数</div>
+          <div class="card-title">{{ $t('processParameters.title') }}</div>
           <div class="card-content">
             <el-form :inline="true" label-position="right" label-width="115px" :model="orderMainForm" class="demo-form-inline">
-              <el-form-item label="订单编号：">
-                <el-input size="small" v-model="orderMainForm.orderNo" placeholder="订单编号" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.dingdanbianhao') + '：'">
+                <el-input size="small" v-model="orderMainForm.orderNo" :placeholder="$t('processParameters.dingdanbianhao')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="订单名称：">
-                <el-input size="small" v-model="orderMainForm.orderName" placeholder="订单名称" :readonly="!(isNewSave || isEdit)"></el-input>
-              </el-form-item>
-              <el-form-item>
-                <el-checkbox v-model="orderMainForm.revertFlag" :disabled="!(isNewSave || isEdit) || ((isNewSave || isEdit) && orderMainForm.trayFlag)">翻转</el-checkbox>
+              <el-form-item :label="$t('processParameters.dingdanmingcheng') + '：'">
+                <el-input size="small" v-model="orderMainForm.orderName" :placeholder="$t('processParameters.dingdanmingcheng')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
               <el-form-item>
-                <el-checkbox v-model="orderMainForm.trayFlag" :disabled="!(isNewSave || isEdit) || ((isNewSave || isEdit) &&orderMainForm.revertFlag)">托盘模式</el-checkbox>
+                <el-checkbox v-model="orderMainForm.revertFlag" :disabled="!(isNewSave || isEdit) || ((isNewSave || isEdit) && orderMainForm.trayFlag)">{{ $t('processParameters.fanzhuan') }}</el-checkbox>
+              </el-form-item>
+              <el-form-item>
+                <el-checkbox v-model="orderMainForm.trayFlag" :disabled="!(isNewSave || isEdit) || ((isNewSave || isEdit) &&orderMainForm.revertFlag)">{{ $t('processParameters.tuopan') }}</el-checkbox>
               </el-form-item>
               <br/>
-              <el-form-item label="灭菌批号：">
-                <el-input size="small" v-model="orderMainForm.batchId" placeholder="灭菌批号" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.miejunpihao') + '：'">
+                <el-input size="small" v-model="orderMainForm.batchId" :placeholder="$t('processParameters.miejunpihao')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="产品名称：">
-                <el-input size="small" v-model="orderMainForm.productName" placeholder="产品名称" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.chanpinmingcheng') + '：'">
+                <el-input size="small" v-model="orderMainForm.productName" :placeholder="$t('processParameters.chanpinmingcheng')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="工艺名称：">
-                <el-input size="small" v-model="orderMainForm.artName" placeholder="工艺名称" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.gongyimingcheng') + '：'">
+                <el-input size="small" v-model="orderMainForm.artName" :placeholder="$t('processParameters.gongyimingcheng') " :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="装载方式：">
-                <el-input size="small" v-model="orderMainForm.loadMethod" placeholder="装载方式" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.zhuangzaifangshi') + '：'">
+                <el-input size="small" v-model="orderMainForm.loadMethod" :placeholder="$t('processParameters.zhuangzaifangshi') " :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="路径名称：">
-                <el-input size="small" v-model="orderMainForm.pathName" placeholder="路径名称" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.lujingmingcheng') + '：'">
+                <el-input size="small" v-model="orderMainForm.pathName" :placeholder="$t('processParameters.lujingmingcheng')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="圈数：">
-                <el-input type="number" size="small" v-model="orderMainForm.numberTurns" placeholder="圈数" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.quanshu') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.numberTurns" :placeholder="$t('processParameters.quanshu')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="箱子长度：">
-                <el-input type="number" size="small" v-model="orderMainForm.boxLength" placeholder="箱子长度" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.xiangzichangdu') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.boxLength" :placeholder="$t('processParameters.xiangzichangdu')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="箱子高度：">
-                <el-input type="number" size="small" v-model="orderMainForm.boxHeight" placeholder="箱子高度" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.xiangzigaodu') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.boxHeight" :placeholder="$t('processParameters.xiangzigaodu')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="箱子宽度：">
-                <el-input type="number" size="small" v-model="orderMainForm.boxWidth" placeholder="箱子宽度" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.xiangzikuandu') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.boxWidth" :placeholder="$t('processParameters.xiangzikuandu')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="箱子重量：">
-                <el-input type="number" size="small" v-model="orderMainForm.boxWeight" placeholder="箱子重量" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.xiangzizhongliang') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.boxWeight" :placeholder="$t('processParameters.xiangzizhongliang') " :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
               <el-form-item label="订单箱数：" v-show="false">
                 <el-input type="number" size="small" v-model="orderMainForm.orderBoxNum" placeholder="订单箱数" :readonly="!(isNewSave || isEdit)"></el-input>
@@ -61,84 +61,84 @@
               <el-form-item label="合格箱数：">
                 <el-input size="small" v-model="orderMainForm.qualifiedBoxNum" placeholder="合格箱数" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item> -->
-              <el-form-item label="束下速度下限：">
-                <el-input type="number" size="small" v-model="orderMainForm.sxSpeedLowerLimit" placeholder="束下速度下限" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.shuxiasuduxiaxian') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.sxSpeedLowerLimit" :placeholder="$t('processParameters.shuxiasuduxiaxian')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="束下速度值：">
-                <el-input type="number" size="small" v-model="orderMainForm.sxSpeedSet" placeholder="束下速度值" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.shuxiasuduzhi') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.sxSpeedSet" :placeholder="$t('processParameters.shuxiasuduzhi')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="束下速度上限：">
-                <el-input type="number" size="small" v-model="orderMainForm.sxSpeedUpperLimit" placeholder="束下速度上限" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.shuxiasudushangxian') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.sxSpeedUpperLimit" :placeholder="$t('processParameters.shuxiasudushangxian')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="束流下限：">
-                <el-input type="number" size="small" v-model="orderMainForm.slLowerLimit" placeholder="束流下限" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.shuliuxiaxian') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.slLowerLimit" :placeholder="$t('processParameters.shuliuxiaxian')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="束流设定值：">
-                <el-input type="number" size="small" v-model="orderMainForm.slSet" placeholder="束流设定值" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.shuliusheding') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.slSet" :placeholder="$t('processParameters.shuliusheding')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="束流上限：">
-                <el-input type="number" size="small" v-model="orderMainForm.slUpperLimit" placeholder="束流上限" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.shuliushangxina') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.slUpperLimit" :placeholder="$t('processParameters.shuliushangxina')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="功率下限：">
-                <el-input type="number" size="small" v-model="orderMainForm.glLowerLimit" placeholder="功率下限" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.gonglvxiaxian') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.glLowerLimit" :placeholder="$t('processParameters.gonglvxiaxian')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="功率设定值：">
-                <el-input type="number" size="small" v-model="orderMainForm.glSet" placeholder="功率设定值" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.gonglvsheding') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.glSet" :placeholder="$t('processParameters.gonglvsheding')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="功率上限：">
-                <el-input type="number" size="small" v-model="orderMainForm.glUpperLimit" placeholder="功率上限" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.gonglvshangxian') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.glUpperLimit" :placeholder="$t('processParameters.gonglvshangxian')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="扫宽下限：">
-                <el-input type="number" size="small" v-model="orderMainForm.skLowerLimit" placeholder="扫宽下限" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.saokuanxiaxian') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.skLowerLimit" :placeholder="$t('processParameters.saokuanxiaxian')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="扫宽设定值：">
-                <el-input type="number" size="small" v-model="orderMainForm.skSet" placeholder="扫宽设定值" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.saokuansheding') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.skSet" :placeholder="$t('processParameters.saokuansheding')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="扫宽上限：">
-                <el-input type="number" size="small" v-model="orderMainForm.skUpperLimit" placeholder="扫宽上限" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.saokuanshangxian') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.skUpperLimit" :placeholder="$t('processParameters.saokuanshangxian')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="扫描频率下限：">
-                <el-input type="number" size="small" v-model="orderMainForm.smplLowerLimit" placeholder="扫描频率下限" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.saomiaopinlvxiaxian') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.smplLowerLimit" :placeholder="$t('processParameters.saomiaopinlvxiaxian')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="扫描频率设定：">
-                <el-input type="number" size="small" v-model="orderMainForm.smplSet" placeholder="扫描频率设定" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.saomiaopinlvsheding') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.smplSet" :placeholder="$t('processParameters.saomiaopinlvsheding')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="扫描频率上限：">
-                <el-input type="number" size="small" v-model="orderMainForm.smplUpperLimit" placeholder="扫描频率上限" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.saomiaopinlvshangxian') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.smplUpperLimit" :placeholder="$t('processParameters.saomiaopinlvshangxian')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="PFN电压下限：">
-                <el-input type="number" size="small" v-model="orderMainForm.pfnLowerLimit" placeholder="PFN电压下限" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.pfnxiaxian') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.pfnLowerLimit" :placeholder="$t('processParameters.pfnxiaxian') " :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="PFN电压设定：">
-                <el-input type="number" size="small" v-model="orderMainForm.pfnSet" placeholder="PFN电压设定" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.pfnsheding') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.pfnSet" :placeholder="$t('processParameters.pfnsheding')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="PFN电压上限：">
-                <el-input type="number" size="small" v-model="orderMainForm.pfnUpperLimit" placeholder="PFN电压上限" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.pfnshangxian') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.pfnUpperLimit" :placeholder="$t('processParameters.pfnshangxian')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="能量下限：">
-                <el-input type="number" size="small" v-model="orderMainForm.nlLowerLimit" placeholder="能量下限" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.nengliangxiaxian') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.nlLowerLimit" :placeholder="$t('processParameters.nengliangxiaxian')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="能量设定值：">
-                <el-input type="number" size="small" v-model="orderMainForm.nlSet" placeholder="能量设定值" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.nengliangshedingzhi') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.nlSet" :placeholder="$t('processParameters.nengliangshedingzhi')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="能量上限：">
-                <el-input type="number" size="small" v-model="orderMainForm.nlUpperLimit" placeholder="能量上限" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.nengliangshangxian') + '：'">
+                <el-input type="number" size="small" v-model="orderMainForm.nlUpperLimit" :placeholder="$t('processParameters.nengliangshangxian')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
-              <el-form-item label="操作员：">
-                <el-input size="small" v-model="orderMainForm.creatorName" placeholder="操作员" :readonly="!(isNewSave || isEdit)"></el-input>
+              <el-form-item :label="$t('processParameters.caozuoyuan') + '：'">
+                <el-input size="small" v-model="orderMainForm.creatorName" :placeholder="$t('processParameters.caozuoyuan')" :readonly="!(isNewSave || isEdit)"></el-input>
               </el-form-item>
             </el-form>
             <div class="content-bottom" v-show="isNewSave || isEdit">
               <el-button type="warning" plain size="small" v-if="isNewSave" style="margin-right: 6px;">
                 <i class="iconfont icon-saoma" style="font-size: 12px;"></i>
-                扫码添加
+                {{ $t('orderList.scanCode') }}
               </el-button>
               <el-divider direction="vertical" style="height: 1.2em;" v-if="isNewSave"></el-divider>
-              <el-button type="primary" style="margin-left: 6px;" size="small" icon="el-icon-success" @click="saveOrder" :loading="saveLoading" v-if="isNewSave">保存</el-button>
-              <el-button type="primary" size="small" icon="el-icon-success" @click="updateOrder" :loading="editLoading" v-else>修改</el-button>
-              <el-button size="small" style="margin-left: 15px;" icon="el-icon-error" @click="cancelEditOrSave">取消</el-button>
-              <div v-if="isNewSave" style="height: 30px;width: 72px;display: flex;align-items: center;margin-left: 30px;font-size: 14px;font-weight: 600;">引入配方：</div>
-              <el-select v-model="selectTemp" v-if="isNewSave" filterable placeholder="可输入汉字检索配方" @visible-change="getDictOrder" @change="selectDictOrder" size="small">
+              <el-button type="primary" style="margin-left: 6px;" size="small" icon="el-icon-success" @click="saveOrder" :loading="saveLoading" v-if="isNewSave">{{ $t('orderList.save') }}</el-button>
+              <el-button type="primary" size="small" icon="el-icon-success" @click="updateOrder" :loading="editLoading" v-else>{{ $t('orderList.update') }}</el-button>
+              <el-button size="small" style="margin-left: 15px;" icon="el-icon-error" @click="cancelEditOrSave">{{ $t('orderList.cancel') }}</el-button>
+              <div v-if="isNewSave" style="height: 30px;width: 72px;display: flex;align-items: center;margin-left: 30px;font-size: 14px;font-weight: 600;">{{ $t('orderList.yinrupeifang') }}</div>
+              <el-select v-model="selectTemp" v-if="isNewSave" filterable :placeholder="$t('orderList.yinrupeifangTip')" @visible-change="getDictOrder" @change="selectDictOrder" size="small">
                 <el-option
                   v-for="(item, index) in dictOrderList"
                   :key="index"
@@ -153,11 +153,11 @@
         <el-divider></el-divider>
         <div class="listDiv">
           <div class="list-top">
-            <el-button type="primary" icon="el-icon-plus" size="small" @click="newOrderClick">新建</el-button>
-            <el-button icon="el-icon-refresh-right" size="small" @click="getOrderList" style="margin-left: 15px;margin-right: 6px;">刷新</el-button>
+            <el-button type="primary" icon="el-icon-plus" size="small" @click="newOrderClick">{{ $t('orderList.xinjian') }}</el-button>
+            <el-button icon="el-icon-refresh-right" size="small" @click="getOrderList" style="margin-left: 15px;margin-right: 6px;">{{ $t('orderList.refresh') }}</el-button>
             <el-divider direction="vertical" style="height: 1.2em;" v-if="nowRunOrderId != ''"></el-divider>
-            <el-tooltip content="点击快速定位到运行订单→" placement="top" v-if="nowRunOrderId != ''">
-              <el-button type="primary" plain size="small" icon="el-icon-loading" style="margin-left: 6px;" @click="positionOrder">当前正在运行的订单：{{ nowRunOrderId }}</el-button>
+            <el-tooltip :content="$t('orderList.dingwei')" placement="top" v-if="nowRunOrderId != ''">
+              <el-button type="primary" plain size="small" icon="el-icon-loading" style="margin-left: 6px;" @click="positionOrder">{{ $t('orderList.nowOrderTip') }}{{ nowRunOrderId }}</el-button>
             </el-tooltip>
           </div>
           <div class="list-middle" ref="listMiddle">
@@ -170,7 +170,7 @@
               highlight-current-row
               @current-change="handleCurrentChange"
               v-loading="getOrderListLoading">
-              <el-table-column type="index" width="80" :index="indexMethod" fixed="left" label="序号">
+              <el-table-column type="index" width="80" :index="indexMethod" fixed="left" :label="$t('orderList.xuhao')">
               </el-table-column>
               <el-table-column v-for="item in tableTitle"
                 :key="item.prop"
@@ -180,24 +180,24 @@
               </el-table-column>
               <el-table-column
                 prop="tag"
-                label="来源"
+                :label="$t('orderList.laiyuan')"
                 width="100"
                 fixed="right">
                 <template>
-                  <el-tag type="success" disable-transitions>手动</el-tag>
+                  <el-tag type="success" disable-transitions>{{ $t('orderList.shoudong') }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column
                 fixed="right"
-                label="操作"
-                width="320">
+                :label="$t('orderList.caozuo')"
+                :width="this.$i18n.locale === 'zh' ? 320: 370">
                 <template slot-scope="scope">
-                  <el-link type="primary" icon="el-icon-edit" @click.stop="editClick(scope.row)">编辑</el-link>
-                  <el-link type="success" icon="el-icon-switch-button" style="margin-left: 10px;" v-if="scope.row.orderId != nowRunOrderId" :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId)" @click="chooseOrder(scope.row, false)">开始</el-link>
-                  <el-link type="success" icon="el-icon-loading" style="margin-left: 10px;" v-else :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId)">已选中</el-link>
-                  <el-link type="danger" icon="el-icon-error" style="margin-left: 10px;" @click="cancelOrder(scope.row)" :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId) || nowRunOrderId == ''">停止</el-link>
-                  <el-link type="primary" icon="el-icon-success" style="margin-left: 10px;" :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId)" @click="generateBatchReport">完成</el-link>
-                  <el-link type="primary" icon="el-icon-pie-chart" style="margin-left: 10px;" @click="showDynamicGraph(scope.row)" :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId) || nowRunOrderId == ''">动态图</el-link>
+                  <el-link type="primary" icon="el-icon-edit" @click.stop="editClick(scope.row)">{{ $t('orderList.bianji') }}</el-link>
+                  <el-link type="success" icon="el-icon-switch-button" style="margin-left: 10px;" v-if="scope.row.orderId != nowRunOrderId" :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId)" @click="chooseOrder(scope.row, false)">{{ $t('orderList.kaishi') }}</el-link>
+                  <el-link type="success" icon="el-icon-loading" style="margin-left: 10px;" v-else :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId)">{{ $t('orderList.yixuanzhong') }}</el-link>
+                  <el-link type="danger" icon="el-icon-error" style="margin-left: 10px;" @click="cancelOrder(scope.row)" :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId) || nowRunOrderId == ''">{{ $t('orderList.tingzhi') }}</el-link>
+                  <el-link type="primary" icon="el-icon-success" style="margin-left: 10px;" :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId)" @click="generateBatchReport">{{ $t('orderList.wancheng') }}</el-link>
+                  <el-link type="primary" icon="el-icon-pie-chart" style="margin-left: 10px;" @click="showDynamicGraph(scope.row)" :disabled="(scope.row.orderId !== currentSelect.orderId) || (nowRunOrderId != '' && scope.row.orderId != nowRunOrderId) || nowRunOrderId == ''">{{ $t('orderList.dongtaitu') }}</el-link>
                 </template>
               </el-table-column>
             </el-table>
@@ -214,12 +214,12 @@
           <i v-show="!zhankaiflag" class="el-icon-caret-left"></i>
           <i v-show="zhankaiflag" class="el-icon-caret-right"></i>
           <span style="font-size: 15px;">
-            工艺配方
+            {{ $t('orderList.gongyimoban') }}
           </span>
         </div>
         <div class="patlist-container">
           <div class="patlist-container-wrapper">
-            <span class="patlist-container-wrapper-title">维护工艺配方模板</span>
+            <span class="patlist-container-wrapper-title">{{ $t('orderList.weihugongyipeifangmuban') }}</span>
             <span class="patlist-container-wrapper-close" @click="zhankaiflag = false"><i class="el-icon-close"></i></span>
           </div>
           <div class="patlist-container-inner">
@@ -249,10 +249,16 @@ export default {
       zhankaiflag: false,
       orderMainForm: {},
       tableTitle:[
-        {prop:"orderId",label:"任务编号",width:"200"},{prop:"revertFlag",label:"翻转",width:"150"},
-        {prop:"batchId",label:"灭菌批号",width:"150"},{prop:"orderNo",label:"订单编号",width:"150"},{prop:"orderName",label:"订单名称",width:"150"},
-        {prop:"planNum",label:"计划数量",width:"150"},{prop:"productName",label:"产品名称",width:"150"},{prop:"loadMethod",label:"装载方式",width:"150"},
-        {prop:"pathName",label:"路径名称",width:"150"},{prop:"artName",label:"工艺名称",width:"150"},{prop:"acceleratorKValue",label:"加速器k值",width:"150"}
+        {prop:"orderId",label: this.$t('orderList.tableTitle.orderId'),width:"200"},
+        {prop:"revertFlag",label: this.$t('orderList.tableTitle.revertFlag'),width:"150"},
+        {prop:"batchId",label: this.$t('orderList.tableTitle.batchId'),width:"150"},
+        {prop:"orderNo",label: this.$t('orderList.tableTitle.orderNo'),width:"150"},
+        {prop:"orderName",label: this.$t('orderList.tableTitle.orderName'),width:"150"},
+        {prop:"planNum",label: this.$t('orderList.tableTitle.planNum'),width:"150"},
+        {prop:"productName",label: this.$t('orderList.tableTitle.productName'),width:"150"},
+        {prop:"loadMethod",label: this.$t('orderList.tableTitle.loadMethod'),width:"150"},
+        {prop:"pathName",label: this.$t('orderList.tableTitle.pathName'),width:"150"},
+        {prop:"artName",label: this.$t('orderList.tableTitle.artName'),width:"150"}
       ],
       dictOrderList: [],
       tableData: [],

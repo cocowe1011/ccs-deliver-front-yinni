@@ -2,65 +2,72 @@
   <div class="config">
     <div>
       <div class="formDiv">
-        <div class="card-title">配置列表</div>
+        <div class="card-title">{{ $t('config.peizhiliebiao') }}</div>
         <div class="card-content">
           <el-form label-position="right" label-width="150px" :model="cssConfig" v-loading="loading">
             <el-divider content-position="left">PLC</el-divider>
-            <el-form-item label="ip地址：">
+            <el-form-item :label="$t('config.ipaddress')">
               <el-input v-model="cssConfig.plcIp" style="width: 250px;"></el-input>
             </el-form-item>
-            <el-form-item label="端口：">
+            <el-form-item :label="$t('config.port')">
               <el-input v-model="cssConfig.plcPort" style="width: 250px;"></el-input>
             </el-form-item>
-            <el-divider content-position="left">束前传送带长度</el-divider>
-            <el-form-item label="L1-1长度(mm)：">
-              <el-input v-model="cssConfig.oneOneLength" style="width: 250px;"></el-input>
-            </el-form-item>
-            <el-form-item label="L2长度(mm)：">
-              <el-input v-model="cssConfig.twoLength" style="width: 250px;"></el-input>
-            </el-form-item>
-            <el-divider content-position="left">H-A点传送带长度</el-divider>
-            <el-form-item label="J长度(mm)：">
-              <el-input v-model="cssConfig.pointjLength" style="width: 250px;" type="number"></el-input>
-            </el-form-item>
-            <el-form-item label="K长度(mm)：">
-              <el-input v-model="cssConfig.pointkLength" style="width: 250px;" type="number"></el-input>
-            </el-form-item>
-            <el-form-item label="L长度(mm)：">
-              <el-input v-model="cssConfig.pointlLength" style="width: 250px;" type="number"></el-input>
-            </el-form-item>
-            <el-divider content-position="left">点位</el-divider>
-            <el-form-item label="判断禁止上货点位：">
-              <el-select v-model="cssConfig.judgeLoadPoint" style="width: 250px;">
-                <el-option label="光电D" value="D"></el-option>
-                <el-option label="光电E" value="E"></el-option>
-                <el-option label="光电F" value="F"></el-option>
-                <el-option label="光电H" value="H"></el-option>
+            <el-divider content-position="left">{{ $t('config.yuyanshezhi') }}</el-divider>
+            <el-form-item :label="$t('config.yuyanshezhi') + '：'">
+              <el-select v-model="cssConfig.languageSet" style="width: 250px;">
+                <el-option label="中文" value="0"></el-option>
+                <el-option label="english" value="1"></el-option>
               </el-select>
             </el-form-item>
-            <el-divider content-position="left">G-H光电配置</el-divider>
-            <el-form-item label="X1长度(mm)：">
+            <el-divider content-position="left">{{ $t('config.shuqianchuansongdaichangdu') }}</el-divider>
+            <el-form-item :label="$t('config.l11length')">
+              <el-input v-model="cssConfig.oneOneLength" style="width: 250px;"></el-input>
+            </el-form-item>
+            <el-form-item :label="$t('config.l2length')">
+              <el-input v-model="cssConfig.twoLength" style="width: 250px;"></el-input>
+            </el-form-item>
+            <el-divider content-position="left">{{ $t('config.halength') }}</el-divider>
+            <el-form-item :label="$t('config.jlength')">
+              <el-input v-model="cssConfig.pointjLength" style="width: 250px;" type="number"></el-input>
+            </el-form-item>
+            <el-form-item :label="$t('config.klength')">
+              <el-input v-model="cssConfig.pointkLength" style="width: 250px;" type="number"></el-input>
+            </el-form-item>
+            <el-form-item :label="$t('config.llength')">
+              <el-input v-model="cssConfig.pointlLength" style="width: 250px;" type="number"></el-input>
+            </el-form-item>
+            <el-divider content-position="left">{{ $t('config.dianwei') }}</el-divider>
+            <el-form-item :label="$t('config.panduanjinzhi')">
+              <el-select v-model="cssConfig.judgeLoadPoint" style="width: 250px;">
+                <el-option label="D" value="D"></el-option>
+                <el-option label="E" value="E"></el-option>
+                <el-option label="F" value="F"></el-option>
+                <el-option label="H" value="H"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-divider content-position="left">{{ $t('config.ghconfig') }}</el-divider>
+            <el-form-item :label="$t('config.x1length')">
               <el-input v-model="cssConfig.lengthOne" style="width: 250px;" type="number"></el-input>
             </el-form-item>
-            <el-form-item label="X2长度(mm)：">
+            <el-form-item :label="$t('config.x2length')">
               <el-input v-model="cssConfig.lengthTwo" style="width: 250px;" type="number"></el-input>
             </el-form-item>
-            <el-form-item label="V1系数比：">
+            <el-form-item :label="$t('config.v1p')">
               <el-input v-model="cssConfig.speedOne" style="width: 250px;" type="number"></el-input>
             </el-form-item>
-            <el-form-item label="V2系数比：">
+            <el-form-item :label="$t('config.v2p')">
               <el-input v-model="cssConfig.speedTwo" style="width: 250px;" type="number"></el-input>
             </el-form-item>
-            <el-form-item label="G点延迟时间(ms)：">
+            <el-form-item :label="$t('config.gdelay')">
               <el-input v-model="cssConfig.newDelayPointTime" style="width: 250px;" type="number"></el-input>
             </el-form-item>
           </el-form>
         </div>
       </div>
       <div class="footer">
-        <el-button type="info" plain @click="allowEdit=true" v-show="!allowEdit">页面已锁定，点击修改配置</el-button>
-        <el-button type="primary" @click="update" v-show="allowEdit">保存</el-button>
-        <el-button @click="allowEdit=false" v-show="allowEdit">取消</el-button>
+        <el-button type="info" plain @click="allowEdit=true" v-show="!allowEdit">{{ $t('config.yemiansuodingTip') }}</el-button>
+        <el-button type="primary" @click="update" v-show="allowEdit">{{ $t('config.save') }}</el-button>
+        <el-button @click="allowEdit=false" v-show="allowEdit">{{ $t('config.cancel') }}</el-button>
       </div>
     </div>
   </div>

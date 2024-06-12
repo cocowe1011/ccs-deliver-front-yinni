@@ -1,8 +1,8 @@
 <template>
   <div style="width: 100%;height: 100%;">
     <div class="dict-order-top">
-      <el-button type="primary" icon="el-icon-plus" @click="addNew()" style="margin-left: 2px;">新建配方</el-button>
-      <el-button type="info" icon="el-icon-refresh" @click="getDictOrder()">刷新</el-button>
+      <el-button type="primary" icon="el-icon-plus" @click="addNew()" style="margin-left: 2px;">{{ $t('dictOrder.xinjian') }}</el-button>
+      <el-button type="info" icon="el-icon-refresh" @click="getDictOrder()">{{ $t('dictOrder.refresh') }}</el-button>
     </div>
     <div class="dict-order-down">
         <div v-if="dictOrderList.length > 0" style="width: 100%;height: 100%;box-sizing: border-box;padding:8px;background-color: rgb(214, 220, 230);display: flex;">
@@ -11,7 +11,7 @@
               <div class="tag-div"><el-tag>{{ index + 1 }}</el-tag></div>
               <span class="dict-name-span">{{ item.dictName }}</span>
               <div class="edit-dict-div">
-                <el-tooltip class="item" effect="dark" content="修改配方名称" placement="right">
+                <el-tooltip class="item" effect="dark" :content="$t('dictOrder.xiugainame')" placement="right">
                   <el-button icon="el-icon-edit" circle size="mini" @click="editDictOrderName"></el-button>
                 </el-tooltip>
               </div>
@@ -19,149 +19,149 @@
           </div>
           <div style="width: calc(100% - 308px); margin-left: 10px; height: 100%; background-color: white; box-sizing:border-box; padding: 10px 0px 0px 20px;overflow: auto;" v-loading="dictOrderLoading">
             <el-form :inline="true" label-position="right" label-width="130px" :model="dictOrderForm" class="demo-form-inline">
-              <el-form-item label="订单名称：">
-                <el-input size="small" v-model="dictOrderForm.orderName" placeholder="订单名称"></el-input>
+              <el-form-item :label="$t('processParameters.dingdanmingcheng') + '：'">
+                <el-input size="small" v-model="dictOrderForm.orderName" :placeholder="$t('processParameters.dingdanmingcheng')"></el-input>
               </el-form-item>
               <el-form-item>
-                <el-checkbox v-model="dictOrderForm.revertFlag">翻转</el-checkbox>
+                <el-checkbox v-model="dictOrderForm.revertFlag">{{ $t('processParameters.fanzhuan') }}</el-checkbox>
               </el-form-item>
               <el-form-item>
-                <el-checkbox v-model="dictOrderForm.trayFlag">托盘模式</el-checkbox>
+                <el-checkbox v-model="dictOrderForm.trayFlag">{{ $t('processParameters.tuopan') }}</el-checkbox>
               </el-form-item>
               <br/>
-              <el-form-item label="产品名称：">
-                <el-input size="small" v-model="dictOrderForm.productName" placeholder="产品名称"></el-input>
+              <el-form-item :label="$t('processParameters.chanpinmingcheng') + '：'">
+                <el-input size="small" v-model="dictOrderForm.productName" :placeholder="$t('processParameters.chanpinmingcheng')"></el-input>
               </el-form-item>
-              <el-form-item label="工艺名称：">
-                <el-input size="small" v-model="dictOrderForm.artName" placeholder="工艺名称"></el-input>
+              <el-form-item :label="$t('processParameters.gongyimingcheng') + '：'">
+                <el-input size="small" v-model="dictOrderForm.artName" :placeholder="$t('processParameters.gongyimingcheng')"></el-input>
               </el-form-item>
-              <el-form-item label="装载方式：">
-                <el-input size="small" v-model="dictOrderForm.loadMethod" placeholder="装载方式"></el-input>
+              <el-form-item :label="$t('processParameters.zhuangzaifangshi') + '：'">
+                <el-input size="small" v-model="dictOrderForm.loadMethod" :placeholder="$t('processParameters.zhuangzaifangshi') "></el-input>
               </el-form-item>
-              <el-form-item label="路径名称：">
-                <el-input size="small" v-model="dictOrderForm.pathName" placeholder="路径名称"></el-input>
+              <el-form-item :label="$t('processParameters.lujingmingcheng') + '：'">
+                <el-input size="small" v-model="dictOrderForm.pathName" :placeholder="$t('processParameters.lujingmingcheng')"></el-input>
               </el-form-item>
-              <el-form-item label="圈数：">
-                <el-input type="number" size="small" v-model="dictOrderForm.numberTurns" placeholder="圈数"></el-input>
+              <el-form-item :label="$t('processParameters.quanshu') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.numberTurns" :placeholder="$t('processParameters.quanshu') "></el-input>
               </el-form-item>
-              <el-form-item label="箱子长度：">
-                <el-input type="number" size="small" v-model="dictOrderForm.boxLength" placeholder="箱子长度"></el-input>
+              <el-form-item :label="$t('processParameters.xiangzichangdu') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.boxLength" :placeholder="$t('processParameters.xiangzichangdu')"></el-input>
               </el-form-item>
-              <el-form-item label="箱子高度：">
-                <el-input type="number" size="small" v-model="dictOrderForm.boxHeight" placeholder="箱子高度"></el-input>
+              <el-form-item :label="$t('processParameters.xiangzigaodu') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.boxHeight" :placeholder="$t('processParameters.xiangzigaodu')"></el-input>
               </el-form-item>
-              <el-form-item label="箱子宽度：">
-                <el-input type="number" size="small" v-model="dictOrderForm.boxWidth" placeholder="箱子宽度"></el-input>
+              <el-form-item :label="$t('processParameters.xiangzikuandu') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.boxWidth" :placeholder="$t('processParameters.xiangzikuandu')"></el-input>
               </el-form-item>
-              <el-form-item label="箱子重量：">
-                <el-input type="number" size="small" v-model="dictOrderForm.boxWeight" placeholder="箱子重量"></el-input>
+              <el-form-item :label="$t('processParameters.xiangzizhongliang') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.boxWeight" :placeholder="$t('processParameters.xiangzizhongliang')"></el-input>
               </el-form-item>
-              <el-form-item label="束下速度下限：">
-                <el-input type="number" size="small" v-model="dictOrderForm.sxSpeedLowerLimit" placeholder="束下速度下限"></el-input>
+              <el-form-item :label="$t('processParameters.shuxiasuduxiaxian') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.sxSpeedLowerLimit" :placeholder="$t('processParameters.shuxiasuduxiaxian') "></el-input>
               </el-form-item>
-              <el-form-item label="束下速度值：">
-                <el-input type="number" size="small" v-model="dictOrderForm.sxSpeedSet" placeholder="束下速度值"></el-input>
+              <el-form-item :label="$t('processParameters.shuxiasuduzhi') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.sxSpeedSet" :placeholder="$t('processParameters.shuxiasuduzhi')"></el-input>
               </el-form-item>
-              <el-form-item label="束下速度上限：">
-                <el-input type="number" size="small" v-model="dictOrderForm.sxSpeedUpperLimit" placeholder="束下速度上限"></el-input>
+              <el-form-item :label="$t('processParameters.shuxiasudushangxian') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.sxSpeedUpperLimit" :placeholder="$t('processParameters.shuxiasudushangxian')"></el-input>
               </el-form-item>
-              <el-form-item label="束流下限：">
-                <el-input type="number" size="small" v-model="dictOrderForm.slLowerLimit" placeholder="束流下限"></el-input>
+              <el-form-item :label="$t('processParameters.shuliuxiaxian') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.slLowerLimit" :placeholder="$t('processParameters.shuliuxiaxian')"></el-input>
               </el-form-item>
-              <el-form-item label="束流设定值：">
-                <el-input type="number" size="small" v-model="dictOrderForm.slSet" placeholder="束流设定值"></el-input>
+              <el-form-item :label="$t('processParameters.shuliusheding') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.slSet" :placeholder="$t('processParameters.shuliusheding') "></el-input>
               </el-form-item>
-              <el-form-item label="束流上限：">
-                <el-input type="number" size="small" v-model="dictOrderForm.slUpperLimit" placeholder="束流上限"></el-input>
+              <el-form-item :label="$t('processParameters.shuliushangxina') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.slUpperLimit" :placeholder="$t('processParameters.shuliushangxina')"></el-input>
               </el-form-item>
-              <el-form-item label="功率下限：">
-                <el-input type="number" size="small" v-model="dictOrderForm.glLowerLimit" placeholder="功率下限"></el-input>
+              <el-form-item :label="$t('processParameters.gonglvxiaxian') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.glLowerLimit" :placeholder="$t('processParameters.gonglvxiaxian') "></el-input>
               </el-form-item>
-              <el-form-item label="功率设定值：">
-                <el-input type="number" size="small" v-model="dictOrderForm.glSet" placeholder="功率设定值"></el-input>
+              <el-form-item :label="$t('processParameters.gonglvsheding') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.glSet" :placeholder="$t('processParameters.gonglvsheding')"></el-input>
               </el-form-item>
-              <el-form-item label="功率上限：">
-                <el-input type="number" size="small" v-model="dictOrderForm.glUpperLimit" placeholder="功率上限"></el-input>
+              <el-form-item :label="$t('processParameters.gonglvshangxian') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.glUpperLimit" :placeholder="$t('processParameters.gonglvshangxian')"></el-input>
               </el-form-item>
-              <el-form-item label="扫宽下限：">
-                <el-input type="number" size="small" v-model="dictOrderForm.skLowerLimit" placeholder="扫宽下限"></el-input>
+              <el-form-item :label="$t('processParameters.saokuanxiaxian') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.skLowerLimit" :placeholder="$t('processParameters.saokuanxiaxian')"></el-input>
               </el-form-item>
-              <el-form-item label="扫宽设定值：">
-                <el-input type="number" size="small" v-model="dictOrderForm.skSet" placeholder="扫宽设定值"></el-input>
+              <el-form-item :label="$t('processParameters.saokuansheding') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.skSet" :placeholder="$t('processParameters.saokuansheding')"></el-input>
               </el-form-item>
-              <el-form-item label="扫宽上限：">
-                <el-input type="number" size="small" v-model="dictOrderForm.skUpperLimit" placeholder="扫宽上限"></el-input>
+              <el-form-item :label="$t('processParameters.saokuanshangxian') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.skUpperLimit" :placeholder="$t('processParameters.saokuanshangxian')"></el-input>
               </el-form-item>
-              <el-form-item label="扫描频率下限：">
-                <el-input type="number" size="small" v-model="dictOrderForm.smplLowerLimit" placeholder="扫描频率下限"></el-input>
+              <el-form-item :label="$t('processParameters.saomiaopinlvxiaxian') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.smplLowerLimit" :placeholder="$t('processParameters.saomiaopinlvxiaxian')"></el-input>
               </el-form-item>
-              <el-form-item label="扫描频率设定：">
-                <el-input type="number" size="small" v-model="dictOrderForm.smplSet" placeholder="扫描频率设定"></el-input>
+              <el-form-item :label="$t('processParameters.saomiaopinlvsheding') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.smplSet" :placeholder="$t('processParameters.saomiaopinlvsheding')"></el-input>
               </el-form-item>
-              <el-form-item label="扫描频率上限：">
-                <el-input type="number" size="small" v-model="dictOrderForm.smplUpperLimit" placeholder="扫描频率上限"></el-input>
+              <el-form-item :label="$t('processParameters.saomiaopinlvshangxian') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.smplUpperLimit" :placeholder="$t('processParameters.saomiaopinlvshangxian')"></el-input>
               </el-form-item>
-              <el-form-item label="PFN电压下限：">
-                <el-input type="number" size="small" v-model="dictOrderForm.pfnLowerLimit" placeholder="PFN电压下限"></el-input>
+              <el-form-item :label="$t('processParameters.pfnxiaxian') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.pfnLowerLimit" :placeholder="$t('processParameters.pfnxiaxian')"></el-input>
               </el-form-item>
-              <el-form-item label="PFN电压设定：">
-                <el-input type="number" size="small" v-model="dictOrderForm.pfnSet" placeholder="PFN电压设定"></el-input>
+              <el-form-item :label="$t('processParameters.pfnsheding') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.pfnSet" :placeholder="$t('processParameters.pfnsheding')"></el-input>
               </el-form-item>
-              <el-form-item label="PFN电压上限：">
-                <el-input type="number" size="small" v-model="dictOrderForm.pfnUpperLimit" placeholder="PFN电压上限"></el-input>
+              <el-form-item :label="$t('processParameters.pfnshangxian') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.pfnUpperLimit" :placeholder="$t('processParameters.pfnshangxian')"></el-input>
               </el-form-item>
-              <el-form-item label="能量下限：">
-                <el-input type="number" size="small" v-model="dictOrderForm.nlLowerLimit" placeholder="能量下限"></el-input>
+              <el-form-item :label="$t('processParameters.nengliangxiaxian') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.nlLowerLimit" :placeholder="$t('processParameters.nengliangxiaxian')"></el-input>
               </el-form-item>
-              <el-form-item label="能量设定值：">
-                <el-input type="number" size="small" v-model="dictOrderForm.nlSet" placeholder="能量设定值"></el-input>
+              <el-form-item :label="$t('processParameters.nengliangshedingzhi') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.nlSet" :placeholder="$t('processParameters.nengliangshedingzhi')"></el-input>
               </el-form-item>
-              <el-form-item label="能量上限：">
-                <el-input type="number" size="small" v-model="dictOrderForm.nlUpperLimit" placeholder="能量上限"></el-input>
+              <el-form-item :label="$t('processParameters.nengliangshangxian') + '：'">
+                <el-input type="number" size="small" v-model="dictOrderForm.nlUpperLimit" :placeholder="$t('processParameters.nengliangshangxian')"></el-input>
               </el-form-item>
               <el-form-item label="订单箱数：" v-show="false">
                 <el-input type="number" size="small" v-model="dictOrderForm.orderBoxNum" placeholder="订单箱数"></el-input>
               </el-form-item>
             </el-form>
             <div style="width: 100%;height: 50px;line-height: 50px;text-align: center;">
-              <el-button type="primary" @click="update">保 存</el-button>
+              <el-button type="primary" @click="update">{{ $t('dictOrder.baocun') }}</el-button>
               <el-popconfirm
-                title="删除后不可恢复，请确认是否删除？"
+                :title="$t('dictOrder.baocunTip')"
                 placement="top"
                 @confirm="deleteDict"
               >
-                <el-button slot="reference" type="danger" style="margin-left: 20px;">作废配方</el-button>
+                <el-button slot="reference" type="danger" style="margin-left: 20px;">{{ $t('dictOrder.zuofei') }}</el-button>
               </el-popconfirm>
               
             </div>
           </div>
         </div>
-        <el-empty v-else description="暂无工艺配方模板！" style="height: 100%;"></el-empty>
+        <el-empty v-else :description="$t('dictOrder.zanwu')" style="height: 100%;"></el-empty>
     </div>
     <el-dialog
-      title="请输入配方名称："
+      :title="$t('dictOrder.shurupeifangming') + '：'"
       :visible.sync="dialogVisible"
       width="30%"
       append-to-body
       :close-on-click-modal="false"
       >
-      <el-input v-model="inputName" placeholder="请输入配方名称"></el-input>
+      <el-input v-model="inputName" :placeholder="$t('dictOrder.shurupeifangming')"></el-input>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="save" :loading="saveLoading">确 定</el-button>
+        <el-button @click="dialogVisible = false">{{ $t('dictOrder.quxiao') }}</el-button>
+        <el-button type="primary" @click="save" :loading="saveLoading">{{ $t('dictOrder.queding') }}</el-button>
       </span>
     </el-dialog>
     <el-dialog
-      title="修改配方名称："
+      :title="$t('dictOrder.xiugaipeifangming')"
       :visible.sync="dialogEditVisible"
       width="30%"
       append-to-body
       :close-on-click-modal="false"
       >
-      <el-input v-model="dictOrderForm.dictName" placeholder="请输入配方名称"></el-input>
+      <el-input v-model="dictOrderForm.dictName" :placeholder="$t('dictOrder.qingshurupei')"></el-input>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogEditVisible = false">取 消</el-button>
-        <el-button type="primary" @click="updateDictOrderName" :loading="dialogEditLoading">确 定</el-button>
+        <el-button @click="dialogEditVisible = false">{{ $t('dictOrder.quxiao') }}</el-button>
+        <el-button type="primary" @click="updateDictOrderName" :loading="dialogEditLoading">{{ $t('dictOrder.queding') }}</el-button>
       </span>
     </el-dialog>
   </div>
