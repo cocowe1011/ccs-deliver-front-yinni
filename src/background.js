@@ -164,6 +164,7 @@ app.on('ready', () => {
   // 程序启动时判断是否存在报表、日志等本地文件夹，没有就创建
   createFile('batchReport.grf');
   createFile('boxreport.grf');
+  createFile('printBarcodeQRcode.grf');
   // 定义自定义事件
   ipcMain.on('writeLogToLocal', (event, arg) => {
     fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + ".txt").replaceAll('/','-'), arg + '\n', function(err) {});

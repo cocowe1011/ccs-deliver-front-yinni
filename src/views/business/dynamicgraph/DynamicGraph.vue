@@ -402,6 +402,7 @@ import { Debugger, ipcRenderer } from 'electron'
 import HttpUtil from '@/utils/HttpUtil'
 import moment from 'moment';
 const remote = require('electron').remote
+import grwebapp from '@/utils/grwebapp'
 export default {
   name: "DynamicGraph",
   components: {},
@@ -551,7 +552,8 @@ export default {
       lengthOne: 0, // G-H X1长度
       lengthTwo: 0, // G-H X2长度
       firstLabelCode: '', // 首标签
-      secLabelCode: '' // 尾标签
+      secLabelCode: '', // 尾标签
+      qrReportPath: 'D://css_temp_data/report/printBarcodeQRcode.grf',
     };
   },
   watch: {
@@ -2295,6 +2297,16 @@ export default {
         const result = this.generateTimestamp();
         this.firstLabelCode = result[0];
         this.secLabelCode = result[1];
+        const printObj = {recordset:[{"PRINT_CODE": this.firstLabelCode}, {"PRINT_CODE": this.secLabelCode}]};
+        var args = {
+          type: "print",
+          report: grwebapp.urlAddRandomNo(this.qrReportPath),
+          PrinterName: "XP-58", //指定要输出的打印机名称
+          //实际应用中，data应该为程序中通过各种途径获取到的数据，最后要将数据转换为报表需要的XML或JSON格式的字符串数据
+          data: printObj,
+          showOptionDlg: false
+        };
+        grwebapp.webapp_ws_ajax_run(args);
         // 把首尾箱标签在数据库存储一下
         this.$message({
           type: 'success',
@@ -2324,6 +2336,7 @@ export default {
     }
   },
   created() {
+    grwebapp.webapp_urlprotocol_startup();
     this.getConfig()
   },
   mounted() {

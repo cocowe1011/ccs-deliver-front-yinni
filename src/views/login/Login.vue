@@ -41,7 +41,7 @@
           <div></div>
         </div>
         <div id="lodtext">
-          {{ $t('login.xitongqidong') }}...&nbsp;{{ $t('login.qingshaohou') }}...
+          System Loading...&nbsp;Please wait...
         </div>
       </div>
     </transition>
@@ -203,14 +203,14 @@ export default {
         if (response.data === 'OK') {
           this.setLocate()
           this.javaAppStarted = true;
-          this.$message.success(this.$i18n.locale === 'zh'?'已启动！':'Started!')
+          this.$message.success('Started!')
           // 给主进程发消息，启动PLC连接
           ipcRenderer.send('conPLC');
         } else {
           if (retries < this.maxRetries) {
             setTimeout(() => this.checkJavaAppStatus(retries + 1), this.retryInterval);
           } else {
-            console.error(this.$i18n.locale === 'zh'?'Java应用程序启动超时':'Java application startup timeout');
+            console.error('Java application startup timeout');
           }
         }
       }).catch((error) => {
@@ -366,8 +366,8 @@ export default {
     top: 50%;
     left: 50%;
     margin-top: 40px;
-    margin-left: -100px;
-    width: 220px;
+    margin-left: -130px;
+    width: 300px;
     height: 30px;
     z-index: 11;
     font-weight: 600;
