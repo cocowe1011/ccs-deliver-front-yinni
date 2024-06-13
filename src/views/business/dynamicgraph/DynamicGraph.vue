@@ -250,7 +250,7 @@
             <!-- 预警 -->
             <img src="./img/yujing.png" class="warning-img" v-show="yujingShow" style="left: 41px;top: 663px;"/>
             <img src="./img/baojing.png" class="warning-img" v-show="baojingShow" style="top: 717px;left: 352px;"/>
-            <div style="width: 70px;height: 70px;left: 695px; position: absolute;background-color: lightcoral;color: white;display: flex;justify-content: center;align-items: center;" v-show="banLoadStatus">
+            <div style="width: 70px;height: 70px;left: 695px; position: absolute;background-color: lightcoral;color: white;display: flex;justify-content: center;align-items: center;" v-if="banLoadStatus">
               {{ $t('dynamicGraph.jinzhishanghuo') }}
             </div>
             <el-button type="success" icon="el-icon-check" v-show="baojingShow" @click="downClick" style="position: absolute;right: 271px;top: 744px;" plain>{{ $t('dynamicGraph.xiahuowancheng') }}</el-button>
@@ -1090,8 +1090,8 @@ export default {
       this.nowShuXiaid = boxImitateIdVal;
       this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '到达束下，开始读取加速器数值！', 'log');
       // 无加速器时放开此注释********************************************
-      // this.qualified4Box(boxImitateIdVal, true)
-      // this.$message.success(this.nowShuXiaid + '合格！');
+      this.qualified4Box(boxImitateIdVal, true)
+      this.$message.success(this.nowShuXiaid + '合格！');
       // 无加速器时放开此注释*********************************************
       // 测试一个箱子不合格，，前后两个箱子都不合格*************************
       // if(boxImitateIdVal == '202307260003') {
@@ -1104,42 +1104,42 @@ export default {
       // 测试一个箱子不合格，，前后两个箱子都不合格*************************
 
       // 获取当前加速器工艺，和系统设置工艺做比较
-      HttpUtil.get('/box/getAccDataByLocal').then((res)=> {
-        // 给当前箱子赋值acc读取值
-        const index = this.arrBC.findIndex(item => {
-          return item.boxImitateId === boxImitateIdVal
-        })
-        if(index != -1) {
-          // 给箱子设置读取值
-          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].slRead = res.data.beam;
-          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].glRead = res.data.power;
-          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].skRead = res.data.scanW;
-          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].smplRead = res.data.scanF;
-          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].pfnRead = res.data.pfn;
-          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].nlRead = res.data.energy;
-          this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].sxSpeedRead = (Number(res.data.speed) * 1000);
-        }
-        if(res.data&&JSON.stringify(this.orderMainDy) != '{}' && this.judgeAccData(res.data, boxImitateIdVal)) {
-          this.$message({
-            type: 'success',
-            message: this.$i18n.locale === 'zh' ? ('箱子id' + boxImitateIdVal + '工艺合格！更新状态！') : ('box id' + boxImitateIdVal + 'Process qualified! Update status!')
-          });
-          this.qualified4Box(boxImitateIdVal, true)
-        } else {
-          this.$message({
-            type: 'warning',
-            message: this.$i18n.locale === 'zh' ? ('箱子id' + boxImitateIdVal + '工艺不合格！更新状态！') : ('box id' + boxImitateIdVal + 'Process not qualified! Update status!')
-          });
-          this.qualified4Box(boxImitateIdVal, false)
-        }
-      }).catch((err)=> {
-        this.$message({
-          type: 'warning',
-          message: this.$i18n.locale === 'zh' ? ('箱子id' + boxImitateIdVal + '工艺不合格！更新状态！'): 'box id' + boxImitateIdVal + 'Process not qualified! Update status!'
-        });
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！数据异常！'+ err, 'log');
-        this.qualified4Box(boxImitateIdVal, false)
-      });
+      // HttpUtil.get('/box/getAccDataByLocal').then((res)=> {
+      //   // 给当前箱子赋值acc读取值
+      //   const index = this.arrBC.findIndex(item => {
+      //     return item.boxImitateId === boxImitateIdVal
+      //   })
+      //   if(index != -1) {
+      //     // 给箱子设置读取值
+      //     this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].slRead = res.data.beam;
+      //     this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].glRead = res.data.power;
+      //     this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].skRead = res.data.scanW;
+      //     this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].smplRead = res.data.scanF;
+      //     this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].pfnRead = res.data.pfn;
+      //     this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].nlRead = res.data.energy;
+      //     this.arrBC[index].turnsInfoList[this.arrBC[index].numberTurns - 1].sxSpeedRead = (Number(res.data.speed) * 1000);
+      //   }
+      //   if(res.data&&JSON.stringify(this.orderMainDy) != '{}' && this.judgeAccData(res.data, boxImitateIdVal)) {
+      //     this.$message({
+      //       type: 'success',
+      //       message: this.$i18n.locale === 'zh' ? ('箱子id' + boxImitateIdVal + '工艺合格！更新状态！') : ('box id' + boxImitateIdVal + 'Process qualified! Update status!')
+      //     });
+      //     this.qualified4Box(boxImitateIdVal, true)
+      //   } else {
+      //     this.$message({
+      //       type: 'warning',
+      //       message: this.$i18n.locale === 'zh' ? ('箱子id' + boxImitateIdVal + '工艺不合格！更新状态！') : ('box id' + boxImitateIdVal + 'Process not qualified! Update status!')
+      //     });
+      //     this.qualified4Box(boxImitateIdVal, false)
+      //   }
+      // }).catch((err)=> {
+      //   this.$message({
+      //     type: 'warning',
+      //     message: this.$i18n.locale === 'zh' ? ('箱子id' + boxImitateIdVal + '工艺不合格！更新状态！'): 'box id' + boxImitateIdVal + 'Process not qualified! Update status!'
+      //   });
+      //   this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！数据异常！'+ err, 'log');
+      //   this.qualified4Box(boxImitateIdVal, false)
+      // });
     },
     analogOptoelectronics(point) {
       switch (point) {
