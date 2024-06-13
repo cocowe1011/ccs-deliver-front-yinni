@@ -59,8 +59,8 @@ export default {
   props: {},
   data() {
     return {
-      userCode: 'admin',
-      userPassword: '2',
+      userCode: '',
+      userPassword: '',
       loadingStatus: false,
       pageMark: 'login',
       showUserNameTips: false,
@@ -85,25 +85,25 @@ export default {
       // 判断非空项
       if(this.userNameReg == '') {
         this.$refs.userNameRegRef.focus();
-        this.$message.error('姓名不可为空，请输入！')
+        this.$message.error(this.$i18n.locale === 'zh' ?'姓名不可为空，请输入！':'Name cannot be empty. Please enter!')
         this.registerStatus = false;
         return false;
       }
       if(this.userCodeReg == '') {
         this.$refs.userCodeRegRef.focus();
-        this.$message.error('注册账号不可为空，请输入！')
+        this.$message.error(this.$i18n.locale === 'zh' ?'注册账号不可为空，请输入！':'Registration account cannot be empty. Please enter!')
         this.registerStatus = false;
         return false;
       }
       if(this.userPasswordReg == '') {
         this.$refs.userPasswordAgainRef.focus();
-        this.$message.error('密码不可为空，请输入！')
+        this.$message.error(this.$i18n.locale === 'zh' ?'密码不可为空，请输入！':'Password cannot be empty. Please enter!')
         this.registerStatus = false;
         return false;
       }
       if(this.userPasswordReg !== this.userPasswordAgain) {
         this.$refs.userPasswordAgainRef.focus();
-        this.$message.error('密码输入不一致，请重新输入！')
+        this.$message.error(this.$i18n.locale === 'zh' ?'密码输入不一致，请重新输入！':'Password input is inconsistent. Please enter again!')
         this.registerStatus = false;
         return false;
       }
@@ -116,8 +116,8 @@ export default {
         if(res.data == 1) {
           // 注册成功，跳转登录页面进行登录
           this.$notify({
-            title: '注册成功！',
-            message: '请输入账号密码进行登录！',
+            title: this.$i18n.locale === 'zh' ?'注册成功！':'Registration successful!',
+            message: this.$i18n.locale === 'zh' ?'请输入账号密码进行登录！':'Please enter your account and password to log in!',
             type: 'success',
             duration: 2000
           });
@@ -127,15 +127,15 @@ export default {
           // 注册失败，请重试
           if(res.code  == '0001') {
             this.$refs.userCodeRegRef.focus();
-            this.$message.error('注册失败！' + this.userCodeReg + res.message)
+            this.$message.error(this.$i18n.locale === 'zh' ?'注册失败！':'Registration failed!' + this.userCodeReg + res.message)
           } else {
-            this.$message.error('注册失败！'+ res.message)
+            this.$message.error(this.$i18n.locale === 'zh' ?'注册失败！':'Registration failed!'+ res.message)
           }
         }
         this.registerStatus = false;
       }).catch((err)=> {
         // 注册失败，请重试
-        this.$message.error('注册失败！' + err)
+        this.$message.error(this.$i18n.locale === 'zh' ?'注册失败！':'Registration failed!' + err)
         this.registerStatus = false;
       });
     },
@@ -169,7 +169,7 @@ export default {
             });
           }, 2000);
         } else {
-          this.$message.error(res.message)
+          this.$message.error(this.$i18n.locale === 'zh'?res.message:res.message.indexOf('未查询到账户信息')>-1? 'No account information found!': 'Incorrect password!')
           this.loadingStatus = false;
         }
       }).catch((err)=> {
@@ -188,7 +188,7 @@ export default {
       if (!this.regex.test(this.userCodeReg)) {
         // 如果输入的值不符合要求，移除非法字符
         this.userCodeReg = this.userCodeReg.replace(/[^a-zA-Z0-9_]/g, '');
-        this.$message.error('登录账户只能设置为数字，字母及下划线！')
+        this.$message.error(this.$i18n.locale === 'zh'?'登录账户只能设置为数字，字母及下划线！':'Login account can only be set as numbers, letters, and underscores!')
       }
     },
     setLocate() {
@@ -203,21 +203,21 @@ export default {
         if (response.data === 'OK') {
           this.setLocate()
           this.javaAppStarted = true;
-          this.$message.success('已启动！')
+          this.$message.success(this.$i18n.locale === 'zh'?'已启动！':'Started!')
           // 给主进程发消息，启动PLC连接
           ipcRenderer.send('conPLC');
         } else {
           if (retries < this.maxRetries) {
             setTimeout(() => this.checkJavaAppStatus(retries + 1), this.retryInterval);
           } else {
-            console.error('Java应用程序启动超时');
+            console.error(this.$i18n.locale === 'zh'?'Java应用程序启动超时':'Java application startup timeout');
           }
         }
       }).catch((error) => {
         if (retries < this.maxRetries) {
           setTimeout(() => this.checkJavaAppStatus(retries + 1), this.retryInterval);
         } else {
-          console.error('检查Java应用程序状态时发生错误', error);
+          console.error(this.$i18n.locale === 'zh'?'检查Java应用程序状态时发生错误':'Error occurred while checking Java application status', error);
         }
       });
     }
