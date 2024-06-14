@@ -151,7 +151,7 @@ app.on('ready', () => {
   }
   setAppTray();
   const platform = os.platform();
-  if (process.env.NODE_ENV === 'production'&&platform === 'win32') {
+  if (platform === 'win32') {
     // 启动Java进程
     javaProcess = startJavaProcess(() => {
       // 设置一个定时器每2秒检查一次 Java 程序的健康状态
@@ -488,8 +488,8 @@ function startJavaProcess(callback) {
   const javaProcess = spawn(path.join(__static, './jre', 'jre1.8.0_251', 'bin', 'java'), ['-Xmx4096m', '-Xms4096m', '-jar', path.join(__static, './jarlib', 'ccs-deliver-middle.jar')]);
   // 检查 Java 程序是否启动成功
   const checkStartup = setInterval(() => {
-    HttpUtil.post('/login/login').then((response)=> {
-      if (response.status === 200) {
+    HttpUtil.post('/status/check').then((response)=> {
+      if (response === 'OK') {
         console.log('Java process started successfully');
         clearInterval(checkStartup);
         if (callback) {
@@ -534,8 +534,8 @@ let lastSuccessfulCheck = Date.now();
 
 // 健康检查函数
 function healthCheck() {
-  HttpUtil.post('/login/health').then(response => {
-    if (response.status === 200) {
+  HttpUtil.post('/status/check').then(response => {
+    if (response == 'OK') {
       console.log('Java process is healthy');
       lastSuccessfulCheck = Date.now();
     }
