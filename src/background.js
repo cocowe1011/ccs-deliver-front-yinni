@@ -14,13 +14,18 @@ logger.transports.file.format = '[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}]{scope}
 console.log(app.getPath("userData"))
 logger.transports.file.file = app.getPath("userData") + "/app.log";
 
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 var appTray = null;
 let closeStatus = false;
 var conn = new nodes7;
 var pollingST = null;
+
+// 初始化并启动 Java 程序并在成功启动后开始健康检查
+let javaProcess = null;
+
 // electron 开启热更新
 try {
   require('electron-reloader')(module,{});
@@ -145,9 +150,13 @@ app.on('ready', () => {
     }, 100);
   }
   setAppTray();
-  if (process.env.NODE_ENV === 'production') {
+  const platform = os.platform();
+  if (process.env.NODE_ENV === 'production'&&platform === 'win32') {
     // 启动Java进程
-    spawn(path.join(__static, './jre', 'jre1.8.0_251', 'bin', 'java'), ['-Xmx4096m', '-Xms4096m', '-jar', path.join(__static, './jarlib', 'ccs-deliver-middle.jar')]);
+    javaProcess = startJavaProcess(() => {
+      // 设置一个定时器每2秒检查一次 Java 程序的健康状态
+      setInterval(healthCheck, 2000); // 每2秒检查一次
+    });
   }
 
   // 开发者工具
@@ -470,4 +479,76 @@ const setAppTray = () => {
       mainWindow.setSkipTaskbar(false);
     }
   })
+}
+
+
+
+// 启动 Java 程序的函数
+function startJavaProcess(callback) {
+  const javaProcess = spawn(path.join(__static, './jre', 'jre1.8.0_251', 'bin', 'java'), ['-Xmx4096m', '-Xms4096m', '-jar', path.join(__static, './jarlib', 'ccs-deliver-middle.jar')]);
+  // 检查 Java 程序是否启动成功
+  const checkStartup = setInterval(() => {
+    HttpUtil.post('/login/login').then((response)=> {
+      if (response.status === 200) {
+        console.log('Java process started successfully');
+        clearInterval(checkStartup);
+        if (callback) {
+            callback(javaProcess);
+        }
+    }
+    }).catch(error => {
+      console.log('Waiting for Java process to start...');
+    });
+  }, 2000); // 每2秒检查一次
+  return javaProcess;
+}
+
+// 检查并杀死占用指定端口的进程
+function checkAndKillPort(port, callback) {
+  const command = `netstat -ano | findstr :${port}`;
+  exec(command, (err, stdout, stderr) => {
+    if (err) {
+        console.error(`Error checking port ${port}: ${stderr}`);
+        callback();
+        return;
+    }
+    const lines = stdout.trim().split('\n');
+    const pids = lines.map(line => line.trim().split(/\s+/).pop()).filter(Boolean);
+    if (pids.length > 0) {
+      pids.forEach(pid => {
+        exec(`taskkill /PID ${pid} /F`, (err, stdout, stderr) => {
+          if (err) {
+            console.error(`Error killing process ${pid}: ${stderr}`);
+          } else {
+            console.log(`Killed process ${pid} on port ${port}`);
+          }
+        });
+      });
+    }
+    callback();
+  });
+}
+
+// 定时器变量
+let lastSuccessfulCheck = Date.now();
+
+// 健康检查函数
+function healthCheck() {
+  HttpUtil.post('/login/health').then(response => {
+    if (response.status === 200) {
+      console.log('Java process is healthy');
+      lastSuccessfulCheck = Date.now();
+    }
+  })
+  .catch(error => {
+    console.error(`Health check failed: ${error.message}`);
+    if (Date.now() - lastSuccessfulCheck > 5000) {
+      console.log('Java process is not responding. Restarting...');
+      checkAndKillPort(7005, () => {
+          javaProcess = startJavaProcess(() => {
+              lastSuccessfulCheck = Date.now();
+          });
+      });
+    }
+  });
 }
