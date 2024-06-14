@@ -485,14 +485,14 @@ const setAppTray = () => {
 
 // 启动 Java 程序的函数
 function startJavaProcess(callback) {
-  fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), '后台java程序启动中...\n', function(err) {});
+  fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), (new Date()).toLocaleTimeString()  + '后台java程序启动中...\n', function(err) {});
   const javaProcess = spawn(path.join(__static, './jre', 'jre1.8.0_251', 'bin', 'java'), ['-Xmx4096m', '-Xms4096m', '-jar', path.join(__static, './jarlib', 'ccs-deliver-middle.jar')]);
   // 检查 Java 程序是否启动成功
   const checkStartup = setInterval(() => {
     HttpUtil.post('/status/check').then((response)=> {
       if (response === 'OK') {
         console.log('Java process started successfully');
-        fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), 'Java process started successfully\n', function(err) {});
+        fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), (new Date()).toLocaleTimeString()  + 'Java process started successfully\n', function(err) {});
         clearInterval(checkStartup);
         if (callback) {
             callback(javaProcess);
@@ -500,7 +500,7 @@ function startJavaProcess(callback) {
     }
     }).catch(error => {
       console.log('Waiting for Java process to start...');
-      fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), 'Waiting for Java process to start...\n', function(err) {});
+      fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), (new Date()).toLocaleTimeString()  + 'Waiting for Java process to start...\n', function(err) {});
     });
   }, 2000); // 每2秒检查一次
   return javaProcess;
@@ -546,10 +546,10 @@ function healthCheck() {
   })
   .catch(error => {
     console.error(`Health check failed: ${error.message}`);
-    fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), `Health check failed: ${error.message}` + '\n', function(err) {});
+    fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), (new Date()).toLocaleTimeString()  + `Health check failed: ${error.message}` + '\n', function(err) {});
     if (Date.now() - lastSuccessfulCheck > 5000) {
       console.log('Java process is not responding. Restarting...');
-      fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), 'Java process is not responding. Restarting...\n', function(err) {});
+      fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), (new Date()).toLocaleTimeString()  + 'Java process is not responding. Restarting...\n', function(err) {});
       isRestarting = true;
       checkAndKillPort(7005, () => {
           javaProcess = startJavaProcess(() => {
