@@ -540,7 +540,6 @@ function healthCheck() {
   if (isRestarting) return; // 如果正在重启，则跳过健康检查
   HttpUtil.post('/status/check').then(response => {
     if (response == 'OK') {
-      console.log('Java process is healthy');
       lastSuccessfulCheck = Date.now();
     }
   })
