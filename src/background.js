@@ -507,28 +507,64 @@ function startJavaProcess(callback) {
 }
 
 // 检查并杀死占用指定端口的进程
-function checkAndKillPort(port, callback) {
+function checkAndKillJavaPort(port, callback) {
   const command = `netstat -ano | findstr :${port}`;
   exec(command, (err, stdout, stderr) => {
     if (err) {
         console.error(`Error checking port ${port}: ${stderr}`);
+        fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), `Error checking port ${port}: ${stderr}` + '\n', function(err) {});
         callback();
         return;
     }
     const lines = stdout.trim().split('\n');
     const pids = lines.map(line => line.trim().split(/\s+/).pop()).filter(Boolean);
     if (pids.length > 0) {
-      pids.forEach(pid => {
-        exec(`taskkill /PID ${pid} /F`, (err, stdout, stderr) => {
-          if (err) {
-            console.error(`Error killing process ${pid}: ${stderr}`);
-          } else {
-            console.log(`Killed process ${pid} on port ${port}`);
-          }
-        });
+        let killCount = 0;
+        pids.forEach(pid => {
+          // 检查进程是否为 Java 进程
+          isJavaProcess(pid, (isJava) => {
+              if (isJava) {
+                  const killCommand = `taskkill /PID ${pid} /F`;
+                  exec(killCommand, (err, stdout, stderr) => {
+                      if (err) {
+                          console.error(`Error killing process ${pid}: ${stderr}`);
+                          fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), `Error killing process ${pid}: ${stderr}` + '\n', function(err) {});
+                      } else {
+                          console.log(`Killed Java process ${pid} on port ${port}`);
+                          fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), `Killed Java process ${pid} on port ${port}` + '\n', function(err) {});
+                      }
+                      killCount++;
+                      if (killCount === pids.length) {
+                          callback();
+                      }
+                  });
+              } else {
+                  killCount++;
+                  if (killCount === pids.length) {
+                      callback();
+                  }
+              }
+          });
       });
+    } else {
+        callback();
     }
-    callback();
+});
+}
+
+// 判断是否是 Java 进程
+function isJavaProcess(pid, callback) {
+  const command = `wmic process where processid=${pid} get commandline`;
+
+  exec(command, (err, stdout, stderr) => {
+      if (err) {
+          console.error(`Error checking process ${pid}: ${stderr}`);
+          callback(false);
+          return;
+      }
+
+      const commandLine = stdout.trim();
+      callback(commandLine.includes('java') && commandLine.includes('ccs-deliver-middle.jar'));
   });
 }
 
@@ -550,7 +586,7 @@ function healthCheck() {
       console.log('Java process is not responding. Restarting...');
       fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), (new Date()).toLocaleTimeString()  + 'Java process is not responding. Restarting...\n', function(err) {});
       isRestarting = true;
-      checkAndKillPort(7005, () => {
+      checkAndKillJavaPort(7005, () => {
           javaProcess = startJavaProcess(() => {
               lastSuccessfulCheck = Date.now();
               isRestarting = false;
