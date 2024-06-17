@@ -1577,8 +1577,10 @@ export default {
                 // 计算时间 改为任务管理
                 const times = this.calculateMilliseconds((Number(this.lengthOne)/(Number(this.orderMainDy.sxSpeedSet)  * Number(this.speedOne)) ).toFixed(2), (Number(this.lengthTwo)/(Number(this.orderMainDy.sxSpeedSet)  * Number(this.speedTwo)) ).toFixed(2)) + this.newDelayPointTime;
                 setTimeout(() => {
-                  this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 首箱到达H点！', 'log');
-                  this.judgeIfBoxOnH();
+                  if(this.arrGH.length > 0) {
+                    this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 首箱到达H点！', 'log');
+                    this.judgeIfBoxOnH();
+                  }
                 }, times);
                 this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrDG[0].boxImitateId + '，是本次上货的第一箱，经过G点，束下设定速度：' + this.orderMainDy.sxSpeedSet + '，X1长度：' + this.lengthOne + '，V1速度比：' + this.speedOne + '，X2长度：'+ this.lengthTwo +'，V2速度比：' + this.speedTwo + '，到达H点延迟时间：' + this.newDelayPointTime + '计算到达H点共需时间：' + times, 'log');
               }
@@ -2002,6 +2004,8 @@ export default {
         ipcRenderer.send('writeValuesToPLC', 'DBW16', 0); // 下货(切换订单不可清空)
         this.$message.success(this.$i18n.locale === 'zh' ? '全线清空成功!': 'All cleared successfully!')
       }
+      // 定时器也需要清除
+      this.deleteAllTimers();
     },
     getConfig() {
       // 查询配置
@@ -2200,6 +2204,11 @@ export default {
       if(this.timers[boxImitateId] != undefined) {
         clearTimeout(this.timers[boxImitateId].timerId);
         delete this.timers[boxImitateId];
+      }
+    },
+    deleteAllTimers() {
+      for (const boxImitateId in this.timers) {
+        this.deleteTimersByBoxImitateId(boxImitateId)
       }
     },
     downClick() {
