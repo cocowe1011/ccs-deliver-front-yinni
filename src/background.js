@@ -517,12 +517,6 @@ function startJavaProcess(callback) {
   try {
     const javaPath = path.join(__static, './jre', 'jre1.8.0_251', 'bin', 'java');
     const jarPath = path.join(__static, './jarlib', 'ccs-deliver-middle.jar');
-    
-    if (!fs.existsSync(javaPath) || !fs.existsSync(jarPath)) {
-      logToFile('错误: Java运行环境或Jar文件不存在');
-      isRestarting = false;
-      return null;
-    }
 
     // 优化的Java启动参数
     const javaOpts = [
@@ -622,12 +616,8 @@ function startHealthCheck(process, callback) {
       return;
     }
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), HTTP_REQUEST_TIMEOUT);
-
-    HttpUtil.post('/status/check', null, { signal: controller.signal })
+    HttpUtil.post('/status/check', null, { timeout: HTTP_REQUEST_TIMEOUT })
       .then((response) => {
-        clearTimeout(timeoutId);
         if (response === 'OK') {
           logToFile('Java程序启动成功');
           clearInterval(checkStartup);
@@ -653,12 +643,7 @@ function startHealthCheck(process, callback) {
         }
       })
       .catch((error) => {
-        clearTimeout(timeoutId);
-        if (error.name === 'AbortError') {
-          logToFile('启动检查请求超时');
-        } else {
-          logToFile('等待Java程序启动...');
-        }
+        logToFile('等待Java程序启动...');
       });
   }, 2000);
 
@@ -672,11 +657,8 @@ function startHealthCheck(process, callback) {
 async function healthCheck(process) {
   if (isRestarting || !process) return;
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), HTTP_REQUEST_TIMEOUT);
-
   try {
-    const response = await HttpUtil.post('/status/check', null, { signal: controller.signal });
+    const response = await HttpUtil.post('/status/check', null, { timeout: HTTP_REQUEST_TIMEOUT });
     if (response === 'OK') {
       lastSuccessfulCheck = Date.now();
       if (restartAttempts > 0) {
@@ -685,19 +667,8 @@ async function healthCheck(process) {
       }
     }
   } catch (error) {
-    if (error.name === 'AbortError') {
-      logToFile('健康检查请求超时');
-    } else {
-      logToFile(`健康检查失败: ${error.message}`);
-    }
+    logToFile(`健康检查失败: ${error.message}`);
     handleJavaProcessFailure();
-  } finally {
-    clearTimeout(timeoutId);
-    try {
-      controller.abort(); // 确保请求被取消
-    } catch (e) {
-      // 忽略可能的 AbortController 错误
-    }
   }
 }
 
