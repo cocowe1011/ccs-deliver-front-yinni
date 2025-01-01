@@ -554,6 +554,8 @@ export default {
       firstLabelCode: '', // 首标签
       secLabelCode: '', // 尾标签
       qrReportPath: 'D://css_temp_data/report/printBarcodeQRcode.grf',
+      maxLogLength: 500, // 日志数组最大长度
+      maxErrorLogLength: 500, // 错误日志数组最大长度
     };
   },
   watch: {
@@ -1000,6 +1002,10 @@ export default {
       if(type == 'log') {
         // 生成日志
         this.logArr.push({text: msg})
+        // 如果超过最大长度，删除最旧的日志
+        if (this.logArr.length > this.maxLogLength) {
+          this.logArr.splice(0, this.logArr.length - this.maxLogLength);
+        }
         this.$nextTick(() => {
           this.scrollToBottom();
         });
@@ -1009,6 +1015,10 @@ export default {
         }
       } else {
         this.errorLogArr.push({text: msg})
+        // 如果超过最大长度，删除最旧的错误日志
+        if (this.errorLogArr.length > this.maxErrorLogLength) {
+          this.errorLogArr.splice(0, this.errorLogArr.length - this.maxErrorLogLength);
+        }
         // 如果当前日志在显示的是运行列表，报警日志有新日志要徽标提示
         if(this.logPageFlag == 'error-log') {
           this.errorLogNotReadNumber++;
