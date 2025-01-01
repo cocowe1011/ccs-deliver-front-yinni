@@ -647,7 +647,7 @@ export default {
             //   this.banLoadStatus = true; // 显示禁止上货图标
             // }
             // 生成日志
-            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateId + '进入A点', 'log');
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.cargoEnterA', {id: boxImitateId}), 'log');
           } else {
             // 把GH队列最开始箱子加入AB对接，并修改圈数
             if(this.arrGH[0] != undefined) {
@@ -661,7 +661,7 @@ export default {
                 // 显示箱子模拟id
                 this.nowABoxImitateId = this.arrAB[this.arrAB.length - 1].boxImitateId;
                 // 生成日志
-                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.nowABoxImitateId + '进入A点', 'log');
+                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.cargoEnterA', {id: this.arrAB[this.arrAB.length - 1].boxImitateId}), 'log');
               }
             }
           }
@@ -680,7 +680,12 @@ export default {
             const boxImitateId = this.arrAB[0].boxImitateId;
             // 计算时间 改为任务管理
             const times = this.calculateMilliseconds(((Number(this.l11))/Number(this.lightBeamRealTimeSpeed)).toFixed(2),(Number(this.l2)/(Number(this.orderMainDy.sxSpeedSet)  * (this.shuxiaSpeedProportion/100)) ).toFixed(2));
-            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateId + '开始进入B点，计算时间-L1长度：' + this.l11  + ' 束下速度：' + this.lightBeamRealTimeSpeed  + ' 束下设置速度：' + this.orderMainDy.sxSpeedSet + ' L2长度：' + this.l2 + ' 束下速度比' + this.shuxiaSpeedProportion + ' 总时间：' + times, 'log');
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.cargoEnterB', {
+              id: boxImitateId,
+              l1: this.l11,
+              speed1: this.lightBeamRealTimeSpeed,
+              speed2: this.orderMainDy.sxSpeedSet
+            }), 'log');
             this.startTimerWithDelay(boxImitateId, times)
           }
         } else { // 货物走出B点
@@ -739,7 +744,7 @@ export default {
           }
         } else {
           // 先暂定报警吧，因为肯定不会出现这种情况，出现了视为异常，不做任何处理
-          alert('异常！程序走到一个不该走到的地方！')
+          alert(this.$t('dynamicGraph.drawerTitle.abnormalAlert'))
         }
       }
     },
@@ -779,7 +784,7 @@ export default {
       handler(newVal, oldVal){
         if(newVal == '1') {
           // 输送线上线急停被按下
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 输送线上线急停被按下!', 'error')
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.emergencyStopUpper') + '!', 'error')
         }
       }
     },
@@ -787,7 +792,7 @@ export default {
       handler(newVal, oldVal){
         if(newVal == '1') {
           // 输送线下线急停被按下
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 输送线下线急停被按下!', 'error')
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.emergencyStopLower') + '!', 'error')
         }
       }
     },
@@ -795,7 +800,7 @@ export default {
       handler(newVal, oldVal){
         if(newVal == '1') {
           // 输送线电箱急停被按下
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 输送线电箱急停被按下!', 'error')
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.emergencyStopBox') + '!', 'error')
         }
       }
     },
@@ -803,7 +808,7 @@ export default {
       handler(newVal, oldVal){
         if(newVal == '1') {
           // 输送线变频过载
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 输送线变频过载!', 'error')
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.conveyorOverload') + '!', 'error')
         }
       }
     },
@@ -811,7 +816,7 @@ export default {
       handler(newVal, oldVal){
         if(newVal == '1') {
           // 束下输送线变频过载
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 束下输送线变频过载!', 'error')
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.beamConveyorOverload') + '!', 'error')
         }
       }
     },
@@ -819,7 +824,7 @@ export default {
       handler(newVal, oldVal){
         if(newVal == '1') {
           // 不翻转模式下，翻转叉子未卸。
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 不翻转模式下，翻转叉子未卸。!', 'error')
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.noFlipForkNotUnload') + '!', 'error')
         }
       }
     },
@@ -827,7 +832,7 @@ export default {
       handler(newVal, oldVal){
         if(newVal == '1') {
           // 翻转机故障报警
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 翻转机故障报警!', 'error')
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.flipMachineFault') + '!', 'error')
         }
       }
     },
@@ -835,7 +840,7 @@ export default {
       handler(newVal, oldVal){
         if(newVal == '1') {
           // 剔除机构故障报警
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 剔除机构故障报警!', 'error')
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.rejectMechanismFault') + '!', 'error')
         }
       }
     },
@@ -843,7 +848,7 @@ export default {
       handler(newVal, oldVal){
         if(newVal == '1') {
           // 束下进货堵料
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 束下进货堵料!', 'error')
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.beamEntryJam') + '!', 'error')
         }
       }
     },
@@ -851,7 +856,7 @@ export default {
       handler(newVal, oldVal){
         if(newVal == '1') {
           // 束下出货堵料
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 束下出货堵料!', 'error')
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.beamExitJam') + '!', 'error')
         }
       }
     },
@@ -859,7 +864,7 @@ export default {
       handler(newVal, oldVal){
         if(newVal == '1') {
           // 货物到达链板前加速器不允许进入报警停机
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物到达链板前加速器不允许进入报警停机!', 'error')
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.acceleratorNotAllowEntry') + '!', 'error')
         }
       }
     },
@@ -867,7 +872,7 @@ export default {
       handler(newVal, oldVal){
         if(newVal == '1') {
           // 居中机构运转超限报警
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 居中机构运转超限报警!', 'error')
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.centeringMechanismOverrun') + '!', 'error')
         }
       }
     },
@@ -875,7 +880,7 @@ export default {
       handler(newVal, oldVal){
         if(newVal == '1') {
           // 不翻转模式下113翻转处箱子堵料报警
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 不翻转模式下113翻转处箱子堵料报警!', 'error')
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.noFlip113Jam') + '!', 'error')
         }
       }
     },
@@ -883,7 +888,7 @@ export default {
       handler(newVal, oldVal){
         if(newVal == '1') {
           // 不翻转模式下114翻转处箱子堵料报警
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 不翻转模式下114翻转处箱子堵料报警!', 'error')
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.noFlip114Jam') + '!', 'error')
         }
       }
     },
@@ -891,22 +896,22 @@ export default {
       handler(newVal, oldVal){
         if(newVal == '1') {
           // 下货箱子未卸货，误进入翻转机构
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 下货箱子未卸货，误进入翻转机构!', 'error')
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.unloadBoxEnterFlip') + '!', 'error')
         }
       }
     },
     err16: {
       handler(newVal, oldVal){
         if(newVal == '1') {
-          // 加速器紧急停机
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 加速器紧急停机!', 'error')
+          // 加速器
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.acceleratorEmergencyStop') + '!', 'error')
         }
       }
     },
     loadScanCodeTemp: {
       handler(newVal, oldVal){
         if(newVal == this.firstLabelCode) {
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 首箱经过A点,扫码信息：' + newVal, 'log')
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.firstBoxPassA') + '：' + newVal, 'log')
         }
       }
     }
@@ -960,14 +965,14 @@ export default {
                 this.arrBC[index + 1].qualified = '0';
                 // 给当前圈也赋值合格
                 this.arrBC[index + 1].turnsInfoList[this.arrBC[index + 1].numberTurns - 1].qualified = '0';
-                this.arrBC[index + 1].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物前后出现不合格箱子，疑似不合格！';
+                this.arrBC[index + 1].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.suspectedUnqualified');
               }
               // 给前一个箱子赋值不合格  
               if(index >= 1) {
                 this.arrBC[index - 1].qualified = '0';
                 // 给当前圈也赋值合格
                 this.arrBC[index - 1].turnsInfoList[this.arrBC[index - 1].numberTurns - 1].qualified = '0';
-                this.arrBC[index - 1].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物前后出现不合格箱子，疑似不合格！';
+                this.arrBC[index - 1].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.suspectedUnqualified');
               }  
             }
           }
@@ -984,122 +989,257 @@ export default {
         // console.log(accData.beam)
         if(accData.beam != undefined && accData.beam != null) {
           if (Number(this.orderMainDy.slLowerLimit) > Number(accData.beam) || Number(this.orderMainDy.slUpperLimit) < Number(accData.beam)) {
-            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束流设定最小值：' + this.orderMainDy.slLowerLimit + '，束流设定最大值：' + this.orderMainDy.slUpperLimit + '，束流读取值：' + accData.beam, 'log');
-            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束流设定最小值：' + this.orderMainDy.slLowerLimit + '，束流设定最大值：' + this.orderMainDy.slUpperLimit + '，束流读取值：' + accData.beam;
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.processUnqualified', {
+              id: boxImitateIdVal,
+              min: this.orderMainDy.slLowerLimit,
+              max: this.orderMainDy.slUpperLimit,
+              value: accData.beam
+            }), 'log');
+            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.processUnqualified', {
+              id: boxImitateIdVal,
+              min: this.orderMainDy.slLowerLimit,
+              max: this.orderMainDy.slUpperLimit,
+              value: accData.beam
+            });
             return false;
           } 
         } else {
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束流设定最小值：' + this.orderMainDy.slLowerLimit + '，束流设定最大值：' + this.orderMainDy.slUpperLimit + '，束流读取值：' + accData.beam, 'log');
-          this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束流设定最小值：' + this.orderMainDy.slLowerLimit + '，束流设定最大值：' + this.orderMainDy.slUpperLimit + '，束流读取值：' + accData.beam;
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.processUnqualified', {
+            id: boxImitateIdVal,
+            min: this.orderMainDy.slLowerLimit,
+            max: this.orderMainDy.slUpperLimit,
+            value: accData.beam
+          }), 'log');
+          this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.processUnqualified', {
+            id: boxImitateIdVal,
+            min: this.orderMainDy.slLowerLimit,
+            max: this.orderMainDy.slUpperLimit,
+            value: accData.beam
+          });
           return false;
         }
         // 判断功率 power
         // console.log(accData.power)
         if(accData.power != undefined && accData.power != null) {
           if (Number(this.orderMainDy.glLowerLimit) > Number(accData.power) || Number(this.orderMainDy.glUpperLimit) < Number(accData.power)) {
-            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！功率设定最小值：' + this.orderMainDy.glLowerLimit + '，功率设定最大值：' + this.orderMainDy.glUpperLimit + '，功率读取值：' + accData.power, 'log');
-            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！功率设定最小值：' + this.orderMainDy.glLowerLimit + '，功率设定最大值：' + this.orderMainDy.glUpperLimit + '，功率读取值：' + accData.power;
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.powerUnqualified', {
+              id: boxImitateIdVal,
+              min: this.orderMainDy.glLowerLimit,
+              max: this.orderMainDy.glUpperLimit,
+              value: accData.power
+            }), 'log');
+            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.powerUnqualified', {
+              id: boxImitateIdVal,
+              min: this.orderMainDy.glLowerLimit,
+              max: this.orderMainDy.glUpperLimit,
+              value: accData.power
+            });
             return false;
           } 
         } else {
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！功率设定最小值：' + this.orderMainDy.glLowerLimit + '，功率设定最大值：' + this.orderMainDy.glUpperLimit + '，功率读取值：' + accData.power, 'log');
-          this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！功率设定最小值：' + this.orderMainDy.glLowerLimit + '，功率设定最大值：' + this.orderMainDy.glUpperLimit + '，功率读取值：' + accData.power;
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.powerUnqualified', {
+            id: boxImitateIdVal,
+            min: this.orderMainDy.glLowerLimit,
+            max: this.orderMainDy.glUpperLimit,
+            value: accData.power
+          }), 'log');
+          this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.powerUnqualified', {
+            id: boxImitateIdVal,
+            min: this.orderMainDy.glLowerLimit,
+            max: this.orderMainDy.glUpperLimit,
+            value: accData.power
+          });
           return false;
         }
         // 判断扫宽 scanW
         // console.log(accData.scanW)
         if(accData.scanW != undefined && accData.scanW != null) {
           if (Number(this.orderMainDy.skLowerLimit) > Number(accData.scanW) || Number(this.orderMainDy.skUpperLimit) < Number(accData.scanW)) {
-            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫宽设定最小值：' + this.orderMainDy.skLowerLimit + '，扫宽设定最大值：' + this.orderMainDy.skUpperLimit + '，扫宽读取值：' + accData.scanW, 'log');
-            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫宽设定最小值：' + this.orderMainDy.skLowerLimit + '，扫宽设定最大值：' + this.orderMainDy.skUpperLimit + '，扫宽读取值：' + accData.scanW;
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.scanWidthUnqualified', {
+              id: boxImitateIdVal,
+              min: this.orderMainDy.skLowerLimit,
+              max: this.orderMainDy.skUpperLimit,
+              value: accData.scanW
+            }), 'log');
+            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.scanWidthUnqualified', {
+              id: boxImitateIdVal,
+              min: this.orderMainDy.skLowerLimit,
+              max: this.orderMainDy.skUpperLimit,
+              value: accData.scanW
+            });
             return false;
           } 
         } else {
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫宽设定最小值：' + this.orderMainDy.skLowerLimit + '，扫宽设定最大值：' + this.orderMainDy.skUpperLimit + '，扫宽读取值：' + accData.scanW, 'log');
-          this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫宽设定最小值：' + this.orderMainDy.skLowerLimit + '，扫宽设定最大值：' + this.orderMainDy.skUpperLimit + '，扫宽读取值：' + accData.scanW;
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.scanWidthUnqualified', {
+            id: boxImitateIdVal,
+            min: this.orderMainDy.skLowerLimit,
+            max: this.orderMainDy.skUpperLimit,
+            value: accData.scanW
+          }), 'log');
+          this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.scanWidthUnqualified', {
+            id: boxImitateIdVal,
+            min: this.orderMainDy.skLowerLimit,
+            max: this.orderMainDy.skUpperLimit,
+            value: accData.scanW
+          });
           return false;
         }
         // 判断扫描频率 scanF
         // console.log(accData.scanF)
         if(accData.scanF != undefined && accData.scanF != null) {
           if (Number(this.orderMainDy.smplLowerLimit) > Number(accData.scanF) || Number(this.orderMainDy.smplUpperLimit) < Number(accData.scanF)) {
-            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫描频率设定最小值：' + this.orderMainDy.smplLowerLimit + '，扫描频率设定最大值：' + this.orderMainDy.smplUpperLimit + '，扫描频率读取值：' + accData.scanF, 'log');
-            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫描频率设定最小值：' + this.orderMainDy.smplLowerLimit + '，扫描频率设定最大值：' + this.orderMainDy.smplUpperLimit + '，扫描频率读取值：' + accData.scanF;
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.scanFreqUnqualified', {
+              id: boxImitateIdVal,
+              min: this.orderMainDy.smplLowerLimit,
+              max: this.orderMainDy.smplUpperLimit,
+              value: accData.scanF
+            }), 'log');
+            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.scanFreqUnqualified', {
+              id: boxImitateIdVal,
+              min: this.orderMainDy.smplLowerLimit,
+              max: this.orderMainDy.smplUpperLimit,
+              value: accData.scanF
+            });
             return false;
           } 
         } else {
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫描频率设定最小值：' + this.orderMainDy.smplLowerLimit + '，扫描频率设定最大值：' + this.orderMainDy.smplUpperLimit + '，扫描频率读取值：' + accData.scanF, 'log');
-          this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！扫描频率设定最小值：' + this.orderMainDy.smplLowerLimit + '，扫描频率设定最大值：' + this.orderMainDy.smplUpperLimit + '，扫描频率读取值：' + accData.scanF;
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.scanFreqUnqualified', {
+            id: boxImitateIdVal,
+            min: this.orderMainDy.smplLowerLimit,
+            max: this.orderMainDy.smplUpperLimit,
+            value: accData.scanF
+          }), 'log');
+          this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.scanFreqUnqualified', {
+            id: boxImitateIdVal,
+            min: this.orderMainDy.smplLowerLimit,
+            max: this.orderMainDy.smplUpperLimit,
+            value: accData.scanF
+          });
           return false;
         }
         // 判断PFN电压 pfn
         // console.log(accData.pfn)
         if(accData.pfn != undefined && accData.pfn != null) {
           if (Number(this.orderMainDy.pfnLowerLimit) > Number(accData.pfn) || Number(this.orderMainDy.pfnUpperLimit) < Number(accData.pfn)) {
-            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！PFN电压设定最小值：' + this.orderMainDy.pfnLowerLimit + '，PFN电压设定最大值：' + this.orderMainDy.pfnUpperLimit + '，PFN电压读取值：' + accData.pfn, 'log');
-            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！PFN电压设定最小值：' + this.orderMainDy.pfnLowerLimit + '，PFN电压设定最大值：' + this.orderMainDy.pfnUpperLimit + '，PFN电压读取值：' + accData.pfn;
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.pfnUnqualified', {
+              id: boxImitateIdVal,
+              min: this.orderMainDy.pfnLowerLimit,
+              max: this.orderMainDy.pfnUpperLimit,
+              value: accData.pfn
+            }), 'log');
+            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.pfnUnqualified', {
+              id: boxImitateIdVal,
+              min: this.orderMainDy.pfnLowerLimit,
+              max: this.orderMainDy.pfnUpperLimit,
+              value: accData.pfn
+            });
             return false;
           } 
         } else {
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！PFN电压设定最小值：' + this.orderMainDy.pfnLowerLimit + '，PFN电压设定最大值：' + this.orderMainDy.pfnUpperLimit + '，PFN电压读取值：' + accData.pfn, 'log');
-          this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！PFN电压设定最小值：' + this.orderMainDy.pfnLowerLimit + '，PFN电压设定最大值：' + this.orderMainDy.pfnUpperLimit + '，PFN电压读取值：' + accData.pfn;
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.pfnUnqualified', {
+            id: boxImitateIdVal,
+            min: this.orderMainDy.pfnLowerLimit,
+            max: this.orderMainDy.pfnUpperLimit,
+            value: accData.pfn
+          }), 'log');
+          this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.pfnUnqualified', {
+            id: boxImitateIdVal,
+            min: this.orderMainDy.pfnLowerLimit,
+            max: this.orderMainDy.pfnUpperLimit,
+            value: accData.pfn
+          });
           return false;
         }
         // 判断能量 energy
         // console.log(accData.energy)
         if(accData.energy != undefined && accData.energy != null) {
           if (Number(this.orderMainDy.nlLowerLimit) > Number(accData.energy) || Number(this.orderMainDy.nlUpperLimit) < Number(accData.energy)) {
-            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！能量设定最小值：' + this.orderMainDy.nlLowerLimit + '，能量设定最大值：' + this.orderMainDy.nlUpperLimit + '，能量读取值：' + accData.energy, 'log');
-            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！能量设定最小值：' + this.orderMainDy.nlLowerLimit + '，能量设定最大值：' + this.orderMainDy.nlUpperLimit + '，能量读取值：' + accData.energy;
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.energyUnqualified', {
+              id: boxImitateIdVal,
+              min: this.orderMainDy.nlLowerLimit,
+              max: this.orderMainDy.nlUpperLimit,
+              value: accData.energy
+            }), 'log');
+            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.energyUnqualified', {
+              id: boxImitateIdVal,
+              min: this.orderMainDy.nlLowerLimit,
+              max: this.orderMainDy.nlUpperLimit,
+              value: accData.energy
+            });
             return false;
           } 
         } else {
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！能量设定最小值：' + this.orderMainDy.nlLowerLimit + '，能量设定最大值：' + this.orderMainDy.nlUpperLimit + '，能量读取值：' + accData.energy, 'log');
-          this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！能量设定最小值：' + this.orderMainDy.nlLowerLimit + '，能量设定最大值：' + this.orderMainDy.nlUpperLimit + '，能量读取值：' + accData.energy;
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.energyUnqualified', {
+            id: boxImitateIdVal,
+            min: this.orderMainDy.nlLowerLimit,
+            max: this.orderMainDy.nlUpperLimit,
+            value: accData.energy
+          }), 'log');
+          this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.energyUnqualified', {
+            id: boxImitateIdVal,
+            min: this.orderMainDy.nlLowerLimit,
+            max: this.orderMainDy.nlUpperLimit,
+            value: accData.energy
+          });
           return false;
         }
         // 判断束下速度 speed
         // console.log(accData.speed)
         if(accData.speed != undefined && accData.speed != null) {
           if (Number(this.orderMainDy.sxSpeedLowerLimit) > (Number(accData.speed) * 1000) || Number(this.orderMainDy.sxSpeedUpperLimit) < (Number(accData.speed) * 1000)) {
-            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束下速度设定最小值：' + this.orderMainDy.sxSpeedLowerLimit + '，束下速度设定最大值：' + this.orderMainDy.sxSpeedUpperLimit + '，束下速度读取值：' + (Number(accData.speed) * 1000), 'log');
-            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束下速度设定最小值：' + this.orderMainDy.sxSpeedLowerLimit + '，束下速度设定最大值：' + this.orderMainDy.sxSpeedUpperLimit + '，束下速度读取值：' + (Number(accData.speed) * 1000);
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.speedUnqualified', {
+              id: boxImitateIdVal,
+              min: this.orderMainDy.sxSpeedLowerLimit,
+              max: this.orderMainDy.sxSpeedUpperLimit,
+              value: Number(accData.speed) * 1000
+            }), 'log');
+            this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.speedUnqualified', {
+              id: boxImitateIdVal,
+              min: this.orderMainDy.sxSpeedLowerLimit,
+              max: this.orderMainDy.sxSpeedUpperLimit,
+              value: Number(accData.speed) * 1000
+            });
             return false;
           } 
         } else {
-          this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺不合格！束下速度设定最小值：' + this.orderMainDy.sxSpeedLowerLimit + '，束下速度设定最大值：' + this.orderMainDy.sxSpeedUpperLimit + '，束下速度读取值：' + (Number(accData.speed) * 1000);
+          this.arrBC[index].failReason = moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.speedUnqualified', {
+            id: boxImitateIdVal,
+            min: this.orderMainDy.sxSpeedLowerLimit,
+            max: this.orderMainDy.sxSpeedUpperLimit,
+            value: Number(accData.speed) * 1000
+          });
           return false;
         }
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺合格！', 'log');
+        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.processQualified', {id: boxImitateIdVal}), 'log');
       } else {
         // 找不着直接默认合格
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '工艺合格！', 'log');
+        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.processQualified', {id: boxImitateIdVal}), 'log');
       }
       return true;
     },
     testAcc() {
       HttpUtil.get('/box/getAccData').then((res)=> {
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 加速器返回数据：' + JSON.stringify(res), 'log');
+        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.accReturnData', {data: JSON.stringify(res)}), 'log');
       }).catch((err)=> {
-        this.$message.error(this.$i18n.locale === 'zh' ? '连接加速器失败！原因：' : 'Failed to connect to the accelerator! Reason：' + err)
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 连接加速器失败！原因：' + err, 'log');
+        this.$message.error(this.$i18n.locale === 'zh' ? this.$t('dynamicGraph.drawerTitle.connectAccFailed') : this.$t('dynamicGraph.drawerTitle.connectAccFailedEn') + err)
+        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.accConnectFailed', {error: err}), 'log');
       });
     },
     // 拿到模拟id去判断箱子的工艺是否合格
     getUndercutProcess(boxImitateIdVal) {
       this.nowShuXiaid = boxImitateIdVal;
-      this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + boxImitateIdVal + '到达束下，开始读取加速器数值！', 'log');
+      this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.cargoReachBeam', {id: boxImitateIdVal}), 'log');
       // 无加速器时放开此注释********************************************
       this.qualified4Box(boxImitateIdVal, true)
-      this.$message.success(this.nowShuXiaid + '合格！');
+      this.$message.success(this.$t('dynamicGraph.drawerTitle.boxQualified', {id: this.nowShuXiaid}));
       // 无加速器时放开此注释*********************************************
       // 测试一个箱子不合格，，前后两个箱子都不合格*************************
       // if(boxImitateIdVal == '202307260003') {
       //   this.qualified4Box(boxImitateIdVal, false)
-      //   this.$message.error(this.nowShuXiaid + '不合格！');
+      //   this.$message.error(this.$t('dynamicGraph.drawerTitle.boxUnqualified', {id: this.nowShuXiaid}));
       // } else {
       //   this.qualified4Box(boxImitateIdVal, true)
-      //   this.$message.success(this.nowShuXiaid + '合格！');
+      //   this.$message.success(this.$t('dynamicGraph.drawerTitle.boxQualified', {id: this.nowShuXiaid}));
       // }
       // 测试一个箱子不合格，，前后两个箱子都不合格*************************
 
@@ -1223,8 +1363,8 @@ export default {
         case 'AB':
           this.arrAB.push(this.boxArr[this.dragIndex]);
           this.$notify({
-            title: '移动成功！',
-            message: '成功移至A-B区域',
+            title: 'success！',
+            message: 'success to A-B area',
             position: 'top-left',
             offset: 70,
             duration:0,
@@ -1234,8 +1374,8 @@ export default {
         case 'BC':
           this.arrBC.push(this.boxArr[this.dragIndex]);
           this.$notify({
-            title: '移动成功！',
-            message: '成功移至B-C区域',
+            title: 'success！',
+            message: 'success to B-C area',
             position: 'top-left',
             offset: 70,
             duration:0,
@@ -1245,8 +1385,8 @@ export default {
         case 'CD':
           this.arrCD.push(this.boxArr[this.dragIndex]);
           this.$notify({
-            title: '移动成功！',
-            message: '成功移至C-D区域',
+            title: 'success！',
+            message: 'success to C-D area',
             position: 'top-left',
             offset: 70,
             duration:0,
@@ -1256,8 +1396,8 @@ export default {
         case 'DG':
           this.arrDG.push(this.boxArr[this.dragIndex]);
           this.$notify({
-            title: '移动成功！',
-            message: '成功移至D-G区域',
+            title: 'success！',
+            message: 'success to D-G area',
             position: 'top-left',
             offset: 70,
             duration:0,
@@ -1267,8 +1407,8 @@ export default {
         case 'F':
           this.arrF.push(this.boxArr[this.dragIndex]);
           this.$notify({
-            title: '移动成功！',
-            message: '成功移至F区域',
+            title: 'success！',
+            message: 'success to F area',
             position: 'top-left',
             offset: 70,
             duration:0,
@@ -1278,8 +1418,8 @@ export default {
         case 'GH':
           this.arrGH.push(this.boxArr[this.dragIndex]);
           this.$notify({
-            title: '移动成功！',
-            message: '成功移至G-H区域',
+            title: 'success！',
+            message: 'success to G-H area',
             position: 'top-left',
             offset: 70,
             duration:0,
@@ -1430,7 +1570,7 @@ export default {
               }
             }
           }
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrAB[this.arrAB.length - 1].boxImitateId + '离开A点，扫码信息：' + this.loadScanCode, 'log');
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.cargoPassA', {id: this.arrAB[this.arrAB.length - 1].boxImitateId}) + '：' + this.loadScanCode, 'log');
           break;
         case 'B':
           // 把AB队列第一个货物出列，进入BC
@@ -1440,7 +1580,7 @@ export default {
           // 删除AB队列第一个
           this.arrAB.splice(0,1)
           // 生成日志
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrBC[this.arrBC.length - 1].boxImitateId + '经过B点，扫码信息：' + this.arrBC[this.arrBC.length - 1].loadScanCode, 'log');
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.cargoPassB', {id: this.arrBC[this.arrBC.length - 1].boxImitateId}) + '：' + this.arrBC[this.arrBC.length - 1].loadScanCode, 'log');
           break;
         case 'C':
           if(this.pointC === '1') {
@@ -1448,7 +1588,7 @@ export default {
             this.arrCD[this.arrCD.length - 1].turnsInfoList[this.arrCD[this.arrCD.length - 1].numberTurns - 1].passCTime = moment().format('YYYY-MM-DD HH:mm:ss');
             // 删除BC队列第一个
             this.arrBC.splice(0,1);
-            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrCD[this.arrCD.length - 1].boxImitateId + '经过C点，扫码信息：' + this.arrCD[this.arrCD.length - 1].loadScanCode, 'log');
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.cargoPassC', {id: this.arrCD[this.arrCD.length - 1].boxImitateId}) + '：' + this.arrCD[this.arrCD.length - 1].loadScanCode, 'log');
             // 允许切换订单
             if(this.arrCD[this.arrCD.length - 1].boxImitateId == this.lastNewBoxPassABoxImitateId) {
               if(this.arrCD[this.arrCD.length - 1].numberTurns == this.arrCD[this.arrCD.length - 1].totalNumberTurns) {
@@ -1474,7 +1614,7 @@ export default {
             this.arrDG[this.arrDG.length - 1].turnsInfoList[this.arrDG[this.arrDG.length - 1].numberTurns - 1].passDTime = moment().format('YYYY-MM-DD HH:mm:ss');
             // 删除BC队列第一个
             this.arrCD.splice(0,1);
-            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrDG[this.arrDG.length - 1].boxImitateId + '经过D点，扫码信息：' + this.arrDG[this.arrDG.length - 1].loadScanCode, 'log');
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.cargoPassD', {id: this.arrDG[this.arrDG.length - 1].boxImitateId}) + '：' + this.arrDG[this.arrDG.length - 1].loadScanCode, 'log');
           }
           break;
         case 'E':
@@ -1507,7 +1647,7 @@ export default {
               // tempArrF 缓存队列第一个一定是经过F点的箱子
               this.arrF.push(this.tempArrF[0]);
               // 执行剔除日志
-              this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.tempArrF[0].boxImitateId + '经过F点，扫码信息：' + this.tempArrF[0].loadScanCode + '。被剔除！', 'log');
+              this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.cargoPassF', {id: this.tempArrF[0].boxImitateId}) + '：' + this.tempArrF[0].loadScanCode, 'log');
               // 删除tempArrF 第一个箱子
               this.tempArrF.splice(0, 1);
               // 在DG数组移除元素
@@ -1527,19 +1667,26 @@ export default {
               // 生成箱报告
               await HttpUtil.post('/box/save', param).then((res)=> {
                 if(res.data == 1) {
-                  this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrF[this.arrF.length - 1].boxImitateId + '，已生成箱报告！', 'log');
+                  this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.boxReportGenerated', {id: this.arrF[this.arrF.length - 1].boxImitateId}), 'log');
                 } else {
-                  this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrF[this.arrF.length - 1].boxImitateId + '，生成箱报告失败！', 'log');
+                  this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.boxReportFailed', {id: this.arrF[this.arrF.length - 1].boxImitateId}), 'log');
                 }
               }).catch((err)=> {
-                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrF[this.arrF.length - 1].boxImitateId + '，生成箱报告失败！' + err, 'log');
+                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.boxReportGeneratedWithError', {
+                  id: this.arrF[this.arrF.length - 1].boxImitateId,
+                  error: err
+                }), 'log');
               });
             }
           }
           break;
         case 'G':
           if(this.pointG === '1') {
-            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrDG[0].boxImitateId + '经过G点，扫码信息：' + this.arrDG[0].loadScanCode + '。当前 ' + this.arrDG[0].numberTurns + ' 圈，剩余 ' + (Number(this.arrDG[0].totalNumberTurns) - Number(this.arrDG[0].numberTurns)) + ' 圈', 'log');
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.cargoPassG', {
+              id: this.arrDG[0].boxImitateId,
+              current: this.arrDG[0].numberTurns,
+              remaining: Number(this.arrDG[0].totalNumberTurns) - Number(this.arrDG[0].numberTurns)
+            }) + '：' + this.arrDG[0].loadScanCode, 'log');
             // 判断是否符合下货条件
             if (this.arrDG[0].numberTurns >= this.arrDG[0].totalNumberTurns) {
               // 判断此箱子是否还属于当前订单
@@ -1561,12 +1708,15 @@ export default {
               // 生成箱报告
               await HttpUtil.post('/box/save', param).then((res)=> {
                 if(res.data == 1) {
-                  this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrDG[0].boxImitateId + '，已生成箱报告！', 'log');
+                  this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.boxReportGenerated', {id: this.arrDG[0].boxImitateId}), 'log');
                 } else {
-                  this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrDG[0].boxImitateId + '，生成箱报告失败！', 'log');
+                  this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.boxReportFailed', {id: this.arrDG[0].boxImitateId}), 'log');
                 }
               }).catch((err)=> {
-                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrDG[0].boxImitateId + '，生成箱报告失败！' + err, 'log');
+                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.boxReportError', {
+                  id: this.arrDG[0].boxImitateId,
+                  error: err
+                }), 'log');
               });
             }
             // 判断此箱子是否还属于当前订单
@@ -1578,11 +1728,20 @@ export default {
                 const times = this.calculateMilliseconds((Number(this.lengthOne)/(Number(this.orderMainDy.sxSpeedSet)  * Number(this.speedOne)) ).toFixed(2), (Number(this.lengthTwo)/(Number(this.orderMainDy.sxSpeedSet)  * Number(this.speedTwo)) ).toFixed(2)) + this.newDelayPointTime;
                 setTimeout(() => {
                   if(this.arrGH.length > 0) {
-                    this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 首箱到达H点！', 'log');
+                    this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.firstBoxReachH'), 'log');
                     this.judgeIfBoxOnH();
                   }
                 }, times);
-                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrDG[0].boxImitateId + '，是本次上货的第一箱，经过G点，束下设定速度：' + this.orderMainDy.sxSpeedSet + '，X1长度：' + this.lengthOne + '，V1速度比：' + this.speedOne + '，X2长度：'+ this.lengthTwo +'，V2速度比：' + this.speedTwo + '，到达H点延迟时间：' + this.newDelayPointTime + '计算到达H点共需时间：' + times, 'log');
+                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.firstBoxPassGTime', {
+                  id: this.arrDG[0].boxImitateId,
+                  speed: this.orderMainDy.sxSpeedSet,
+                  x1: this.lengthOne,
+                  v1: this.speedOne,
+                  x2: this.lengthTwo,
+                  v2: this.speedTwo,
+                  delay: this.newDelayPointTime,
+                  total: times
+                }), 'log');
               }
               // 把DG队列第一个货物出列，进入GH
               this.arrGH.push(this.arrDG[0]);
@@ -1632,7 +1791,7 @@ export default {
               // 更新全局圈数 和 报警信号
               if (this.arrGH[indexHBox].numberTurns >= this.arrGH[indexHBox].totalNumberTurns) {
                 this.baojingShow = true;
-                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 下货报警!', 'error')
+                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.unloadAlarm'), 'error')
                 // 发送报警信号
                 ipcRenderer.send('writeValuesToPLC', 'DBW38', 1);
                 const param = {
@@ -1643,12 +1802,15 @@ export default {
                 // 更新箱报告的H点的时间
                 await HttpUtil.post('/box/save', param).then((res)=> {
                   if(res.data == 1) {
-                    this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrGH[indexHBox].boxImitateId + '，已更新箱报告！', 'log');
+                    this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.boxReportUpdated', {id: this.arrGH[indexHBox].boxImitateId}), 'log');
                   } else {
-                    this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrGH[indexHBox].boxImitateId + '，更新箱报告失败！', 'log');
+                    this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.boxReportUpdateFailed', {id: this.arrGH[indexHBox].boxImitateId}), 'log');
                   }
                 }).catch((err)=> {
-                  this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 货物' + this.arrGH[indexHBox].boxImitateId + '，更新箱报告失败！' + err, 'log');
+                  this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.boxReportUpdateError', {
+                    id: this.arrGH[indexHBox].boxImitateId,
+                    error: err
+                  }), 'log');
                 });
               }
             }
@@ -1681,7 +1843,7 @@ export default {
           if(!this.isDelayPointTime) {
             // 当前没有延迟中
             this.isDelayPointTime = true
-            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' H点开始延迟！', 'log');
+            this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.hPointDelayStart'), 'log');
             this.startTimerWithDelay(9999, delayPointTime)
           }
         } else {
@@ -1699,7 +1861,14 @@ export default {
       const kAreaSpeed = this.kAreaSpeed;
       const lAreaSpeed = this.lAreaSpeed;
       if(!this.isDelayPointTime){
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' H点开始计算延迟时间，参数：J区域长度:' + pointjLength + '|K区域长度:' + pointkLength + '|L区域长度:' + pointlLength + '|J区域速度:' + jAreaSpeed + '|K区域速度:' + kAreaSpeed + '|L区域速度:' + lAreaSpeed, 'log');
+        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.hPointDelayCalc', {
+          j: pointjLength,
+          k: pointkLength,
+          l: pointlLength,
+          sj: jAreaSpeed,
+          sk: kAreaSpeed,
+          sl: lAreaSpeed
+        }), 'log');
       }
       // 检查长度是否不为负数且速度是否大于0
       if (pointjLength >= 0 && pointkLength >= 0 && pointlLength >= 0 && 
@@ -1711,13 +1880,13 @@ export default {
         // 计算总时间
         let totalTime = timeForJ + timeForK + timeForL;
         if(!this.isDelayPointTime){
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 计算的延迟时间：' + totalTime + 'ms', 'log');
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.delayTimeCalc', {time: totalTime}), 'log');
         }
         return totalTime;
       } else {
         // 如果输入不合法，返回0
         if(!this.isDelayPointTime){
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 计算的延迟时间：0', 'log');
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.delayTimeZero'), 'log');
         }
         return 0;
       }
@@ -1745,7 +1914,7 @@ export default {
         if(this.orderMainDy.trayFlag != '1') {
           // 执行剔除命令
           ipcRenderer.send('writeValuesToPLC', 'DBW18', 1);
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + '货物' + this.arrDG[index].boxImitateId + '经过E点,货物不合格！执行剔除命令！', 'log');
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.cargoPassEUnqualified', {id: this.arrDG[index].boxImitateId}), 'log');
           this.arrDG[index].tichuFlag = 'WAIT_PUT_OUT';
           // 将不合格货物加入 tempArrF 缓存队列
           this.tempArrF.push(this.arrDG[index])
@@ -1759,12 +1928,12 @@ export default {
           }
         } else {
           // 只输出日志
-          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + '货物' + this.arrDG[index].boxImitateId + '经过E点,货物不合格！托盘模式下不执行剔除命令！', 'log');
+          this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.cargoPassEUnqualifiedTray', {id: this.arrDG[index].boxImitateId}), 'log');
         }
       } else {
         // 合格无需处理，写0即可
         ipcRenderer.send('writeValuesToPLC', 'DBW18', 0);
-        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + '货物' + this.arrDG[index].boxImitateId + '经过E点,货物合格！', 'log');
+        this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.cargoPassEQualified', {id: this.arrDG[index].boxImitateId}), 'log');
       }
     },
     closeDynamicGraphShow() {
@@ -2118,7 +2287,7 @@ export default {
               if(res.data) {
                 this.$message.success(this.$i18n.locale === 'zh'?'验证通过！': 'Verification Successful!');
                 this.clearAllData(false);
-                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' 用户：' + remote.getGlobal('sharedObject').userInfo.userName + '进行了全线清空操作！', 'log');
+                this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.userClearLine', {user: remote.getGlobal('sharedObject').userInfo.userName}), 'log');
               } else {
                 this.$message.error(this.$i18n.locale === 'zh' ? '验证未通过！': 'Verification unsuccessful!');
               }
@@ -2158,9 +2327,8 @@ export default {
       }
     },
     delayHpoint() {
-      this.nowNumberTurns++;
       this.isDelayPointTime = false;
-      this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' H点开始延迟结束！', 'log');
+      this.createLog(moment().format('YYYY-MM-DD HH:mm:ss') + ' ' + this.$t('dynamicGraph.drawerTitle.hPointDelayEnd'), 'log');
     },
     startTimerWithDelay(boxImitateId, delay) {
       const timerId = setTimeout(() => {
@@ -2212,9 +2380,9 @@ export default {
       }
     },
     downClick() {
-      this.$confirm('此操作将默认全部箱子已下货, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+      this.$confirm(this.$t('dynamicGraph.drawerTitle.confirmAllUnload'), this.$t('dynamicGraph.drawerTitle.tip'), {
+        confirmButtonText: this.$t('dynamicGraph.drawerTitle.confirm'),
+        cancelButtonText: this.$t('dynamicGraph.drawerTitle.cancel'),
         type: 'warning'
       }).then(() => {
         this.baojingShow = false;
@@ -2238,10 +2406,10 @@ export default {
     },
     handleCurrentChange(val) {
       if(val != null) {
-        this.$confirm(this.$i18n.locale === 'zh'? '即将切换订单，请先处理当前订单状态！': 'Order switching imminent, please handle the current order status first!', this.$i18n.locale === 'zh'?'确认信息':'Confirm the information', {
+        this.$confirm(this.$i18n.locale === 'zh'? this.$t('dynamicGraph.drawerTitle.switchOrderConfirm'): this.$t('dynamicGraph.drawerTitle.switchOrderConfirmEn'), this.$i18n.locale === 'zh'? this.$t('dynamicGraph.drawerTitle.confirmInfo'): this.$t('dynamicGraph.drawerTitle.confirmInfoEn'), {
           distinguishCancelAndClose: true,
-          confirmButtonText: this.$i18n.locale === 'zh'?'当前订单完成':'Current order completed',
-          cancelButtonText: this.$i18n.locale === 'zh'?'当前订单暂停':'Current order paused',
+          confirmButtonText: this.$i18n.locale === 'zh'? this.$t('dynamicGraph.drawerTitle.currentOrderComplete'): this.$t('dynamicGraph.drawerTitle.currentOrderCompleteEn'),
+          cancelButtonText: this.$i18n.locale === 'zh'? this.$t('dynamicGraph.drawerTitle.currentOrderPause'): this.$t('dynamicGraph.drawerTitle.currentOrderPauseEn'),
           type: 'warning',
           cancelButtonClass: 'el-button--info'
         })
@@ -2298,9 +2466,10 @@ export default {
     },
     printLabel() {
       // 自动生成一个首尾箱标签
-      this.$confirm(this.$i18n.locale === 'zh'?'此操作将生成首尾箱条码并打印标签, 是否继续?':'This operation will generate first and last box barcodes and print labels. Do you want to continue?', this.$i18n.locale === 'zh'?'提示':'Tip', {
-        confirmButtonText: this.$i18n.locale === 'zh' ? '确定' : 'OK',
-        cancelButtonText: this.$i18n.locale === 'zh' ? '取消': 'Cancel',
+      this.$confirm(this.$i18n.locale === 'zh'? this.$t('dynamicGraph.drawerTitle.printLabelConfirm'): this.$t('dynamicGraph.drawerTitle.printLabelConfirmEn'), 
+        this.$i18n.locale === 'zh'? this.$t('dynamicGraph.drawerTitle.tip'): this.$t('dynamicGraph.drawerTitle.tipEn'), {
+        confirmButtonText: this.$i18n.locale === 'zh' ? this.$t('dynamicGraph.drawerTitle.ok') : this.$t('dynamicGraph.drawerTitle.okEn'),
+        cancelButtonText: this.$i18n.locale === 'zh' ? this.$t('dynamicGraph.drawerTitle.cancel'): this.$t('dynamicGraph.drawerTitle.cancelEn'),
         type: 'warning'
       }).then(() => {
         const result = this.generateTimestamp();
@@ -2319,12 +2488,12 @@ export default {
         // 把首尾箱标签在数据库存储一下
         this.$message({
           type: 'success',
-          message: this.$i18n.locale === 'zh'?'打印成功！':'Printing successful!'
+          message: this.$i18n.locale === 'zh'? this.$t('dynamicGraph.drawerTitle.printSuccess'): this.$t('dynamicGraph.drawerTitle.printSuccessEn')
         });
       }).catch(() => {
         this.$message({
           type: 'info',
-          message: this.$i18n.locale === 'zh'?'已取消打印':'Printing canceled.'
+          message: this.$i18n.locale === 'zh'? this.$t('dynamicGraph.drawerTitle.printCancel'): this.$t('dynamicGraph.drawerTitle.printCancelEn')
         });          
       });
     },
