@@ -23,8 +23,25 @@ let closeStatus = false;
 var conn = new nodes7;
 var pollingST = null;
 
-// 初始化并启动 Java 程序并在成功启动后开始健康检查
+// 全局变量定义
 let javaProcess = null;
+let healthCheckInterval = null;
+let lastSuccessfulCheck = Date.now();
+let isRestarting = false;
+let restartAttempts = 0;
+const MAX_RESTART_ATTEMPTS = 5;
+const RESTART_ATTEMPT_RESET_INTERVAL = 1000 * 60 * 30; // 30分钟
+const HEALTH_CHECK_INTERVAL = 2000; // 2秒
+const HTTP_REQUEST_TIMEOUT = 2000;  // HTTP请求超时时间设为2秒
+
+// 记录日志的辅助函数
+function logToFile(message) {
+  const timestamp = new Date().toLocaleString();
+  const logPath = "D://css_temp_data/log/" + new Date().toLocaleDateString().replaceAll('/','-') + "runlog.txt";
+  fs.appendFile(logPath, `[${timestamp}] ${message}\n`, (err) => {
+    if (err) console.error('Error writing to log file:', err);
+  });
+}
 
 // electron 开启热更新
 try {
@@ -123,7 +140,7 @@ app.on('ready', () => {
       title: '提醒！',
       message:'确认关闭程序吗？',
       buttons: ['关闭程序', '放入托盘','取消'],   //选择按钮，点击确认则下面的idx为0，取消为1
-      cancelId: 2, //这个的值是如果直接把提示框×掉返回的值，这里设置成和“取消”按钮一样的值，下面的idx也会是1
+      cancelId: 2, //这个的值是如果直接把提示框×掉返回的值，这里设置成和"取消"按钮一样的值，下面的idx也会是1
     }).then(idx => {
       if (idx.response == 2) {
         e.preventDefault();
@@ -154,8 +171,8 @@ app.on('ready', () => {
   if (platform === 'win32') {
     // 启动Java进程
     javaProcess = startJavaProcess(() => {
-      // 设置一个定时器每2秒检查一次 Java 程序的健康状态
-      setInterval(healthCheck, 2000); // 每2秒检查一次
+        // 移除这里的setInterval，统一使用startHealthCheck中的健康检查
+        logToFile('Java进程启动回调执行');
     });
   }
 
@@ -180,6 +197,19 @@ app.on('ready', () => {
   })
   // 同步映射加速器数据
   synAccData();
+});
+
+// 在app.on('ready')之前添加退出清理
+app.on('before-quit', () => {
+    logToFile('应用程序准备退出，清理资源...');
+    clearProcessTimers(javaProcess);
+    if (javaProcess) {
+        isRestarting = true; // 防止触发重启
+        killJavaProcess(javaProcess.pid, () => {
+            logToFile('Java进程已清理');
+            javaProcess = null;
+        });
+    }
 });
 
 function synAccData() {
@@ -481,117 +511,351 @@ const setAppTray = () => {
   })
 }
 
-
-
 // 启动 Java 程序的函数
 function startJavaProcess(callback) {
-  fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), (new Date()).toLocaleTimeString()  + '后台java程序启动中...\n', function(err) {});
-  const javaProcess = spawn(path.join(__static, './jre', 'jre1.8.0_251', 'bin', 'java'), ['-Xmx4096m', '-Xms4096m', '-jar', path.join(__static, './jarlib', 'ccs-deliver-middle.jar')]);
-  // 检查 Java 程序是否启动成功
-  const checkStartup = setInterval(() => {
-    HttpUtil.post('/status/check').then((response)=> {
-      if (response === 'OK') {
-        console.log('Java process started successfully');
-        fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), (new Date()).toLocaleTimeString()  + 'Java process started successfully\n', function(err) {});
-        clearInterval(checkStartup);
-        if (callback) {
-            callback(javaProcess);
-        }
+  logToFile('开始启动Java程序...');
+  try {
+    const javaPath = path.join(__static, './jre', 'jre1.8.0_251', 'bin', 'java');
+    const jarPath = path.join(__static, './jarlib', 'ccs-deliver-middle.jar');
+    
+    if (!fs.existsSync(javaPath) || !fs.existsSync(jarPath)) {
+      logToFile('错误: Java运行环境或Jar文件不存在');
+      isRestarting = false;
+      return null;
     }
-    }).catch(error => {
-      console.log('Waiting for Java process to start...');
-      fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), (new Date()).toLocaleTimeString()  + 'Waiting for Java process to start...\n', function(err) {});
+
+    // 优化的Java启动参数
+    const javaOpts = [
+      // 内存设置
+      '-Xmx4096m',                    // 最大堆内存
+      '-Xms4096m',                    // 初始堆内存
+      '-XX:MaxMetaspaceSize=512m',    // 最大元空间大小
+      '-XX:MetaspaceSize=256m',       // 初始元空间大小
+      
+      // GC设置
+      '-XX:+UseG1GC',                 // 使用G1垃圾收集器
+      '-XX:MaxGCPauseMillis=200',     // 最大GC停顿时间
+      '-XX:+HeapDumpOnOutOfMemoryError', // 内存溢出时导出堆转储
+      '-XX:HeapDumpPath=D://css_temp_data/dump',  // 堆转储文件路径
+      
+      // 性能优化
+      '-XX:+DisableExplicitGC',       // 禁止显式GC调用
+      '-XX:+UseStringDeduplication',   // 开启字符串去重
+      '-XX:+OptimizeStringConcat',     // 优化字符串连接
+      
+      // 监控和调试
+      '-XX:+PrintGCDetails',          // 打印GC详细信息
+      '-XX:+PrintGCDateStamps',       // 打印GC时间戳
+      '-Xloggc:D://css_temp_data/log/gc.log',  // GC日志文件
+      '-XX:+HeapDumpBeforeFullGC',    // Full GC前生成堆转储
+      '-XX:+PrintGCApplicationStoppedTime', // 打印应用暂停时间
+      
+      // 错误处理
+      '-XX:+ExitOnOutOfMemoryError',  // 发生OOM时退出
+      '-XX:ErrorFile=D://css_temp_data/log/hs_err_%p.log',  // JVM错误日志
+      
+      // 应用参数
+      '-jar',
+      jarPath
+    ];
+
+    // 确保日志目录存在
+    const logDir = 'D://css_temp_data/log';
+    const dumpDir = 'D://css_temp_data/dump';
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true });
+    }
+    if (!fs.existsSync(dumpDir)) {
+      fs.mkdirSync(dumpDir, { recursive: true });
+    }
+
+    logToFile(`启动Java进程，使用参数: ${javaOpts.join(' ')}`);
+    const process = spawn(javaPath, javaOpts);
+
+    process.on('error', (err) => {
+      logToFile(`Java程序启动错误: ${err.message}`);
+      clearProcessTimers(process);
+      if (javaProcess === process) {
+        javaProcess = null;
+      }
+      isRestarting = false;
+      handleJavaProcessFailure();
     });
-  }, 2000); // 每2秒检查一次
-  return javaProcess;
+
+    process.on('exit', (code, signal) => {
+      logToFile(`Java程序退出，退出码: ${code}, 信号: ${signal}`);
+      clearProcessTimers(process);
+      
+      if (javaProcess === process) {
+        const oldProcess = javaProcess;
+        javaProcess = null;
+        isRestarting = false;
+        
+        if (code !== 0 && !closeStatus && oldProcess) {
+          handleJavaProcessFailure();
+        }
+      }
+    });
+
+    startHealthCheck(process, callback);
+    return process;
+  } catch (error) {
+    logToFile(`Java程序启动异常: ${error.message}`);
+    isRestarting = false;
+    return null;
+  }
+}
+
+// 启动健康检查
+function startHealthCheck(process, callback) {
+  let startupTimeout = setTimeout(() => {
+    logToFile('Java程序启动超时');
+    clearInterval(checkStartup);
+    if (callback) callback(false);
+  }, 30000);
+
+  const checkStartup = setInterval(() => {
+    if (!process || process.killed) {
+      clearInterval(checkStartup);
+      clearTimeout(startupTimeout);
+      if (callback) callback(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), HTTP_REQUEST_TIMEOUT);
+
+    HttpUtil.post('/status/check', null, { signal: controller.signal })
+      .then((response) => {
+        clearTimeout(timeoutId);
+        if (response === 'OK') {
+          logToFile('Java程序启动成功');
+          clearInterval(checkStartup);
+          clearTimeout(startupTimeout);
+          
+          // 确保在启动成功时重置状态
+          lastSuccessfulCheck = Date.now();
+          if (callback) callback(true);
+          
+          // 启动定期健康检查
+          if (healthCheckInterval) {
+            clearInterval(healthCheckInterval);
+          }
+          healthCheckInterval = setInterval(() => {
+            if (!process || process.killed) {
+              clearInterval(healthCheckInterval);
+              healthCheckInterval = null;
+              handleJavaProcessFailure();  // 进程已死，触发重启
+              return;
+            }
+            healthCheck(process);
+          }, HEALTH_CHECK_INTERVAL);
+        }
+      })
+      .catch((error) => {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+          logToFile('启动检查请求超时');
+        } else {
+          logToFile('等待Java程序启动...');
+        }
+      });
+  }, 2000);
+
+  if (process) {
+    process.startupInterval = checkStartup;
+    process.startupTimeout = startupTimeout;
+  }
+}
+
+// 健康检查函数 - 作为额外的保障
+async function healthCheck(process) {
+  if (isRestarting || !process) return;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), HTTP_REQUEST_TIMEOUT);
+
+  try {
+    const response = await HttpUtil.post('/status/check', null, { signal: controller.signal });
+    if (response === 'OK') {
+      lastSuccessfulCheck = Date.now();
+      if (restartAttempts > 0) {
+        logToFile('Java程序恢复正常，重置重启计数');
+        restartAttempts = 0;
+      }
+    }
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      logToFile('健康检查请求超时');
+    } else {
+      logToFile(`健康检查失败: ${error.message}`);
+    }
+    handleJavaProcessFailure();
+  } finally {
+    clearTimeout(timeoutId);
+    try {
+      controller.abort(); // 确保请求被取消
+    } catch (e) {
+      // 忽略可能的 AbortController 错误
+    }
+  }
+}
+
+// 处理Java进程失败的情况
+function handleJavaProcessFailure() {
+  // 更严格的状态检查
+  if (isRestarting || !javaProcess || closeStatus) return;
+  
+  const now = Date.now();
+  if (now - lastSuccessfulCheck < 1000) {
+    logToFile('距离上次检查时间太短，跳过本次重启');
+    return;
+  }
+  
+  restartAttempts++;
+  logToFile(`Java程序崩溃，立即重启，这是第 ${restartAttempts} 次重启（30分钟内）`);
+
+  if (restartAttempts > MAX_RESTART_ATTEMPTS) {
+    logToFile('30分钟内达到最大重启次数，停止重启尝试');
+    clearInterval(healthCheckInterval);
+    isRestarting = false; // 确保状态重置
+    return;
+  }
+
+  isRestarting = true;
+  restartJavaProcess();
+}
+
+// 重启Java进程
+function restartJavaProcess() {
+  logToFile('开始重启Java进程...');
+  
+  clearProcessTimers(javaProcess);
+  
+  checkAndKillJavaPort(7005, () => {
+    // 确保之前的进程引用被清理
+    if (javaProcess) {
+      javaProcess = null;
+    }
+    
+    javaProcess = startJavaProcess((success) => {
+      isRestarting = false;
+      if (success) {
+        lastSuccessfulCheck = Date.now();
+        logToFile('Java进程重启成功');
+      } else {
+        logToFile('Java进程重启失败');
+        // 重启失败时的清理
+        if (javaProcess) {
+          javaProcess = null;
+        }
+      }
+    });
+  });
 }
 
 // 检查并杀死占用指定端口的进程
 function checkAndKillJavaPort(port, callback) {
+  logToFile(`检查端口 ${port} 占用情况`);
+  
   const command = `netstat -ano | findstr :${port}`;
   exec(command, (err, stdout, stderr) => {
     if (err) {
-        console.error(`Error checking port ${port}: ${stderr}`);
-        fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), `Error checking port ${port}: ${stderr}` + '\n', function(err) {});
-        callback();
-        return;
+      logToFile(`检查端口错误: ${stderr}`);
+      callback();
+      return;
     }
+
     const lines = stdout.trim().split('\n');
-    const pids = lines.map(line => line.trim().split(/\s+/).pop()).filter(Boolean);
-    if (pids.length > 0) {
-        let killCount = 0;
-        pids.forEach(pid => {
-          // 检查进程是否为 Java 进程
-          isJavaProcess(pid, (isJava) => {
-              if (isJava) {
-                  const killCommand = `taskkill /PID ${pid} /F`;
-                  exec(killCommand, (err, stdout, stderr) => {
-                      if (err) {
-                          console.error(`Error killing process ${pid}: ${stderr}`);
-                          fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), `Error killing process ${pid}: ${stderr}` + '\n', function(err) {});
-                      } else {
-                          console.log(`Killed Java process ${pid} on port ${port}`);
-                          fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), `Killed Java process ${pid} on port ${port}` + '\n', function(err) {});
-                      }
-                      killCount++;
-                      if (killCount === pids.length) {
-                          callback();
-                      }
-                  });
-              } else {
-                  killCount++;
-                  if (killCount === pids.length) {
-                      callback();
-                  }
-              }
-          });
-      });
-    } else {
-        callback();
+    const pids = lines
+      .map(line => line.trim().split(/\s+/).pop())
+      .filter(Boolean)
+      .filter((value, index, self) => self.indexOf(value) === index); // 去重
+
+    if (pids.length === 0) {
+      logToFile('没有找到占用端口的进程');
+      callback();
+      return;
     }
-});
+
+    let killCount = 0;
+    pids.forEach(pid => {
+      isJavaProcess(pid, (isJava) => {
+        if (isJava) {
+          killJavaProcess(pid, () => {
+            killCount++;
+            if (killCount === pids.length) {
+              callback();
+            }
+          });
+        } else {
+          killCount++;
+          if (killCount === pids.length) {
+            callback();
+          }
+        }
+      });
+    });
+  });
 }
 
 // 判断是否是 Java 进程
 function isJavaProcess(pid, callback) {
   const command = `wmic process where processid=${pid} get commandline`;
-
+  
   exec(command, (err, stdout, stderr) => {
-      if (err) {
-          console.error(`Error checking process ${pid}: ${stderr}`);
-          callback(false);
-          return;
-      }
+    if (err) {
+      logToFile(`检查进程 ${pid} 失败: ${stderr}`);
+      callback(false);
+      return;
+    }
 
-      const commandLine = stdout.trim();
-      callback(commandLine.includes('java') && commandLine.includes('ccs-deliver-middle.jar'));
+    const commandLine = stdout.trim().toLowerCase();
+    const isJava = commandLine.includes('java') && 
+                   commandLine.includes('ccs-deliver-middle.jar') &&
+                   !commandLine.includes('electron');
+    
+    logToFile(`进程 ${pid} ${isJava ? '是' : '不是'} Java进程`);
+    callback(isJava);
   });
 }
 
-// 定时器变量
-let lastSuccessfulCheck = Date.now();
-let isRestarting = false; // 标志是否正在重启
-// 健康检查函数
-function healthCheck() {
-  if (isRestarting) return; // 如果正在重启，则跳过健康检查
-  HttpUtil.post('/status/check').then(response => {
-    if (response == 'OK') {
-      lastSuccessfulCheck = Date.now();
+// 杀死Java进程
+function killJavaProcess(pid, callback) {
+  logToFile(`准备终止Java进程 ${pid}`);
+  
+  const killCommand = `taskkill /PID ${pid} /F`;
+  exec(killCommand, (err, stdout, stderr) => {
+    if (err) {
+      logToFile(`终止进程 ${pid} 失败: ${stderr}`);
+    } else {
+      logToFile(`成功终止进程 ${pid}`);
     }
-  })
-  .catch(error => {
-    console.error(`Health check failed: ${error.message}`);
-    fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), (new Date()).toLocaleTimeString()  + `Health check failed: ${error.message}` + '\n', function(err) {});
-    if (Date.now() - lastSuccessfulCheck > 5000) {
-      console.log('Java process is not responding. Restarting...');
-      fs.appendFile("D://css_temp_data/log/" + ((new Date()).toLocaleDateString() + "runlog.txt").replaceAll('/','-'), (new Date()).toLocaleTimeString()  + 'Java process is not responding. Restarting...\n', function(err) {});
-      isRestarting = true;
-      checkAndKillJavaPort(7005, () => {
-          javaProcess = startJavaProcess(() => {
-              lastSuccessfulCheck = Date.now();
-              isRestarting = false;
-          });
-      });
-    }
+    callback();
   });
+}
+// 定期重置重启计数
+setInterval(() => {
+  if (restartAttempts > 0) {
+    restartAttempts = 0;
+    logToFile('重置重启尝试计数');
+  }
+}, RESTART_ATTEMPT_RESET_INTERVAL);
+
+// 清理进程相关的所有定时器
+function clearProcessTimers(process) {
+  if (process) {
+    if (process.startupInterval) {
+      clearInterval(process.startupInterval);
+      process.startupInterval = null;
+    }
+    if (process.startupTimeout) {
+      clearTimeout(process.startupTimeout);
+      process.startupTimeout = null;
+    }
+  }
+  if (healthCheckInterval) {
+    clearInterval(healthCheckInterval);
+    healthCheckInterval = null;
+  }
 }
